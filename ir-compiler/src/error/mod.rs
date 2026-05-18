@@ -6,5 +6,5 @@ pub type CompilerResult<T> = Result<T, CompilerError>;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum CompilerError {
-    UnexpectedCharacterError(UnexpectedCharacterError)
+    UnexpectedCharacterError(UnexpectedCharacterError),
 }

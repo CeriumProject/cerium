@@ -122,12 +122,24 @@ mod tests {
         let code = "let x = 10 + 4;";
         let mut lexer = Lexer::new(code);
         assert_eq!(lexer.next(), Some(Ok(Ranged::new(0..=2, Token::Let))));
-        assert_eq!(lexer.next(), Some(Ok(Ranged::new(4..=4, Token::Ident(String::from("x"))))));
+        assert_eq!(
+            lexer.next(),
+            Some(Ok(Ranged::new(4..=4, Token::Ident(String::from("x")))))
+        );
         assert_eq!(lexer.next(), Some(Ok(Ranged::new(6..=6, Token::Assign))));
-        assert_eq!(lexer.next(), Some(Ok(Ranged::new(8..=9, Token::Number(String::from("10"))))));
+        assert_eq!(
+            lexer.next(),
+            Some(Ok(Ranged::new(8..=9, Token::Number(String::from("10")))))
+        );
         assert_eq!(lexer.next(), Some(Ok(Ranged::new(11..=11, Token::Plus))));
-        assert_eq!(lexer.next(), Some(Ok(Ranged::new(13..=13, Token::Number(String::from("4"))))));
-        assert_eq!(lexer.next(), Some(Ok(Ranged::new(14..=14, Token::Semicolon))));
+        assert_eq!(
+            lexer.next(),
+            Some(Ok(Ranged::new(13..=13, Token::Number(String::from("4")))))
+        );
+        assert_eq!(
+            lexer.next(),
+            Some(Ok(Ranged::new(14..=14, Token::Semicolon)))
+        );
         assert_eq!(lexer.next(), None);
     }
 
