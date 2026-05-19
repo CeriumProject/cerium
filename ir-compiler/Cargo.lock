@@ -3,5 +3,13 @@
 version = 4
 
 [[package]]
+name = "chasm-ir"
+version = "0.1.0"
+source = "git+https://github.com/CeriumProject/chasm-ir.git#382a7061b371b1b4d6b857b50c65471b0f57fe26"
+
+[[package]]
 name = "ir-compiler"
 version = "0.1.0"
+dependencies = [
+ "chasm-ir",
+]
