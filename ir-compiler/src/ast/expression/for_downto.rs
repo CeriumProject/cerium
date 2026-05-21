@@ -5,6 +5,6 @@ use crate::ranged::Ranged;
 #[derive(Debug, Clone, PartialEq)]
 pub struct ForDownTo {
     pub counter: Ranged<Qualifier>,
-    pub target: Ranged<Expression>,
+    pub limit: Ranged<Expression>,
     pub body: Ranged<Expression>,
 }

@@ -1,5 +1,5 @@
-use crate::error::unexpected_character::UnexpectedCharacterError;
 use crate::error::CompilerResult;
+use crate::error::UnexpectedCharacterError;
 use crate::ranged::{Ranged, ToRanged};
 use crate::token::Token;
 use std::iter::{Enumerate, Peekable};
@@ -89,6 +89,7 @@ impl<'a> Lexer<'a> {
             },
             '*' => Ok(Token::Asterisk.ranged(idx..=idx)),
             '/' => Ok(Token::Slash.ranged(idx..=idx)),
+            '&' => Ok(Token::Ampersand.ranged(idx..=idx)),
             _ => Err(UnexpectedCharacterError {
                 character: next,
                 idx,
@@ -121,25 +122,22 @@ mod tests {
     fn test_tokenization() {
         let code = "let x = 10 + 4;";
         let mut lexer = Lexer::new(code);
-        assert_eq!(lexer.next(), Some(Ok(Ranged::new(0..=2, Token::Let))));
+        assert_eq!(lexer.next(), Some(Ok((0..=2, Token::Let))));
         assert_eq!(
             lexer.next(),
-            Some(Ok(Ranged::new(4..=4, Token::Ident(String::from("x")))))
+            Some(Ok((4..=4, Token::Ident(String::from("x")))))
         );
-        assert_eq!(lexer.next(), Some(Ok(Ranged::new(6..=6, Token::Assign))));
+        assert_eq!(lexer.next(), Some(Ok((6..=6, Token::Assign))));
         assert_eq!(
             lexer.next(),
-            Some(Ok(Ranged::new(8..=9, Token::Number(String::from("10")))))
+            Some(Ok((8..=9, Token::Number(String::from("10")))))
         );
-        assert_eq!(lexer.next(), Some(Ok(Ranged::new(11..=11, Token::Plus))));
+        assert_eq!(lexer.next(), Some(Ok((11..=11, Token::Plus))));
         assert_eq!(
             lexer.next(),
-            Some(Ok(Ranged::new(13..=13, Token::Number(String::from("4")))))
+            Some(Ok((13..=13, Token::Number(String::from("4")))))
         );
-        assert_eq!(
-            lexer.next(),
-            Some(Ok(Ranged::new(14..=14, Token::Semicolon)))
-        );
+        assert_eq!(lexer.next(), Some(Ok((14..=14, Token::Semicolon))));
         assert_eq!(lexer.next(), None);
     }
 

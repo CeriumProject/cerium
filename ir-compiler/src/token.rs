@@ -21,7 +21,9 @@ pub enum Token {
     // Equals, NotEquals, GreaterThan, GreaterThanEquals, LessThan, LessThanEquals,
     // boolean operators
     // Bang, And, Or, Xor,
-    // Types
+    // multipurpose operators
+    Ampersand,
+    // types
     F16, I16, U16, // Any, Bool,
     // conversion
     As, Alias,

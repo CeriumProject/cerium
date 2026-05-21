@@ -3,7 +3,8 @@ use crate::ranged::Ranged;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct GenericOperation {
-    pub operands: Vec<Ranged<Expression>>,
+    pub lhs: Ranged<Expression>,
+    pub rhs: Ranged<Expression>,
     pub operator: Ranged<GenericOperator>,
 }
 
@@ -13,4 +14,10 @@ pub enum GenericOperator {
     Sub,
     Mul,
     Div,
+}
+
+impl From<GenericOperation> for Expression {
+    fn from(generic_operation: GenericOperation) -> Self {
+        Expression::GenericOperation(Box::new(generic_operation))
+    }
 }
