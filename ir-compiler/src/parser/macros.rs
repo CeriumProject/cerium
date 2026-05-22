@@ -24,8 +24,11 @@ macro_rules! expect_token {
 #[macro_export]
 macro_rules! next_matches {
     ($lexer:expr, $pattern:pat, $result:expr) => {
-        match $lexer.next() {
-            Some(Ok($pattern)) => Some($result),
+        match $lexer.peek() {
+            Some(Ok($pattern)) => match $lexer.next() {
+                Some(Ok($pattern)) => Some($result),
+                _ => unreachable!(),
+            },
             _ => None,
         }
     };
