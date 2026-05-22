@@ -1,3 +1,5 @@
+use crate::ast::compilation::context::Context;
+use crate::ast::compilation::Compilable;
 use crate::ast::dereference::Dereference;
 pub use crate::ast::expression::assignment::Assignment;
 pub use crate::ast::expression::constant_value::ConstantValue;
@@ -11,6 +13,9 @@ pub use crate::ast::expression::type_cast::TypeCast;
 pub use crate::ast::expression::variable::Variable;
 pub use crate::ast::invocation::Invocation;
 pub use crate::ast::reference::Reference;
+use crate::ast::CeriumType;
+use crate::error::CompilerResult;
+use chasm_ir::{Instruction, Operand};
 
 pub mod assignment;
 pub mod constant_value;
@@ -41,6 +46,34 @@ pub enum Expression {
     Reference(Box<Reference>),
     Dereference(Box<Dereference>),
     Invocation(Box<Invocation>),
+}
+
+impl Compilable for Expression {
+    fn compile(
+        &self,
+        ctx: &mut Context,
+    ) -> CompilerResult<(Vec<Instruction>, Option<(Operand, CeriumType)>)> {
+        todo!()
+    }
+
+    fn compile_mut(
+        &self,
+        ctx: &mut Context,
+    ) -> CompilerResult<(Vec<Instruction>, Option<(Operand, CeriumType)>)> {
+        todo!()
+    }
+
+    fn compile_unit(&self, ctx: &mut Context) -> CompilerResult<Vec<Instruction>> {
+        todo!()
+    }
+
+    fn compile_into(
+        &self,
+        ctx: &mut Context,
+        operand: Operand,
+    ) -> CompilerResult<(Vec<Instruction>, Option<CeriumType>)> {
+        todo!()
+    }
 }
 
 // TODO: implement recursive iter (can e.g. be used to find type of break or check use of variables)

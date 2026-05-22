@@ -1,5 +1,5 @@
 mod cerium_type;
-mod compilable;
+mod compilation;
 mod definition;
 mod expression;
 mod qualifier;
