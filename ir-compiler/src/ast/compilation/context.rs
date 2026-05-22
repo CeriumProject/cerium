@@ -30,6 +30,10 @@ impl Context {
         self.counter += 1;
         result
     }
+
+    pub fn uuid(&mut self) -> String {
+        format!("u_{0:X}", rand::random::<u128>())
+    }
 }
 
 impl Deref for Context {

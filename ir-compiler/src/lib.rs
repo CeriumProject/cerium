@@ -1,3 +1,5 @@
+#![feature(f16)]
+
 mod ast;
 mod error;
 mod lexer;
