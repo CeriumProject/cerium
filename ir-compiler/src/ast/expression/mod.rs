@@ -42,3 +42,5 @@ pub enum Expression {
     Dereference(Box<Dereference>),
     Invocation(Box<Invocation>),
 }
+
+// TODO: implement recursive iter (can e.g. be used to find type of break or check use of variables)
