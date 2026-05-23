@@ -46,7 +46,7 @@ impl Deref for Context {
 
 impl DerefMut for Context {
     fn deref_mut(&mut self) -> &mut Self::Target {
-         &mut self.vars
+        &mut self.vars
     }
 }
 

@@ -52,12 +52,19 @@ impl Compilable for GenericOperation {
         })?;
         ctx.pop_scope();
 
-        let inst = generate_inst_for(self.operator.1, (lhs_op.clone(), &lhs_type), (rhs_op, &rhs_type))
-            .ok_or_else(|| IncompatibleTypes {
-                lhs: (self.lhs.0.clone(), lhs_type.clone()),
-                rhs: (self.rhs.0.clone(), rhs_type),
-            })?;
-        Ok((amend!(lhs_code, amend!(rhs_code, snippet!(inst))), Some((lhs_op, lhs_type))))
+        let inst = generate_inst_for(
+            self.operator.1,
+            (lhs_op.clone(), &lhs_type),
+            (rhs_op, &rhs_type),
+        )
+        .ok_or_else(|| IncompatibleTypes {
+            lhs: (self.lhs.0.clone(), lhs_type.clone()),
+            rhs: (self.rhs.0.clone(), rhs_type),
+        })?;
+        Ok((
+            amend!(lhs_code, amend!(rhs_code, snippet!(inst))),
+            Some((lhs_op, lhs_type)),
+        ))
     }
 
     fn compile_unit(&self, ctx: &mut Context) -> CompilerResult<Vec<Instruction>> {
