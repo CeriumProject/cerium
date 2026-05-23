@@ -65,9 +65,11 @@ impl Compilable for ConstantValue {
         &self,
         ctx: &mut Context,
     ) -> CompilerResult<(Vec<Instruction>, Option<(Operand, CeriumType)>)> {
-        let operand = Operand::Variable(ctx.uuid());
+        let uuid = ctx.uuid();
+        let operand = Operand::Variable(uuid.clone());
         let (value, r#type) = self.parse()?;
-        Ok((snippet!(inst!(Mov, op operand.clone(), val value)), Some((operand, r#type))))
+        let body = Instruction::Alloc(uuid, 1, snippet!(inst!(Mov, op operand.clone(), val value)));
+        Ok((snippet!(body), Some((operand, r#type))))
     }
 
     fn compile_unit(&self, ctx: &mut Context) -> CompilerResult<Vec<Instruction>> {

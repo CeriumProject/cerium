@@ -1,6 +1,6 @@
 use crate::ast::{CeriumType, Qualifier};
 use std::collections::HashMap;
-use std::ops::Deref;
+use std::ops::{Deref, DerefMut};
 
 #[derive(Debug, Clone)]
 pub struct Context {
@@ -41,6 +41,12 @@ impl Deref for Context {
 
     fn deref(&self) -> &Vars {
         &self.vars
+    }
+}
+
+impl DerefMut for Context {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+         &mut self.vars
     }
 }
 
