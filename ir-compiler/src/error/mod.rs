@@ -1,3 +1,4 @@
+mod false_return_type;
 mod incompatible_types;
 mod unexpected_character;
 mod unexpected_eof;
@@ -5,6 +6,7 @@ mod unexpected_token;
 mod unparseable_constant;
 mod unprocessable_unit;
 
+pub use false_return_type::FalseReturnType;
 pub use incompatible_types::IncompatibleTypes;
 pub use unexpected_character::UnexpectedCharacterError;
 pub use unexpected_eof::UnexpectedEof;
@@ -22,4 +24,5 @@ pub enum CompilerError {
     UnparseableConstant(UnparseableConstant),
     IncompatibleTypes(IncompatibleTypes),
     UnprocessableUnit(UnprocessableUnit),
+    FalseReturnType(FalseReturnType),
 }

@@ -8,3 +8,9 @@ pub enum CeriumType {
     Reference(Box<CeriumType>),
     Function(Vec<CeriumType>, Option<Box<CeriumType>>),
 }
+
+impl CeriumType {
+    pub fn size(&self) -> usize {
+        1
+    }
+}
