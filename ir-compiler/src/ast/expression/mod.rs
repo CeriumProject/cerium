@@ -53,18 +53,33 @@ impl Compilable for Expression {
         &self,
         ctx: &mut Context,
     ) -> CompilerResult<(Vec<Instruction>, Option<(Operand, CeriumType)>)> {
-        todo!()
+        match self {
+            Expression::Constant(constant) => constant.compile(ctx),
+            Expression::Loop(plain_loop) => plain_loop.compile(ctx),
+            Expression::GenericOperation(generic_operation) => generic_operation.compile(ctx),
+            _ => todo!(),
+        }
     }
 
     fn compile_mut(
         &self,
         ctx: &mut Context,
     ) -> CompilerResult<(Vec<Instruction>, Option<(Operand, CeriumType)>)> {
-        todo!()
+        match self {
+            Expression::Constant(constant) => constant.compile_mut(ctx),
+            Expression::Loop(plain_loop) => plain_loop.compile_mut(ctx),
+            Expression::GenericOperation(generic_operation) => generic_operation.compile_mut(ctx),
+            _ => todo!(),
+        }
     }
 
     fn compile_unit(&self, ctx: &mut Context) -> CompilerResult<Vec<Instruction>> {
-        todo!()
+        match self {
+            Expression::Constant(constant) => constant.compile_unit(ctx),
+            Expression::Loop(plain_loop) => plain_loop.compile_unit(ctx),
+            Expression::GenericOperation(generic_operation) => generic_operation.compile_unit(ctx),
+            _ => todo!(),
+        }
     }
 
     fn compile_into(
@@ -72,7 +87,14 @@ impl Compilable for Expression {
         ctx: &mut Context,
         operand: Operand,
     ) -> CompilerResult<(Vec<Instruction>, Option<CeriumType>)> {
-        todo!()
+        match self {
+            Expression::Constant(constant) => constant.compile_into(ctx, operand),
+            Expression::Loop(plain_loop) => plain_loop.compile_into(ctx, operand),
+            Expression::GenericOperation(generic_operation) => {
+                generic_operation.compile_into(ctx, operand)
+            }
+            _ => todo!(),
+        }
     }
 }
 
