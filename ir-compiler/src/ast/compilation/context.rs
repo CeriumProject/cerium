@@ -1,4 +1,6 @@
 use crate::ast::{CeriumType, Qualifier};
+use crate::error::CompilerResult;
+use chasm_ir::{Instruction, Operand, Section};
 use std::collections::HashMap;
 use std::ops::{Deref, DerefMut};
 
@@ -33,6 +35,34 @@ impl Context {
 
     pub fn uuid(&mut self) -> String {
         format!("u_{0:X}", rand::random::<u128>())
+    }
+
+    pub fn push_var(&mut self, name: String) -> Operand {
+        todo!()
+    }
+
+    pub fn push_param(&mut self, name: String) -> Operand {
+        todo!()
+    }
+
+    pub fn push_result(&mut self, name: String) -> Operand {
+        todo!()
+    }
+
+    pub fn scope(
+        &mut self,
+        body: impl FnOnce(&mut Context) -> CompilerResult<()>,
+    ) -> CompilerResult<()> {
+        todo!()
+    }
+
+    pub fn push_inst(&mut self, inst: Instruction) {
+        todo!()
+    }
+
+    // TODO: rename ts
+    pub fn resolve(&mut self) -> CompilerResult<Section> {
+        todo!()
     }
 }
 
