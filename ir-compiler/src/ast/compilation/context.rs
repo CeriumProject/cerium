@@ -49,10 +49,10 @@ impl Context {
         todo!()
     }
 
-    pub fn scope(
+    pub fn scope<T>(
         &mut self,
-        body: impl FnOnce(&mut Context) -> CompilerResult<()>,
-    ) -> CompilerResult<()> {
+        body: impl FnOnce(&mut Context) -> CompilerResult<T>,
+    ) -> CompilerResult<T> {
         todo!()
     }
 
