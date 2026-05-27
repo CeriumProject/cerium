@@ -51,7 +51,7 @@ impl Function {
                 ctx.push_inst(inst!(Ret));
             }
             Some((_, expected_type)) => {
-                self.body.1.compile(&mut ctx, |op, actual_type, ctx| {
+                self.body.1.compile(&mut ctx, &mut |op, actual_type, ctx| {
                     if *expected_type != *actual_type {
                         Err(FalseReturnType {
                             function: self.name.clone(),

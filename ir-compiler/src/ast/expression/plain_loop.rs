@@ -16,7 +16,7 @@ impl Compilable for Loop {
     fn compile(
         &self,
         ctx: &mut Context,
-        then: impl FnOnce(&Operand, &CeriumType, &mut Context) -> CompilerResult<()>,
+        then: &mut dyn FnMut(&Operand, &CeriumType, &mut Context) -> CompilerResult<()>,
     ) -> CompilerResult<()> {
         Err(UnprocessableUnit {
             range: self.body.0.clone(),
@@ -26,7 +26,7 @@ impl Compilable for Loop {
     fn compile_mut(
         &self,
         ctx: &mut Context,
-        then: impl FnOnce(&Operand, &CeriumType, &mut Context) -> CompilerResult<()>,
+        then: &mut dyn FnMut(&Operand, &CeriumType, &mut Context) -> CompilerResult<()>,
     ) -> CompilerResult<()> {
         Err(UnprocessableUnit {
             range: self.body.0.clone(),

@@ -31,7 +31,7 @@ impl Compilable for GenericOperation {
     fn compile(
         &self,
         ctx: &mut Context,
-        then: impl FnOnce(&Operand, &CeriumType, &mut Context) -> CompilerResult<()>,
+        then: &mut dyn FnMut(&Operand, &CeriumType, &mut Context) -> CompilerResult<()>,
     ) -> CompilerResult<()> {
         self.compile_mut(ctx, then)
     }
@@ -39,11 +39,11 @@ impl Compilable for GenericOperation {
     fn compile_mut(
         &self,
         ctx: &mut Context,
-        then: impl FnOnce(&Operand, &CeriumType, &mut Context) -> CompilerResult<()>,
+        then: &mut dyn FnMut(&Operand, &CeriumType, &mut Context) -> CompilerResult<()>,
     ) -> CompilerResult<()> {
         ctx.scope(|ctx| {
-            self.lhs.1.compile_mut(ctx, |lhs_op, lhs_type, ctx| {
-                self.rhs.1.compile(ctx, |rhs_op, rhs_type, ctx| {
+            self.lhs.1.compile_mut(ctx, &mut |lhs_op, lhs_type, ctx| {
+                self.rhs.1.compile(ctx, &mut |rhs_op, rhs_type, ctx| {
                     let inst = generate_inst_for(
                         self.operator.1,
                         (lhs_op.clone(), lhs_type),
@@ -68,7 +68,7 @@ impl Compilable for GenericOperation {
     fn compile_into(&self, ctx: &mut Context, lhs_op: &Operand) -> CompilerResult<CeriumType> {
         let lhs_type = self.lhs.1.compile_into(ctx, lhs_op)?;
         ctx.scope(|ctx| {
-            self.rhs.1.compile(ctx, |rhs_op, rhs_type, ctx| {
+            self.rhs.1.compile(ctx, &mut |rhs_op, rhs_type, ctx| {
                 let inst = generate_inst_for(
                     self.operator.1,
                     (lhs_op.clone(), &lhs_type),

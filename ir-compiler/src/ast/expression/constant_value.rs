@@ -56,7 +56,7 @@ impl Compilable for ConstantValue {
     fn compile(
         &self,
         ctx: &mut Context,
-        then: impl FnOnce(&Operand, &CeriumType, &mut Context) -> CompilerResult<()>,
+        then: &mut dyn FnMut(&Operand, &CeriumType, &mut Context) -> CompilerResult<()>,
     ) -> CompilerResult<()> {
         let (val, ty) = self.parse()?;
         then(&Operand::Constant(val), &ty, ctx)
@@ -65,7 +65,7 @@ impl Compilable for ConstantValue {
     fn compile_mut(
         &self,
         ctx: &mut Context,
-        then: impl FnOnce(&Operand, &CeriumType, &mut Context) -> CompilerResult<()>,
+        then: &mut dyn FnMut(&Operand, &CeriumType, &mut Context) -> CompilerResult<()>,
     ) -> CompilerResult<()> {
         ctx.scope(|ctx| {
             let (val, ty) = self.parse()?;

@@ -16,7 +16,7 @@ impl Compilable for Dereference {
     fn compile(
         &self,
         ctx: &mut Context,
-        then: impl FnOnce(&Operand, &CeriumType, &mut Context) -> CompilerResult<()>,
+        then: &mut dyn FnMut(&Operand, &CeriumType, &mut Context) -> CompilerResult<()>,
     ) -> CompilerResult<()> {
         self.compile_mut(ctx, then)
     }
@@ -24,9 +24,9 @@ impl Compilable for Dereference {
     fn compile_mut(
         &self,
         ctx: &mut Context,
-        then: impl FnOnce(&Operand, &CeriumType, &mut Context) -> CompilerResult<()>,
+        then: &mut dyn FnMut(&Operand, &CeriumType, &mut Context) -> CompilerResult<()>,
     ) -> CompilerResult<()> {
-        self.inner.1.compile(ctx, |src, ty, ctx| {
+        self.inner.1.compile(ctx, &mut |src, ty, ctx| {
             let uuid = ctx.uuid();
             let inner_type = deref_type(self.inner.0.clone(), ty)?;
             let dst = ctx.push_var(uuid, inner_type.clone());
@@ -43,7 +43,7 @@ impl Compilable for Dereference {
 
     fn compile_into(&self, ctx: &mut Context, operand: &Operand) -> CompilerResult<CeriumType> {
         let mut result = MaybeUninit::<CeriumType>::uninit();
-        self.inner.1.compile(ctx, |src, ty, ctx| {
+        self.inner.1.compile(ctx, &mut |src, ty, ctx| {
             result = MaybeUninit::new(deref_type(self.inner.0.clone(), ty)?);
             ctx.push_inst(inst!(Read, op operand.clone(), op src.clone()));
             Ok(())

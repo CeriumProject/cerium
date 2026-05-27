@@ -16,7 +16,7 @@ impl Compilable for Scope {
     fn compile(
         &self,
         ctx: &mut Context,
-        then: impl FnOnce(&Operand, &CeriumType, &mut Context) -> CompilerResult<()>,
+        then: &mut dyn FnMut(&Operand, &CeriumType, &mut Context) -> CompilerResult<()>,
     ) -> CompilerResult<()> {
         ctx.scope(|ctx| {
             for (_, statement) in &self.statements {
@@ -33,7 +33,7 @@ impl Compilable for Scope {
     fn compile_mut(
         &self,
         ctx: &mut Context,
-        then: impl FnOnce(&Operand, &CeriumType, &mut Context) -> CompilerResult<()>,
+        then: &mut dyn FnMut(&Operand, &CeriumType, &mut Context) -> CompilerResult<()>,
     ) -> CompilerResult<()> {
         ctx.scope(|ctx| {
             for (_, statement) in &self.statements {
