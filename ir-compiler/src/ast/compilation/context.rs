@@ -34,7 +34,7 @@ impl Context {
     pub fn new(globals: HashMap<Qualifier, CeriumType>) -> Context {
         Context {
             globals,
-            vars: Vec::new(),
+            vars: vec![(VarConfig::Scope, Vec::new())],
             // vars: Vars::new(),
             counter: 0,
         }

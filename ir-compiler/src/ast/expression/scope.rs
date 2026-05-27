@@ -24,7 +24,7 @@ impl Compilable for Scope {
             }
             self.result
                 .as_ref()
-                .ok_or(UnprocessableUnit { range: todo!() })?
+                .ok_or_else(|| UnprocessableUnit { range: todo!() })?
                 .1
                 .compile(ctx, then)
         })
@@ -41,7 +41,7 @@ impl Compilable for Scope {
             }
             self.result
                 .as_ref()
-                .ok_or(UnprocessableUnit { range: todo!() })?
+                .ok_or_else(|| UnprocessableUnit { range: todo!() })?
                 .1
                 .compile_mut(ctx, then)
         })
@@ -66,7 +66,7 @@ impl Compilable for Scope {
             }
             self.result
                 .as_ref()
-                .ok_or(UnprocessableUnit { range: todo!() })?
+                .ok_or_else(|| UnprocessableUnit { range: todo!() })?
                 .1
                 .compile_into(ctx, operand)
         })
