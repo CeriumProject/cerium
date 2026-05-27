@@ -6,6 +6,7 @@ mod unexpected_token;
 mod unparseable_constant;
 mod unprocessable_unit;
 mod value_not_dereferenceable;
+mod type_alias_has_different_size;
 
 pub use false_return_type::FalseReturnType;
 pub use incompatible_types::IncompatibleTypes;
@@ -15,6 +16,7 @@ pub use unexpected_token::UnexpectedTokenError;
 pub use unparseable_constant::UnparseableConstant;
 pub use unprocessable_unit::UnprocessableUnit;
 pub use value_not_dereferenceable::ValueNotDereferenceable;
+pub use type_alias_has_different_size::TypeAliasHasDifferentSize;
 
 pub type CompilerResult<T> = Result<T, CompilerError>;
 
@@ -28,4 +30,5 @@ pub enum CompilerError {
     UnprocessableUnit(UnprocessableUnit),
     FalseReturnType(FalseReturnType),
     ValueNotDereferenceable(ValueNotDereferenceable),
+    TypeAliasHasDifferentSize(TypeAliasHasDifferentSize),
 }
