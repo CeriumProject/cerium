@@ -20,6 +20,7 @@ pub trait Compilable {
         then: &mut dyn FnMut(&Operand, &CeriumType, &mut Context) -> CompilerResult<()>,
     ) -> CompilerResult<()>;
 
+    // TODO: return type regardless to still allow for type checking (e.g. {a+b;} )
     fn compile_unit(&self, ctx: &mut Context) -> CompilerResult<()>;
 
     fn compile_into(&self, ctx: &mut Context, operand: &Operand) -> CompilerResult<CeriumType>;
