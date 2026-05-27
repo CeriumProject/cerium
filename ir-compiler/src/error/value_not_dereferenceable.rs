@@ -1,6 +1,6 @@
-use std::ops::RangeInclusive;
 use crate::ast::CeriumType;
 use crate::error::CompilerError;
+use std::ops::RangeInclusive;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct ValueNotDereferenceable {

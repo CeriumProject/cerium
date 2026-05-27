@@ -28,10 +28,11 @@ impl Compilable for Dereference {
     ) -> CompilerResult<()> {
         self.inner.1.compile(ctx, |src, ty, ctx| {
             let uuid = ctx.uuid();
-            let dst = ctx.push_var(uuid);
+            let inner_type = deref_type(self.inner.0.clone(), ty)?;
+            let dst = ctx.push_var(uuid, inner_type.clone());
             ctx.scope(|ctx| {
                 ctx.push_inst(inst!(Read, op dst.clone(), op src.clone()));
-                then(&dst, &deref_type(self.inner.0.clone(), ty)?, ctx)
+                then(&dst, &inner_type, ctx)
             })
         })
     }

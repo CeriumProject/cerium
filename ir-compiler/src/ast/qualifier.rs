@@ -17,6 +17,12 @@ impl Qualifier {
     }
 }
 
+impl From<String> for Qualifier {
+    fn from(value: String) -> Self {
+        Qualifier::short(value)
+    }
+}
+
 impl Display for Qualifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.scopes.join("::"))

@@ -68,9 +68,9 @@ impl Compilable for ConstantValue {
         then: impl FnOnce(&Operand, &CeriumType, &mut Context) -> CompilerResult<()>,
     ) -> CompilerResult<()> {
         ctx.scope(|ctx| {
-            let uuid = ctx.uuid();
-            let op = ctx.push_var(uuid);
             let (val, ty) = self.parse()?;
+            let uuid = ctx.uuid();
+            let op = ctx.push_var(uuid, ty.clone());
             ctx.push_inst(inst!(Mov, op op.clone(), val val));
             then(&op, &ty, ctx)
         })

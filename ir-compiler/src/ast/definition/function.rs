@@ -60,7 +60,7 @@ impl Function {
                         })?
                     }
                     let uuid = ctx.uuid();
-                    let result = ctx.push_result(uuid);
+                    let result = ctx.push_result(uuid, expected_type.clone());
                     ctx.push_inst(inst!(Mov, op result, op op.clone()));
                     ctx.push_inst(inst!(Ret));
                     Ok(())
@@ -68,6 +68,11 @@ impl Function {
             }
         }
 
-        ctx.resolve() // TODO: ctx.section(|...| ...) instead
+        let body = ctx.resolve()?; // TODO: ctx.section(|...| ...) instead
+        Ok(Section {
+            name: self.name.1.to_string(),
+            signature: Some(self.chasm_signature()),
+            body,
+        })
     }
 }
