@@ -31,6 +31,13 @@ pub mod type_alias;
 pub mod type_cast;
 pub mod variable;
 
+#[macro_export]
+macro_rules! unprocessable_unit {
+    () => {
+        todo!("Return value of type unit.")
+    };
+}
+
 #[derive(Debug, Clone, PartialEq)]
 pub enum Expression {
     Variable(Box<Variable>),

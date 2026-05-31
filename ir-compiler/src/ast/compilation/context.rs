@@ -21,6 +21,15 @@ impl VarConfig {
             | VarConfig::Result(name, r#type) => Some((name, r#type)),
         }
     }
+
+    fn as_pair_mut(&mut self) -> Option<(&mut Qualifier, &mut CeriumType)> {
+        match self {
+            VarConfig::Scope => None,
+            VarConfig::Var(name, r#type)
+            | VarConfig::Param(name, r#type)
+            | VarConfig::Result(name, r#type) => Some((name, r#type)),
+        }
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -43,10 +52,21 @@ impl Context {
     pub fn lookup(&self, name: &Qualifier) -> Option<&CeriumType> {
         self.vars
             .iter()
+            .rev()
             .flat_map(|(config, _)| config.as_pair())
-            .find(|(var_name, _)| *var_name == name)
+            .find(|(var_name, _)| **var_name == *name)
             .map(|(_, r#type)| r#type)
             .or_else(|| self.globals.get(name))
+    }
+
+    pub fn change_type(&mut self, name: &Qualifier, r#type: CeriumType) -> Option<()> {
+        self.vars
+            .iter_mut()
+            .flat_map(|(config, _)| config.as_pair_mut())
+            .rfind(|(var_name, _)| **var_name == *name)
+            .map(|(_, var_type)| {
+                *var_type = r#type;
+            })
     }
 
     pub fn label(&mut self) -> String {
