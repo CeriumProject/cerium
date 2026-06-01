@@ -14,7 +14,7 @@ use crate::{expect_token, next_matches};
 
 impl Parser<'_> {
     pub(super) fn parse_expression(&mut self) -> CompilerResult<Ranged<Expression>> {
-        let dest = self.parse_multiplication_division()?;
+        let dest = self.parse_addition_subtraction()?;
 
         if next_matches!(self.lexer, Token::Assign) {
             let source = self.parse_expression()?;
@@ -26,22 +26,21 @@ impl Parser<'_> {
         }
     }
 
-    fn parse_multiplication_division(&mut self) -> CompilerResult<Ranged<Expression>> {
-        let mut lhs = self.parse_addition_subtraction()?;
+    fn parse_addition_subtraction(&mut self) -> CompilerResult<Ranged<Expression>> {
+        let mut lhs = self.parse_multiplication_division()?;
         loop {
-            if let Some(op_range) = next_matches!(self.lexer, (op_range, Token::Asterisk), op_range)
-            {
-                let rhs = self.parse_addition_subtraction()?;
-                let operator = (op_range, GenericOperator::Mul);
+            if let Some(op_range) = next_matches!(self.lexer, (op_range, Token::Plus), op_range) {
+                let rhs = self.parse_multiplication_division()?;
+                let operator = (op_range, GenericOperator::Add);
                 lhs = (
                     join_ranges(&lhs, &rhs),
                     GenericOperation { lhs, rhs, operator }.into(),
                 );
             } else if let Some(op_range) =
-                next_matches!(self.lexer, (op_range, Token::Slash), op_range)
+                next_matches!(self.lexer, (op_range, Token::Minus), op_range)
             {
-                let rhs = self.parse_addition_subtraction()?;
-                let operator = (op_range, GenericOperator::Div);
+                let rhs = self.parse_multiplication_division()?;
+                let operator = (op_range, GenericOperator::Sub);
                 lhs = (
                     join_ranges(&lhs, &rhs),
                     GenericOperation { lhs, rhs, operator }.into(),
@@ -52,21 +51,22 @@ impl Parser<'_> {
         }
     }
 
-    fn parse_addition_subtraction(&mut self) -> CompilerResult<Ranged<Expression>> {
+    fn parse_multiplication_division(&mut self) -> CompilerResult<Ranged<Expression>> {
         let mut lhs = self.parse_typing_operation()?;
         loop {
-            if let Some(op_range) = next_matches!(self.lexer, (op_range, Token::Plus), op_range) {
+            if let Some(op_range) = next_matches!(self.lexer, (op_range, Token::Asterisk), op_range)
+            {
                 let rhs = self.parse_typing_operation()?;
-                let operator = (op_range, GenericOperator::Add);
+                let operator = (op_range, GenericOperator::Mul);
                 lhs = (
                     join_ranges(&lhs, &rhs),
                     GenericOperation { lhs, rhs, operator }.into(),
                 );
             } else if let Some(op_range) =
-                next_matches!(self.lexer, (op_range, Token::Minus), op_range)
+                next_matches!(self.lexer, (op_range, Token::Slash), op_range)
             {
                 let rhs = self.parse_typing_operation()?;
-                let operator = (op_range, GenericOperator::Sub);
+                let operator = (op_range, GenericOperator::Div);
                 lhs = (
                     join_ranges(&lhs, &rhs),
                     GenericOperation { lhs, rhs, operator }.into(),
