@@ -47,4 +47,13 @@ mod tests {
         let chasm = script.compile().unwrap();
         dbg!(&chasm);
     }
+
+    #[test]
+    fn nleb() {
+        let code = "fn num() -> u16 { let x = 10; x }";
+        let mut parser = Parser::new(Lexer::new(code));
+        let script = parser.parse().unwrap();
+        let chasm = script.compile().unwrap();
+        dbg!(&chasm);
+    }
 }

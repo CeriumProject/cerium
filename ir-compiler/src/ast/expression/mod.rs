@@ -62,10 +62,10 @@ impl Compilable for Expression {
         then: &mut dyn FnMut(&Operand, &CeriumType, &mut Context) -> CompilerResult<()>,
     ) -> CompilerResult<()> {
         match self {
-            Expression::Variable(_) => todo!(),
+            Expression::Variable(variable) => variable.compile(ctx, then),
             Expression::Constant(constant) => constant.compile(ctx, then),
             Expression::Scope(scope) => scope.compile(ctx, then),
-            Expression::Declaration(_) => todo!(),
+            Expression::Declaration(declaration) => declaration.compile(ctx, then),
             Expression::ForDownTo(_) => todo!(),
             Expression::Loop(plain_loop) => plain_loop.compile(ctx, then),
             Expression::Assignment(_) => todo!(),
@@ -84,10 +84,10 @@ impl Compilable for Expression {
         then: &mut dyn FnMut(&Operand, &CeriumType, &mut Context) -> CompilerResult<()>,
     ) -> CompilerResult<()> {
         match self {
-            Expression::Variable(_) => todo!(),
+            Expression::Variable(variable) => variable.compile_mut(ctx, then),
             Expression::Constant(constant) => constant.compile_mut(ctx, then),
             Expression::Scope(scope) => scope.compile_mut(ctx, then),
-            Expression::Declaration(_) => todo!(),
+            Expression::Declaration(declaration) => declaration.compile_mut(ctx, then),
             Expression::ForDownTo(_) => todo!(),
             Expression::Loop(plain_loop) => plain_loop.compile_mut(ctx, then),
             Expression::Assignment(_) => todo!(),
@@ -104,10 +104,10 @@ impl Compilable for Expression {
 
     fn compile_unit(&self, ctx: &mut Context) -> CompilerResult<()> {
         match self {
-            Expression::Variable(_) => todo!(),
+            Expression::Variable(variable) => variable.compile_unit(ctx),
             Expression::Constant(constant) => constant.compile_unit(ctx),
             Expression::Scope(scope) => scope.compile_unit(ctx),
-            Expression::Declaration(_) => todo!(),
+            Expression::Declaration(declaration) => declaration.compile_unit(ctx),
             Expression::ForDownTo(_) => todo!(),
             Expression::Loop(plain_loop) => plain_loop.compile_unit(ctx),
             Expression::Assignment(_) => todo!(),
@@ -122,10 +122,10 @@ impl Compilable for Expression {
 
     fn compile_into(&self, ctx: &mut Context, operand: &Operand) -> CompilerResult<CeriumType> {
         match self {
-            Expression::Variable(_) => todo!(),
+            Expression::Variable(variable) => variable.compile_into(ctx, operand),
             Expression::Constant(constant) => constant.compile_into(ctx, operand),
             Expression::Scope(scope) => scope.compile_into(ctx, operand),
-            Expression::Declaration(_) => todo!(),
+            Expression::Declaration(declaration) => declaration.compile_into(ctx, operand),
             Expression::ForDownTo(_) => todo!(),
             Expression::Loop(plain_loop) => plain_loop.compile_into(ctx, operand),
             Expression::Assignment(_) => todo!(),

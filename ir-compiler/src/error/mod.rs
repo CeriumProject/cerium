@@ -1,3 +1,4 @@
+mod could_not_resolve_variable;
 mod false_return_type;
 mod incompatible_types;
 mod type_alias_has_different_size;
@@ -8,6 +9,7 @@ mod unparseable_constant;
 mod unprocessable_unit;
 mod value_not_dereferenceable;
 
+pub use could_not_resolve_variable::CouldNotResolveVariable;
 pub use false_return_type::FalseReturnType;
 pub use incompatible_types::IncompatibleTypes;
 pub use type_alias_has_different_size::TypeAliasHasDifferentSize;
@@ -31,4 +33,5 @@ pub enum CompilerError {
     FalseReturnType(FalseReturnType),
     ValueNotDereferenceable(ValueNotDereferenceable),
     TypeAliasHasDifferentSize(TypeAliasHasDifferentSize),
+    CouldNotResolveVariable(CouldNotResolveVariable),
 }
