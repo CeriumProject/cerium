@@ -54,7 +54,7 @@ impl Compilable for GenericOperation {
                         rhs: (self.rhs.0.clone(), rhs_type.clone()),
                     })?;
                     ctx.push_inst(inst);
-                    Ok(())
+                    then(lhs_op, lhs_type, ctx)
                 })
             })
         })
