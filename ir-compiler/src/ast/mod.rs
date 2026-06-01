@@ -64,4 +64,13 @@ mod tests {
         let chasm = script.compile().unwrap();
         dbg!(&chasm);
     }
+
+    #[test]
+    fn sqrt() {
+        let code = "fn sqrt(radicand: f16) -> f16 { let approx = (radicand alias u16 / 2 + 7680) alias f16 in (radicand / approx + approx) * 0.5 }";
+        let mut parser = Parser::new(Lexer::new(code));
+        let script = parser.parse().unwrap();
+        let chasm = script.compile().unwrap();
+        dbg!(&chasm);
+    }
 }
