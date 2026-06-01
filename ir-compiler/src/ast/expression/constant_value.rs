@@ -1,10 +1,10 @@
-use crate::ast::compilation::context::Context;
-use crate::ast::compilation::Compilable;
 use crate::ast::CeriumType;
+use crate::ast::compilation::Compilable;
+use crate::ast::compilation::context::Context;
 use crate::error::{CompilerResult, UnparseableConstant};
 use crate::ranged::Ranged;
 use crate::snippet;
-use chasm_ir::{inst, Instruction, Operand};
+use chasm_ir::{Instruction, Operand, inst};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct ConstantValue {
@@ -56,32 +56,33 @@ impl Compilable for ConstantValue {
     fn compile(
         &self,
         ctx: &mut Context,
-    ) -> CompilerResult<(Vec<Instruction>, Option<(Operand, CeriumType)>)> {
-        let (value, r#type) = self.parse()?;
-        Ok((snippet!(), Some((Operand::Constant(value), r#type))))
+        then: &mut dyn FnMut(&Operand, &CeriumType, &mut Context) -> CompilerResult<()>,
+    ) -> CompilerResult<()> {
+        let (val, ty) = self.parse()?;
+        then(&Operand::Constant(val), &ty, ctx)
     }
 
     fn compile_mut(
         &self,
         ctx: &mut Context,
-    ) -> CompilerResult<(Vec<Instruction>, Option<(Operand, CeriumType)>)> {
-        let uuid = ctx.uuid();
-        let operand = Operand::Variable(uuid.clone());
-        let (value, r#type) = self.parse()?;
-        let body = Instruction::Alloc(uuid, 1, snippet!(inst!(Mov, op operand.clone(), val value)));
-        Ok((snippet!(body), Some((operand, r#type))))
+        then: &mut dyn FnMut(&Operand, &CeriumType, &mut Context) -> CompilerResult<()>,
+    ) -> CompilerResult<()> {
+        ctx.scope(|ctx| {
+            let (val, ty) = self.parse()?;
+            let uuid = ctx.uuid();
+            let op = ctx.push_var(uuid, ty.clone());
+            ctx.push_inst(inst!(Mov, op op.clone(), val val));
+            then(&op, &ty, ctx)
+        })
     }
 
-    fn compile_unit(&self, ctx: &mut Context) -> CompilerResult<Vec<Instruction>> {
-        Ok(snippet!())
+    fn compile_unit(&self, ctx: &mut Context) -> CompilerResult<()> {
+        Ok(())
     }
 
-    fn compile_into(
-        &self,
-        ctx: &mut Context,
-        operand: Operand,
-    ) -> CompilerResult<(Vec<Instruction>, Option<CeriumType>)> {
-        let (value, r#type) = self.parse()?;
-        Ok((snippet!(inst!(Mov, op operand, val value)), Some(r#type)))
+    fn compile_into(&self, ctx: &mut Context, operand: &Operand) -> CompilerResult<CeriumType> {
+        let (val, ty) = self.parse()?;
+        ctx.push_inst(inst!(Mov, op operand.clone(), val val));
+        Ok(ty)
     }
 }

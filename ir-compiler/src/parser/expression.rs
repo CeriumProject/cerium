@@ -7,7 +7,7 @@ use crate::ast::{
 };
 use crate::ast::{Expression, TypeCast};
 use crate::error::{CompilerError, CompilerResult, UnexpectedEof, UnexpectedTokenError};
-use crate::parser::{join_ranges, Parser};
+use crate::parser::{Parser, join_ranges};
 use crate::ranged::Ranged;
 use crate::token::Token;
 use crate::{expect_token, next_matches};

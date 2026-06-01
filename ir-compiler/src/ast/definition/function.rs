@@ -1,12 +1,12 @@
 use crate::ast::cerium_type::CeriumType;
-use crate::ast::compilation::context::Context;
 use crate::ast::compilation::Compilable;
+use crate::ast::compilation::context::Context;
 use crate::ast::expression::Expression;
 use crate::ast::qualifier::Qualifier;
 use crate::error::{CompilerResult, FalseReturnType};
 use crate::ranged::Ranged;
 use crate::{amend, snippet};
-use chasm_ir::{inst, Instruction, Section, Words};
+use chasm_ir::{Instruction, Section, Words, inst};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Function {
@@ -44,42 +44,31 @@ impl Function {
     }
 
     pub fn compile(&self, mut ctx: Context) -> CompilerResult<Section> {
-        // <compile -> <op>>; result u0[1] { mov u0 op; ret }
-        let (mut body, result_op_type) = self.body.1.compile(&mut ctx)?;
-        match (&self.return_type, &result_op_type) {
-            (None, None) => {}
-            (Some((_, expected)), Some((_, actual))) if expected == actual => {}
-            _ => {
-                let actual_range = match &self.body.1 {
-                    Expression::Scope(scope) => scope
-                        .result
-                        .as_ref()
-                        .map(|(range, _)| range.clone())
-                        .unwrap_or(self.body.0.clone()),
-                    _ => self.body.0.clone(),
-                };
-                Err(FalseReturnType {
-                    function: self.name.clone(),
-                    expected: self.return_type.clone(),
-                    actual: result_op_type
-                        .as_ref()
-                        .map(|(_, r#type)| (actual_range, r#type.clone())),
-                })?
+        // TODO: proper return type checks (None if should be Some and vise-versa)
+        match &self.return_type {
+            None => {
+                self.body.1.compile_unit(&mut ctx)?;
+                ctx.push_inst(inst!(Ret));
+            }
+            Some((_, expected_type)) => {
+                self.body.1.compile(&mut ctx, &mut |op, actual_type, ctx| {
+                    if *expected_type != *actual_type {
+                        Err(FalseReturnType {
+                            function: self.name.clone(),
+                            expected: self.return_type.clone(),
+                            actual: Some((todo!(), actual_type.clone())),
+                        })?
+                    }
+                    let uuid = ctx.uuid();
+                    let result = ctx.push_result(uuid, expected_type.clone());
+                    ctx.push_inst(inst!(Mov, op result, op op.clone()));
+                    ctx.push_inst(inst!(Ret));
+                    Ok(())
+                })?;
             }
         }
-        if let Some((result_op, result_type)) = result_op_type {
-            let uuid = ctx.uuid();
-            body = amend!(
-                body,
-                snippet!(Instruction::Result(
-                    uuid.clone(),
-                    1,
-                    snippet!(inst!(Mov, uuid, op result_op), inst!(Ret))
-                ))
-            );
-        } else {
-            body = amend!(body, snippet!(inst!(Ret)));
-        }
+
+        let body = ctx.resolve()?; // TODO: ctx.section(|...| ...) instead
         Ok(Section {
             name: self.name.1.to_string(),
             signature: Some(self.chasm_signature()),

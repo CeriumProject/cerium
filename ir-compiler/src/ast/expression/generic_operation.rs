@@ -1,11 +1,10 @@
-use crate::ast::compilation::context::Context;
-use crate::ast::compilation::Compilable;
-use crate::ast::expression::Expression;
 use crate::ast::CeriumType;
+use crate::ast::compilation::Compilable;
+use crate::ast::compilation::context::Context;
+use crate::ast::expression::Expression;
 use crate::error::{CompilerResult, IncompatibleTypes, UnprocessableUnit};
 use crate::ranged::Ranged;
-use crate::{amend, snippet};
-use chasm_ir::{inst, Instruction, Operand};
+use chasm_ir::{Instruction, Operand, inst};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct GenericOperation {
@@ -32,74 +31,58 @@ impl Compilable for GenericOperation {
     fn compile(
         &self,
         ctx: &mut Context,
-    ) -> CompilerResult<(Vec<Instruction>, Option<(Operand, CeriumType)>)> {
-        self.compile_mut(ctx)
+        then: &mut dyn FnMut(&Operand, &CeriumType, &mut Context) -> CompilerResult<()>,
+    ) -> CompilerResult<()> {
+        self.compile_mut(ctx, then)
     }
 
     fn compile_mut(
         &self,
         ctx: &mut Context,
-    ) -> CompilerResult<(Vec<Instruction>, Option<(Operand, CeriumType)>)> {
-        ctx.push_scope();
-        let (lhs_code, lhs_op_type) = self.lhs.1.compile_mut(ctx)?;
-        let (lhs_op, lhs_type) = lhs_op_type.ok_or_else(|| UnprocessableUnit {
-            range: self.lhs.0.clone(),
-        })?;
-
-        let (rhs_code, rhs_op_type) = self.rhs.1.compile(ctx)?;
-        let (rhs_op, rhs_type) = rhs_op_type.ok_or_else(|| UnprocessableUnit {
-            range: self.rhs.0.clone(),
-        })?;
-        ctx.pop_scope();
-
-        let inst = generate_inst_for(
-            self.operator.1,
-            (lhs_op.clone(), &lhs_type),
-            (rhs_op, &rhs_type),
-        )
-        .ok_or_else(|| IncompatibleTypes {
-            lhs: (self.lhs.0.clone(), lhs_type.clone()),
-            rhs: (self.rhs.0.clone(), rhs_type),
-        })?;
-        Ok((
-            amend!(lhs_code, amend!(rhs_code, snippet!(inst))),
-            Some((lhs_op, lhs_type)),
-        ))
+        then: &mut dyn FnMut(&Operand, &CeriumType, &mut Context) -> CompilerResult<()>,
+    ) -> CompilerResult<()> {
+        ctx.scope(|ctx| {
+            self.lhs.1.compile_mut(ctx, &mut |lhs_op, lhs_type, ctx| {
+                self.rhs.1.compile(ctx, &mut |rhs_op, rhs_type, ctx| {
+                    let inst = generate_inst_for(
+                        self.operator.1,
+                        (lhs_op.clone(), lhs_type),
+                        (rhs_op.clone(), rhs_type),
+                    )
+                    .ok_or_else(|| IncompatibleTypes {
+                        lhs: (self.lhs.0.clone(), lhs_type.clone()),
+                        rhs: (self.rhs.0.clone(), rhs_type.clone()),
+                    })?;
+                    ctx.push_inst(inst);
+                    Ok(())
+                })
+            })
+        })
     }
 
-    fn compile_unit(&self, ctx: &mut Context) -> CompilerResult<Vec<Instruction>> {
-        ctx.push_scope();
-        let lhs = self.lhs.1.compile_unit(ctx)?;
-        ctx.pop_scope();
-        ctx.push_scope();
-        let rhs = self.rhs.1.compile_unit(ctx)?;
-        ctx.pop_scope();
-        Ok(snippet!(lhs, rhs))
+    fn compile_unit(&self, ctx: &mut Context) -> CompilerResult<()> {
+        ctx.scope(|ctx| self.lhs.1.compile_unit(ctx))?;
+        ctx.scope(|ctx| self.rhs.1.compile_unit(ctx))
     }
 
-    fn compile_into(
-        &self,
-        ctx: &mut Context,
-        operand: Operand,
-    ) -> CompilerResult<(Vec<Instruction>, Option<CeriumType>)> {
-        ctx.push_scope();
-        let (lhs_code, lhs_type) = self.lhs.1.compile_into(ctx, operand.clone())?;
-        let lhs_type = lhs_type.ok_or_else(|| UnprocessableUnit {
-            range: self.lhs.0.clone(),
+    fn compile_into(&self, ctx: &mut Context, lhs_op: &Operand) -> CompilerResult<CeriumType> {
+        let lhs_type = self.lhs.1.compile_into(ctx, lhs_op)?;
+        ctx.scope(|ctx| {
+            self.rhs.1.compile(ctx, &mut |rhs_op, rhs_type, ctx| {
+                let inst = generate_inst_for(
+                    self.operator.1,
+                    (lhs_op.clone(), &lhs_type),
+                    (rhs_op.clone(), rhs_type),
+                )
+                .ok_or_else(|| IncompatibleTypes {
+                    lhs: (self.lhs.0.clone(), lhs_type.clone()),
+                    rhs: (self.rhs.0.clone(), rhs_type.clone()),
+                })?;
+                ctx.push_inst(inst);
+                Ok(())
+            })
         })?;
-        ctx.pop_scope();
-        ctx.push_scope();
-        let (rhs_code, rhs_op_type) = self.rhs.1.compile(ctx)?;
-        let (rhs_op, rhs_type) = rhs_op_type.ok_or_else(|| UnprocessableUnit {
-            range: self.rhs.0.clone(),
-        })?;
-        ctx.pop_scope();
-        let inst = generate_inst_for(self.operator.1, (operand, &lhs_type), (rhs_op, &rhs_type))
-            .ok_or_else(|| IncompatibleTypes {
-                lhs: (self.lhs.0.clone(), lhs_type.clone()),
-                rhs: (self.rhs.0.clone(), rhs_type),
-            })?;
-        Ok((snippet!(lhs_code, rhs_code, inst), Some(lhs_type)))
+        Ok(lhs_type)
     }
 }
 
