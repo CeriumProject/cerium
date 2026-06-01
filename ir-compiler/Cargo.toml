@@ -6,3 +6,4 @@ edition = "2024"
 [dependencies]
 chasm-ir = { git = "https://github.com/CeriumProject/chasm-ir.git" }
 rand = "0.10.1"
+colored = "3.1.1"
