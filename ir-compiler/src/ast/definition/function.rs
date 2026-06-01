@@ -74,14 +74,15 @@ impl Function {
                 snippet!(Instruction::Result(
                     uuid.clone(),
                     1,
-                    snippet!(inst!(Mov, uuid, op result_op))
+                    snippet!(inst!(Mov, uuid, op result_op), inst!(Ret))
                 ))
             );
+        } else {
+            body = amend!(body, snippet!(inst!(Ret)));
         }
-        body = amend!(body, snippet!(inst!(Ret)));
         Ok(Section {
             name: self.name.1.to_string(),
-            signature: todo!(),
+            signature: Some(self.chasm_signature()),
             body,
         })
     }
