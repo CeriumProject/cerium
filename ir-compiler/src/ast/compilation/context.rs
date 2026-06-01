@@ -41,7 +41,10 @@ pub struct Context {
 }
 
 impl Context {
-    pub fn new(globals: HashMap<Qualifier, CeriumType>, attributes: HashMap<Qualifier, CeriumType>) -> Context {
+    pub fn new(
+        globals: HashMap<Qualifier, CeriumType>,
+        attributes: HashMap<Qualifier, CeriumType>,
+    ) -> Context {
         Context {
             globals,
             attributes,

@@ -4,7 +4,6 @@ mod definition;
 mod expression;
 mod qualifier;
 
-use crate::ast::compilation::context::Context;
 use crate::error::CompilerResult;
 pub use cerium_type::CeriumType;
 pub use definition::*;

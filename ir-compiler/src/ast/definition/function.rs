@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 use crate::ast::cerium_type::CeriumType;
 use crate::ast::compilation::Compilable;
 use crate::ast::compilation::context::Context;
@@ -6,8 +5,8 @@ use crate::ast::expression::Expression;
 use crate::ast::qualifier::Qualifier;
 use crate::error::{CompilerResult, FalseReturnType};
 use crate::ranged::Ranged;
-use crate::{amend, snippet};
-use chasm_ir::{Instruction, Section, Words, inst};
+use chasm_ir::{Section, Words, inst};
+use std::collections::HashMap;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Function {
@@ -45,7 +44,11 @@ impl Function {
     }
 
     pub fn compile(&self, globals: &HashMap<Qualifier, CeriumType>) -> CompilerResult<Section> {
-        let parameters = self.parameters.iter().map(|((_, name), (_, r#type))| (name.clone(), r#type.clone())).collect();
+        let parameters = self
+            .parameters
+            .iter()
+            .map(|((_, name), (_, r#type))| (name.clone(), r#type.clone()))
+            .collect();
         let mut ctx = Context::new(globals.clone(), parameters);
         // TODO: proper return type checks (None if should be Some and vise-versa)
         match &self.return_type {

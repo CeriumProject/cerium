@@ -2,7 +2,7 @@ use crate::ast::CeriumType;
 use crate::ast::compilation::Compilable;
 use crate::ast::compilation::context::Context;
 use crate::ast::expression::Expression;
-use crate::error::{CompilerResult, IncompatibleTypes, UnprocessableUnit};
+use crate::error::{CompilerResult, IncompatibleTypes};
 use crate::ranged::Ranged;
 use chasm_ir::{Instruction, Operand, inst};
 

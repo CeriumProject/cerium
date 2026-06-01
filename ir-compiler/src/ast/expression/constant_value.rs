@@ -3,8 +3,7 @@ use crate::ast::compilation::Compilable;
 use crate::ast::compilation::context::Context;
 use crate::error::{CompilerResult, UnparseableConstant};
 use crate::ranged::Ranged;
-use crate::snippet;
-use chasm_ir::{Instruction, Operand, inst};
+use chasm_ir::{Operand, inst};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct ConstantValue {
