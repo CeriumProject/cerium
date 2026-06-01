@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use crate::ast::cerium_type::CeriumType;
 use crate::ast::compilation::Compilable;
 use crate::ast::compilation::context::Context;
@@ -43,7 +44,9 @@ impl Function {
         )
     }
 
-    pub fn compile(&self, mut ctx: Context) -> CompilerResult<Section> {
+    pub fn compile(&self, globals: &HashMap<Qualifier, CeriumType>) -> CompilerResult<Section> {
+        let parameters = self.parameters.iter().map(|((_, name), (_, r#type))| (name.clone(), r#type.clone())).collect();
+        let mut ctx = Context::new(globals.clone(), parameters);
         // TODO: proper return type checks (None if should be Some and vise-versa)
         match &self.return_type {
             None => {

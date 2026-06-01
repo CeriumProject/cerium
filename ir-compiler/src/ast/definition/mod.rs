@@ -1,5 +1,6 @@
 mod function;
 
+use std::collections::HashMap;
 use crate::ast::compilation::context::Context;
 pub use crate::ast::definition::function::Function;
 use crate::ast::{CeriumType, Qualifier};
@@ -17,9 +18,9 @@ impl Definition {
         }
     }
 
-    pub fn compile(&self, ctx: Context) -> Option<CompilerResult<chasm_ir::Section>> {
+    pub fn compile(&self, globals: &HashMap<Qualifier, CeriumType>) -> Option<CompilerResult<chasm_ir::Section>> {
         match self {
-            Definition::Function(function) => Some(function.compile(ctx)),
+            Definition::Function(function) => Some(function.compile(globals)),
         }
     }
 }

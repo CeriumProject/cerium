@@ -35,14 +35,16 @@ impl VarConfig {
 #[derive(Debug, Clone)]
 pub struct Context {
     globals: HashMap<Qualifier, CeriumType>,
+    attributes: HashMap<Qualifier, CeriumType>,
     vars: Vec<(VarConfig, Vec<Instruction>)>,
     counter: usize,
 }
 
 impl Context {
-    pub fn new(globals: HashMap<Qualifier, CeriumType>) -> Context {
+    pub fn new(globals: HashMap<Qualifier, CeriumType>, attributes: HashMap<Qualifier, CeriumType>) -> Context {
         Context {
             globals,
+            attributes,
             vars: vec![(VarConfig::Scope, Vec::new())],
             // vars: Vars::new(),
             counter: 0,
@@ -56,6 +58,7 @@ impl Context {
             .flat_map(|(config, _)| config.as_pair())
             .find(|(var_name, _)| **var_name == *name)
             .map(|(_, r#type)| r#type)
+            .or_else(|| self.attributes.get(name))
             .or_else(|| self.globals.get(name))
     }
 

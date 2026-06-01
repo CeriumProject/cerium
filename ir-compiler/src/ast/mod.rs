@@ -26,10 +26,10 @@ impl Script {
     }
 
     pub fn compile(&self) -> CompilerResult<Vec<chasm_ir::Section>> {
-        let context = Context::new(self.parse_globals());
+        let globals = self.parse_globals();
         self.definitions
             .iter()
-            .flat_map(|definition| definition.compile(context.clone()))
+            .flat_map(|definition| definition.compile(&globals))
             .collect()
     }
 }
@@ -51,6 +51,15 @@ mod tests {
     #[test]
     fn nleb() {
         let code = "fn num() -> u16 { let x = 10; x }";
+        let mut parser = Parser::new(Lexer::new(code));
+        let script = parser.parse().unwrap();
+        let chasm = script.compile().unwrap();
+        dbg!(&chasm);
+    }
+
+    #[test]
+    fn bleh() {
+        let code = "fn bleh(x: u16) -> u16 { let y = x * x in 10 - y }";
         let mut parser = Parser::new(Lexer::new(code));
         let script = parser.parse().unwrap();
         let chasm = script.compile().unwrap();
