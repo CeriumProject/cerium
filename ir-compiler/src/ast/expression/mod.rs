@@ -71,7 +71,7 @@ impl Compilable for Expression {
             Expression::Assignment(_) => todo!(),
             Expression::GenericOperation(generic_operation) => generic_operation.compile(ctx, then),
             Expression::TypeCast(_) => todo!(),
-            Expression::TypeAlias(_) => todo!(),
+            Expression::TypeAlias(type_alias) => type_alias.compile(ctx, then),
             Expression::Reference(_) => todo!(),
             Expression::Dereference(dereference) => dereference.compile(ctx, then),
             Expression::Invocation(_) => todo!(),
@@ -95,7 +95,7 @@ impl Compilable for Expression {
                 generic_operation.compile_mut(ctx, then)
             }
             Expression::TypeCast(_) => todo!(),
-            Expression::TypeAlias(_) => todo!(),
+            Expression::TypeAlias(type_alias) => type_alias.compile_mut(ctx, then),
             Expression::Reference(_) => todo!(),
             Expression::Dereference(dereference) => dereference.compile_mut(ctx, then),
             Expression::Invocation(_) => todo!(),
@@ -113,7 +113,7 @@ impl Compilable for Expression {
             Expression::Assignment(_) => todo!(),
             Expression::GenericOperation(generic_operation) => generic_operation.compile_unit(ctx),
             Expression::TypeCast(_) => todo!(),
-            Expression::TypeAlias(_) => todo!(),
+            Expression::TypeAlias(type_alias) => type_alias.compile_unit(ctx),
             Expression::Reference(_) => todo!(),
             Expression::Dereference(dereference) => dereference.compile_unit(ctx),
             Expression::Invocation(_) => todo!(),
@@ -133,7 +133,7 @@ impl Compilable for Expression {
                 generic_operation.compile_into(ctx, operand)
             }
             Expression::TypeCast(_) => todo!(),
-            Expression::TypeAlias(_) => todo!(),
+            Expression::TypeAlias(type_alias) => type_alias.compile_into(ctx, operand),
             Expression::Reference(_) => todo!(),
             Expression::Dereference(dereference) => dereference.compile_into(ctx, operand),
             Expression::Invocation(_) => todo!(),
