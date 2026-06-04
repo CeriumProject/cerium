@@ -1,3 +1,4 @@
+mod cannot_cast_type;
 mod could_not_resolve_variable;
 mod false_return_type;
 mod incompatible_types;
@@ -12,6 +13,7 @@ mod unprocessable_unit;
 mod value_not_dereferenceable;
 mod value_not_invocable;
 
+pub use cannot_cast_type::CannotCastType;
 use colored::{Color, Colorize};
 pub use could_not_resolve_variable::CouldNotResolveVariable;
 pub use false_return_type::FalseReturnType;
@@ -45,6 +47,7 @@ pub enum CompilerError {
     ValueNotInvocable(ValueNotInvocable),
     InvalidParameterAmount(InvalidParameterAmount),
     MismatchedParameterType(MismatchedParameterType),
+    CannotCastType(CannotCastType),
 }
 
 pub trait FormatError {
@@ -67,6 +70,7 @@ impl FormatError for CompilerError {
             CompilerError::ValueNotInvocable(_) => todo!(),
             CompilerError::InvalidParameterAmount(_) => todo!(),
             CompilerError::MismatchedParameterType(_) => todo!(),
+            CompilerError::CannotCastType(_) => todo!(),
         }
     }
 }

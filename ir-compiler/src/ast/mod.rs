@@ -76,7 +76,8 @@ mod tests {
 
     #[test]
     fn call() {
-        let code = "fn a() -> i16 { b(1.0, 1) } fn b(x: f16, y: u16) -> i16 { (x + y alias f16) alias i16 }";
+        let code =
+            "fn a() -> i16 { b(1.0, 1) } fn b(x: f16, y: u16) -> i16 { (x + y as f16) as i16 }";
         let mut parser = Parser::new(Lexer::new(code));
         let script = parser.parse().unwrap();
         let chasm = script.compile().unwrap();
