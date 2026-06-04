@@ -1,6 +1,8 @@
 mod could_not_resolve_variable;
 mod false_return_type;
 mod incompatible_types;
+mod invalid_parameter_amount;
+mod mismatched_parameter_type;
 mod type_alias_has_different_size;
 mod unexpected_character;
 mod unexpected_eof;
@@ -8,11 +10,14 @@ mod unexpected_token;
 mod unparseable_constant;
 mod unprocessable_unit;
 mod value_not_dereferenceable;
+mod value_not_invocable;
 
 use colored::{Color, Colorize};
 pub use could_not_resolve_variable::CouldNotResolveVariable;
 pub use false_return_type::FalseReturnType;
 pub use incompatible_types::IncompatibleTypes;
+pub use invalid_parameter_amount::InvalidParameterAmount;
+pub use mismatched_parameter_type::MismatchedParameterType;
 use std::ops::{Add, Range, RangeInclusive};
 pub use type_alias_has_different_size::TypeAliasHasDifferentSize;
 pub use unexpected_character::UnexpectedCharacterError;
@@ -21,6 +26,7 @@ pub use unexpected_token::UnexpectedTokenError;
 pub use unparseable_constant::UnparseableConstant;
 pub use unprocessable_unit::UnprocessableUnit;
 pub use value_not_dereferenceable::ValueNotDereferenceable;
+pub use value_not_invocable::ValueNotInvocable;
 
 pub type CompilerResult<T> = Result<T, CompilerError>;
 
@@ -36,6 +42,9 @@ pub enum CompilerError {
     ValueNotDereferenceable(ValueNotDereferenceable),
     TypeAliasHasDifferentSize(TypeAliasHasDifferentSize),
     CouldNotResolveVariable(CouldNotResolveVariable),
+    ValueNotInvocable(ValueNotInvocable),
+    InvalidParameterAmount(InvalidParameterAmount),
+    MismatchedParameterType(MismatchedParameterType),
 }
 
 pub trait FormatError {
@@ -55,6 +64,9 @@ impl FormatError for CompilerError {
             CompilerError::ValueNotDereferenceable(_) => todo!(),
             CompilerError::TypeAliasHasDifferentSize(_) => todo!(),
             CompilerError::CouldNotResolveVariable(_) => todo!(),
+            CompilerError::ValueNotInvocable(_) => todo!(),
+            CompilerError::InvalidParameterAmount(_) => todo!(),
+            CompilerError::MismatchedParameterType(_) => todo!(),
         }
     }
 }
