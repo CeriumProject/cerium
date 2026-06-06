@@ -1,6 +1,4 @@
-pub mod amend;
 pub mod context;
-pub mod snippet;
 
 use crate::ast::CeriumType;
 use crate::ast::compilation::context::Context;
