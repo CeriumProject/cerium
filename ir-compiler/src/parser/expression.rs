@@ -18,7 +18,7 @@ impl Parser<'_> {
 
         if next_matches!(self.lexer, Token::Assign) {
             let source = self.parse_expression()?;
-            let range = *dest.0.start()..=*source.0.end();
+            let range = join_ranges(&dest, &source);
             let expression = Expression::Assignment(Box::new(Assignment { dest, source }));
             Ok((range, expression))
         } else {
@@ -106,11 +106,13 @@ impl Parser<'_> {
             .clone()
         {
             Ok((prefix_range, Token::Ampersand)) => {
+                let _ = self.lexer.next();
                 let inner = self.parse_prefix_operation()?;
                 let range = *prefix_range.start()..=*inner.0.end();
                 Ok((range, Expression::Reference(Box::new(Reference { inner }))))
             }
             Ok((prefix_range, Token::Asterisk)) => {
+                let _ = self.lexer.next();
                 let inner = self.parse_prefix_operation()?;
                 let range = *prefix_range.start()..=*inner.0.end();
                 Ok((

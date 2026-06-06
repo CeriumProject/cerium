@@ -30,6 +30,7 @@ pub mod scope;
 pub mod type_alias;
 pub mod type_cast;
 pub mod variable;
+mod iter;
 
 #[macro_export]
 macro_rules! unprocessable_unit {
@@ -68,7 +69,7 @@ impl Compilable for Expression {
             Expression::Declaration(declaration) => declaration.compile(ctx, then),
             Expression::ForDownTo(_) => todo!(),
             Expression::Loop(plain_loop) => plain_loop.compile(ctx, then),
-            Expression::Assignment(_) => todo!(),
+            Expression::Assignment(assignment) => assignment.compile(ctx, then),
             Expression::GenericOperation(generic_operation) => generic_operation.compile(ctx, then),
             Expression::TypeCast(type_cast) => type_cast.compile(ctx, then),
             Expression::TypeAlias(type_alias) => type_alias.compile(ctx, then),
@@ -90,7 +91,7 @@ impl Compilable for Expression {
             Expression::Declaration(declaration) => declaration.compile_mut(ctx, then),
             Expression::ForDownTo(_) => todo!(),
             Expression::Loop(plain_loop) => plain_loop.compile_mut(ctx, then),
-            Expression::Assignment(_) => todo!(),
+            Expression::Assignment(assignment) => assignment.compile_mut(ctx, then),
             Expression::GenericOperation(generic_operation) => {
                 generic_operation.compile_mut(ctx, then)
             }
@@ -110,7 +111,7 @@ impl Compilable for Expression {
             Expression::Declaration(declaration) => declaration.compile_unit(ctx),
             Expression::ForDownTo(_) => todo!(),
             Expression::Loop(plain_loop) => plain_loop.compile_unit(ctx),
-            Expression::Assignment(_) => todo!(),
+            Expression::Assignment(assignment) => assignment.compile_unit(ctx),
             Expression::GenericOperation(generic_operation) => generic_operation.compile_unit(ctx),
             Expression::TypeCast(type_cast) => type_cast.compile_unit(ctx),
             Expression::TypeAlias(type_alias) => type_alias.compile_unit(ctx),
@@ -128,7 +129,7 @@ impl Compilable for Expression {
             Expression::Declaration(declaration) => declaration.compile_into(ctx, operand),
             Expression::ForDownTo(_) => todo!(),
             Expression::Loop(plain_loop) => plain_loop.compile_into(ctx, operand),
-            Expression::Assignment(_) => todo!(),
+            Expression::Assignment(assignment) => assignment.compile_into(ctx, operand),
             Expression::GenericOperation(generic_operation) => {
                 generic_operation.compile_into(ctx, operand)
             }

@@ -83,4 +83,15 @@ mod tests {
         let chasm = script.compile().unwrap();
         dbg!(&chasm);
     }
+
+    #[test]
+    fn nyeyn() {
+        let code =
+            "fn a() { let x = 10; x = 5; } fn b(ptr: &i16) { *ptr = 3 as i16; }";
+        let mut parser = Parser::new(Lexer::new(code));
+        let script = parser.parse().unwrap();
+        dbg!(&script);
+        let chasm = script.compile().unwrap();
+        dbg!(&chasm);
+    }
 }

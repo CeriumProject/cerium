@@ -12,6 +12,7 @@ mod unparseable_constant;
 mod unprocessable_unit;
 mod value_not_dereferenceable;
 mod value_not_invocable;
+mod mismatched_assignment_type;
 
 pub use cannot_cast_type::CannotCastType;
 use colored::{Color, Colorize};
@@ -29,6 +30,7 @@ pub use unparseable_constant::UnparseableConstant;
 pub use unprocessable_unit::UnprocessableUnit;
 pub use value_not_dereferenceable::ValueNotDereferenceable;
 pub use value_not_invocable::ValueNotInvocable;
+pub use mismatched_assignment_type::MismatchedAssignmentType;
 
 pub type CompilerResult<T> = Result<T, CompilerError>;
 
@@ -48,6 +50,7 @@ pub enum CompilerError {
     InvalidParameterAmount(InvalidParameterAmount),
     MismatchedParameterType(MismatchedParameterType),
     CannotCastType(CannotCastType),
+    MismatchedAssignmentType(MismatchedAssignmentType),
 }
 
 pub trait FormatError {
@@ -71,6 +74,7 @@ impl FormatError for CompilerError {
             CompilerError::InvalidParameterAmount(_) => todo!(),
             CompilerError::MismatchedParameterType(_) => todo!(),
             CompilerError::CannotCastType(_) => todo!(),
+            CompilerError::MismatchedAssignmentType(_) => todo!(),
         }
     }
 }
