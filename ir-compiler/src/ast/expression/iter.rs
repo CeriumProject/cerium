@@ -3,7 +3,7 @@ use crate::ast::Expression;
 impl Expression {
     fn iter_rec(&self) -> RecursiveExpressionIterator<'_> {
         RecursiveExpressionIterator {
-            recursion: vec![self.iter()]
+            recursion: vec![self.iter()],
         }
     }
 
@@ -32,7 +32,7 @@ impl<'a> Iterator for RecursiveExpressionIterator<'a> {
                 self.recursion.pop();
                 self.next()
             }
-            Some(e) => todo!()
+            Some(e) => todo!(),
         }
     }
 }
