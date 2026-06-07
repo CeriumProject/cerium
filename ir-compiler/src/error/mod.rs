@@ -2,7 +2,9 @@ mod cannot_cast_type;
 mod could_not_resolve_variable;
 mod false_return_type;
 mod incompatible_types;
+mod invalid_counter_type;
 mod invalid_parameter_amount;
+mod mismatched_assignment_type;
 mod mismatched_parameter_type;
 mod type_alias_has_different_size;
 mod unexpected_character;
@@ -12,14 +14,15 @@ mod unparseable_constant;
 mod unprocessable_unit;
 mod value_not_dereferenceable;
 mod value_not_invocable;
-mod mismatched_assignment_type;
 
 pub use cannot_cast_type::CannotCastType;
 use colored::{Color, Colorize};
 pub use could_not_resolve_variable::CouldNotResolveVariable;
 pub use false_return_type::FalseReturnType;
 pub use incompatible_types::IncompatibleTypes;
+pub use invalid_counter_type::InvalidCounterType;
 pub use invalid_parameter_amount::InvalidParameterAmount;
+pub use mismatched_assignment_type::MismatchedAssignmentType;
 pub use mismatched_parameter_type::MismatchedParameterType;
 use std::ops::{Add, Range, RangeInclusive};
 pub use type_alias_has_different_size::TypeAliasHasDifferentSize;
@@ -30,7 +33,6 @@ pub use unparseable_constant::UnparseableConstant;
 pub use unprocessable_unit::UnprocessableUnit;
 pub use value_not_dereferenceable::ValueNotDereferenceable;
 pub use value_not_invocable::ValueNotInvocable;
-pub use mismatched_assignment_type::MismatchedAssignmentType;
 
 pub type CompilerResult<T> = Result<T, CompilerError>;
 
@@ -51,6 +53,7 @@ pub enum CompilerError {
     MismatchedParameterType(MismatchedParameterType),
     CannotCastType(CannotCastType),
     MismatchedAssignmentType(MismatchedAssignmentType),
+    InvalidCounterType(InvalidCounterType),
 }
 
 pub trait FormatError {
@@ -75,6 +78,7 @@ impl FormatError for CompilerError {
             CompilerError::MismatchedParameterType(_) => todo!(),
             CompilerError::CannotCastType(_) => todo!(),
             CompilerError::MismatchedAssignmentType(_) => todo!(),
+            CompilerError::InvalidCounterType(_) => todo!(),
         }
     }
 }

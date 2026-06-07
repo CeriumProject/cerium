@@ -86,8 +86,17 @@ mod tests {
 
     #[test]
     fn nyeyn() {
-        let code =
-            "fn a() { let x = 10; x = 5; } fn b(ptr: &i16) { *ptr = 3 as i16; }";
+        let code = "fn a() { let x = 10; x = 5; } fn b(ptr: &i16) { *ptr = 3 as i16; }";
+        let mut parser = Parser::new(Lexer::new(code));
+        let script = parser.parse().unwrap();
+        dbg!(&script);
+        let chasm = script.compile().unwrap();
+        dbg!(&chasm);
+    }
+
+    #[test]
+    fn memcpy() {
+        let code = "fn memcpy(dst: &u16, src: &u16, len: u16) { for len downto 0 { *dst = *src } }";
         let mut parser = Parser::new(Lexer::new(code));
         let script = parser.parse().unwrap();
         dbg!(&script);

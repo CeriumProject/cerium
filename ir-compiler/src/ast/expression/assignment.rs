@@ -1,12 +1,12 @@
 use crate::ast::CeriumType;
 use crate::ast::compilation::Compilable;
 use crate::ast::compilation::context::Context;
+use crate::ast::dereference::Dereference;
 use crate::ast::expression::Expression;
 use crate::error::{CompilerResult, MismatchedAssignmentType, ValueNotDereferenceable};
 use crate::ranged::Ranged;
-use chasm_ir::{inst, Operand};
-use crate::ast::dereference::Dereference;
 use crate::unprocessable_unit;
+use chasm_ir::{Operand, inst};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Assignment {
@@ -47,8 +47,9 @@ impl Compilable for Assignment {
     }
 
     fn compile_unit(&self, ctx: &mut Context) -> CompilerResult<()> {
-        self.source.1.compile(ctx, &mut |val_op, val_type, ctx| {
-            match &self.dest.1 {
+        self.source
+            .1
+            .compile(ctx, &mut |val_op, val_type, ctx| match &self.dest.1 {
                 Expression::Variable(variable) => {
                     variable.compile(ctx, &mut |var_op, var_type, ctx| {
                         if *val_type != *var_type {
@@ -60,9 +61,11 @@ impl Compilable for Assignment {
                         ctx.push_inst(inst!(Mov, op var_op.clone(), op val_op.clone()));
                         Ok(())
                     })
-                },
+                }
                 Expression::Dereference(reference) => {
-                    let Dereference { inner: (ref_range, reference) } = reference.as_ref();
+                    let Dereference {
+                        inner: (ref_range, reference),
+                    } = reference.as_ref();
                     reference.compile(ctx, &mut |var_op, var_type, ctx| {
                         let CeriumType::Reference(var_type) = var_type else {
                             Err(ValueNotDereferenceable {
@@ -81,8 +84,7 @@ impl Compilable for Assignment {
                     })
                 }
                 _ => todo!("error"),
-            }
-        })
+            })
     }
 
     fn compile_into(&self, ctx: &mut Context, operand: &Operand) -> CompilerResult<CeriumType> {
