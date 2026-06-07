@@ -103,4 +103,14 @@ mod tests {
         let chasm = script.compile().unwrap();
         dbg!(&chasm);
     }
+
+    #[test]
+    fn wref() {
+        let code = "fn main() { let x = 10; let y = &x; }";
+        let mut parser = Parser::new(Lexer::new(code));
+        let script = parser.parse().unwrap();
+        dbg!(&script);
+        let chasm = script.compile().unwrap();
+        dbg!(&chasm);
+    }
 }

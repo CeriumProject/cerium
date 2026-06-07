@@ -73,7 +73,7 @@ impl Compilable for Expression {
             Expression::GenericOperation(generic_operation) => generic_operation.compile(ctx, then),
             Expression::TypeCast(type_cast) => type_cast.compile(ctx, then),
             Expression::TypeAlias(type_alias) => type_alias.compile(ctx, then),
-            Expression::Reference(_) => todo!(),
+            Expression::Reference(reference) => reference.compile(ctx, then),
             Expression::Dereference(dereference) => dereference.compile(ctx, then),
             Expression::Invocation(invocation) => invocation.compile(ctx, then),
         }
@@ -97,7 +97,7 @@ impl Compilable for Expression {
             }
             Expression::TypeCast(type_cast) => type_cast.compile_mut(ctx, then),
             Expression::TypeAlias(type_alias) => type_alias.compile_mut(ctx, then),
-            Expression::Reference(_) => todo!(),
+            Expression::Reference(reference) => reference.compile_mut(ctx, then),
             Expression::Dereference(dereference) => dereference.compile_mut(ctx, then),
             Expression::Invocation(invocation) => invocation.compile_mut(ctx, then),
         }
@@ -115,7 +115,7 @@ impl Compilable for Expression {
             Expression::GenericOperation(generic_operation) => generic_operation.compile_unit(ctx),
             Expression::TypeCast(type_cast) => type_cast.compile_unit(ctx),
             Expression::TypeAlias(type_alias) => type_alias.compile_unit(ctx),
-            Expression::Reference(_) => todo!(),
+            Expression::Reference(reference) => reference.compile_unit(ctx),
             Expression::Dereference(dereference) => dereference.compile_unit(ctx),
             Expression::Invocation(invocation) => invocation.compile_unit(ctx),
         }
@@ -135,7 +135,7 @@ impl Compilable for Expression {
             }
             Expression::TypeCast(type_cast) => type_cast.compile_into(ctx, operand),
             Expression::TypeAlias(type_alias) => type_alias.compile_into(ctx, operand),
-            Expression::Reference(_) => todo!(),
+            Expression::Reference(reference) => reference.compile_into(ctx, operand),
             Expression::Dereference(dereference) => dereference.compile_into(ctx, operand),
             Expression::Invocation(invocation) => invocation.compile_into(ctx, operand),
         }
