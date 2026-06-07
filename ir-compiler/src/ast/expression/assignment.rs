@@ -6,6 +6,7 @@ use crate::error::{CompilerResult, MismatchedAssignmentType, ValueNotDereference
 use crate::ranged::Ranged;
 use chasm_ir::{inst, Operand};
 use crate::ast::dereference::Dereference;
+use crate::unprocessable_unit;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Assignment {
@@ -34,7 +35,7 @@ impl Compilable for Assignment {
         ctx: &mut Context,
         then: &mut dyn FnMut(&Operand, &CeriumType, &mut Context) -> CompilerResult<()>,
     ) -> CompilerResult<()> {
-        todo!()
+        unprocessable_unit!()
     }
 
     fn compile_mut(
@@ -42,7 +43,7 @@ impl Compilable for Assignment {
         ctx: &mut Context,
         then: &mut dyn FnMut(&Operand, &CeriumType, &mut Context) -> CompilerResult<()>,
     ) -> CompilerResult<()> {
-        todo!()
+        unprocessable_unit!()
     }
 
     fn compile_unit(&self, ctx: &mut Context) -> CompilerResult<()> {
@@ -85,6 +86,6 @@ impl Compilable for Assignment {
     }
 
     fn compile_into(&self, ctx: &mut Context, operand: &Operand) -> CompilerResult<CeriumType> {
-        todo!()
+        unprocessable_unit!()
     }
 }
