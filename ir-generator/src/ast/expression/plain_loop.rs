@@ -38,7 +38,7 @@ impl Compilable for Loop {
             let label = ctx.label();
             ctx.push_inst(Instruction::Sublabel(label.clone()));
             self.body.1.compile_unit(ctx)?;
-            ctx.push_inst(inst!(Jmp, label));
+            ctx.push_inst(inst!(Jmp, format!(".{label}")));
             Ok(())
         })
     }

@@ -26,7 +26,7 @@ impl Compilable for CompilerMacro {
         match (self.name.1.to_string().as_str(), self.expressions.as_slice()) {
             ("device", [(_, idx)]) => idx.compile_into(ctx, &Operand::Variable(String::from("rd"))).map(|_| ()),
             ("context", [(_, idx), (_, val)]) => idx.compile(ctx, &mut |idx_op, _, ctx| {
-                idx.compile(ctx, &mut |val_op, _, ctx| {
+                val.compile(ctx, &mut |val_op, _, ctx| {
                     ctx.push_inst(inst!(Ctx, op idx_op.clone(), op val_op.clone()));
                     Ok(())
                 })

@@ -4,3 +4,6 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+chasm-ir = { git = "https://github.com/CeriumProject/chasm-ir.git" }
+chasm-amine-backend = { git = "https://github.com/CeriumProject/chasm-amine-backend.git" }
+ir-generator = { path = "ir-generator" }
