@@ -113,4 +113,14 @@ mod tests {
         let chasm = script.compile().unwrap();
         dbg!(&chasm);
     }
+
+    #[test]
+    fn dbg() {
+        let code = "fn main() { dbg!(1 + 2, 4.5); }";
+        let mut parser = Parser::new(Lexer::new(code));
+        let script = parser.parse().unwrap();
+        dbg!(&script);
+        let chasm = script.compile().unwrap();
+        dbg!(&chasm);
+    }
 }

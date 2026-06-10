@@ -58,13 +58,13 @@ impl Compilable for ForDownTo {
         self.limit.1.compile(ctx, &mut |op, r#type, ctx| {
             let dot_cond = ctx.label();
             let dot_loop = ctx.label();
-            ctx.push_inst(inst!(Jmp, &dot_cond));
+            ctx.push_inst(inst!(Jmp, format!(".{dot_cond}")));
             ctx.push_inst(Instruction::Sublabel(dot_loop.clone()));
             ctx.push_inst(inst!(Add, self.counter.1, op op.clone()));
             self.body.1.compile_unit(ctx)?;
             ctx.push_inst(Instruction::Sublabel(dot_cond));
             ctx.push_inst(inst!(Sub, self.counter.1, op op.clone()));
-            ctx.push_inst(inst!(Jrnzdec, self.counter.1, dot_loop));
+            ctx.push_inst(inst!(Jrnzdec, self.counter.1, format!(".{dot_loop}")));
             Ok(())
         })
     }

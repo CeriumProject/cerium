@@ -83,6 +83,7 @@ impl<'a> Lexer<'a> {
             ',' => Ok(Token::Comma.ranged(idx..=idx)),
             '=' => Ok(Token::Assign.ranged(idx..=idx)),
             '+' => Ok(Token::Plus.ranged(idx..=idx)),
+            '!' => Ok(Token::Bang.ranged(idx..=idx)),
             '-' => match self.src.next_if(|(_, c)| *c == '>') {
                 Some(_) => Ok(Token::Arrow.ranged(idx..=idx)),
                 None => Ok(Token::Minus.ranged(idx..=idx)),

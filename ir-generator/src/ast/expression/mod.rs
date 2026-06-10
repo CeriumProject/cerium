@@ -16,6 +16,7 @@ pub use crate::ast::invocation::Invocation;
 pub use crate::ast::reference::Reference;
 use crate::error::CompilerResult;
 use chasm_ir::Operand;
+use crate::ast::expression::compiler_macro::CompilerMacro;
 
 pub mod assignment;
 pub mod constant_value;
@@ -31,6 +32,7 @@ pub mod scope;
 pub mod type_alias;
 pub mod type_cast;
 pub mod variable;
+pub mod compiler_macro;
 
 #[macro_export]
 macro_rules! unprocessable_unit {
@@ -54,6 +56,7 @@ pub enum Expression {
     Reference(Box<Reference>),
     Dereference(Box<Dereference>),
     Invocation(Box<Invocation>),
+    CompilerMacro(Box<CompilerMacro>),
 }
 
 impl Compilable for Expression {
@@ -76,6 +79,7 @@ impl Compilable for Expression {
             Expression::Reference(reference) => reference.compile(ctx, then),
             Expression::Dereference(dereference) => dereference.compile(ctx, then),
             Expression::Invocation(invocation) => invocation.compile(ctx, then),
+            Expression::CompilerMacro(compiler_macro) => compiler_macro.compile(ctx, then),
         }
     }
 
@@ -100,6 +104,7 @@ impl Compilable for Expression {
             Expression::Reference(reference) => reference.compile_mut(ctx, then),
             Expression::Dereference(dereference) => dereference.compile_mut(ctx, then),
             Expression::Invocation(invocation) => invocation.compile_mut(ctx, then),
+            Expression::CompilerMacro(compiler_macro) => compiler_macro.compile_mut(ctx, then),
         }
     }
 
@@ -118,6 +123,7 @@ impl Compilable for Expression {
             Expression::Reference(reference) => reference.compile_unit(ctx),
             Expression::Dereference(dereference) => dereference.compile_unit(ctx),
             Expression::Invocation(invocation) => invocation.compile_unit(ctx),
+            Expression::CompilerMacro(compiler_macro) => compiler_macro.compile_unit(ctx),
         }
     }
 
@@ -138,6 +144,7 @@ impl Compilable for Expression {
             Expression::Reference(reference) => reference.compile_into(ctx, operand),
             Expression::Dereference(dereference) => dereference.compile_into(ctx, operand),
             Expression::Invocation(invocation) => invocation.compile_into(ctx, operand),
+            Expression::CompilerMacro(compiler_macro) => compiler_macro.compile_into(ctx, operand),
         }
     }
 }

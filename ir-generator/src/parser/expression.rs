@@ -11,6 +11,7 @@ use crate::parser::{Parser, join_ranges};
 use crate::ranged::Ranged;
 use crate::token::Token;
 use crate::{expect_token, next_matches};
+use crate::ast::compiler_macro::CompilerMacro;
 
 impl Parser<'_> {
     pub(super) fn parse_expression(&mut self) -> CompilerResult<Ranged<Expression>> {
@@ -260,10 +261,30 @@ impl Parser<'_> {
 
     fn parse_variable(&mut self) -> CompilerResult<Ranged<Expression>> {
         let name = self.parse_qualifier()?;
-        Ok((
-            name.0.clone(),
-            Expression::Variable(Box::new(Variable { name })),
-        ))
+        if next_matches!(self.lexer, Token::Bang) {
+            expect_token!(self.lexer, Token::LParen)?;
+
+            let mut expressions = Vec::new();
+            while !matches!(self.lexer.peek(), Some(Ok((_, Token::RParen)))) {
+                expressions.push(self.parse_expression()?);
+
+                if !next_matches!(self.lexer, Token::Comma) {
+                    break;
+                }
+            }
+            let end = expect_token!(self.lexer, (range, Token::RParen), range)?;
+
+            let range = join_ranges(&name, &(end, ()));
+            Ok((range, Expression::CompilerMacro(Box::new(CompilerMacro {
+                name,
+                expressions,
+            }))))
+        } else {
+            Ok((
+                name.0.clone(),
+                Expression::Variable(Box::new(Variable { name })),
+            ))
+        }
     }
 
     fn parse_constant(&mut self) -> CompilerResult<Ranged<Expression>> {

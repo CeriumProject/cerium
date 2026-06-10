@@ -34,7 +34,7 @@ dependencies = [
 [[package]]
 name = "chasm-ir"
 version = "0.1.0"
-source = "git+https://github.com/CeriumProject/chasm-ir.git#01725b03ff04df294d22c5bf66a9a60b3f649447"
+source = "git+https://github.com/CeriumProject/chasm-ir.git#572f153671650289fbd67e249aa89218bb704156"
 
 [[package]]
 name = "colored"
