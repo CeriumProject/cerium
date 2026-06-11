@@ -1,5 +1,3 @@
-fn main() {
-    let code = "
 fn memcpy(dst: &fn(f16) -> f16, src: &fn(f16) -> f16, len: u16) {
     for len downto 0 {
         *dst = *src;
@@ -16,10 +14,4 @@ fn main() {
     let func = 10000 alias &fn(f16) -> f16;
     memcpy(func, sqr, 100);
     dbg!(func(98.53));
-}
-";
-    let ir = ir_generator::compile(code).unwrap();
-    dbg!(&ir);
-    let asm = chasm_amine_backend::compile_chasm_to_amine(&ir);
-    println!("{}", asm.iter().map(|s| s.to_string()).collect::<String>());
 }
