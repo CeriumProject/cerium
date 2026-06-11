@@ -13,4 +13,6 @@ impl CeriumType {
     pub fn size(&self) -> usize {
         1
     }
+
+    // TODO: ::is_subtype_of
 }
