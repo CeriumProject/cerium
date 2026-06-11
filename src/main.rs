@@ -40,8 +40,11 @@ fn main() {
         let x = 128 in for x downto 0 {
             context!(1, x);
             let y = 96 in for y downto 0 {
+                let ix = (x - 64) as i16 as f16 / 64.0;
+                let iy = (y - 48) as i16 as f16 / 48.0;
+                let c = (3.9 - (ix * ix + iy * iy) * 2.0) as u16 * 85;
                 context!(2, y);
-                context!(3, x + y);
+                context!(3, c);
                 send!();
             }
         }
@@ -58,6 +61,50 @@ fn main() {
             draw();
             flip();
         }
+    }
+    ";
+    let code = "
+    fn add(x: f16, y: f16) -> f16 {
+        x + y
+    }
+    fn main() {
+        dbg!(add(6.7, 42.0));
+    }
+    ";
+    let code = "
+    fn inc_ptr(ptr: &u16) {
+        *ptr = *ptr + 1;
+    }
+    fn main() {
+        let x = 67;
+        inc_ptr(&x);
+        inc_ptr(&x);
+        dbg!(x);
+    }
+    ";
+    let code = "
+    fn fib(n: u16) -> u16 {
+        let result = n;
+        let k = n in for k downto 0 {
+            for k downto 0 {
+                result = fib(n - 2) + fib(n - 1);
+                k = 0;
+            };
+            k = 0;
+        };
+        result
+    }
+
+    fn main() {
+        dbg!(1, fib(1));
+        dbg!(2, fib(2));
+        dbg!(3, fib(3));
+        dbg!(4, fib(4));
+        dbg!(5, fib(5));
+        let x = 10 in for x downto 0 {
+            let y = 10 - x;
+            dbg!(y, fib(y));
+        };
     }
     ";
     let ir = ir_generator::compile(code).unwrap();

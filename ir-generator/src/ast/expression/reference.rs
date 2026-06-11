@@ -46,7 +46,7 @@ impl Compilable for Reference {
     fn compile_into(&self, ctx: &mut Context, operand: &Operand) -> CompilerResult<CeriumType> {
         let mut result_type = MaybeUninit::uninit();
         self.inner.1.compile(ctx, &mut |op, r#type, ctx| {
-            let Operand::Variable(variable) = operand else {
+            let Operand::Variable(variable) = op else {
                 Err(ValueNotReferenceable {
                     range: self.inner.0.clone(),
                 })?

@@ -42,17 +42,15 @@ impl Compilable for TypeCast {
     }
 
     fn compile_into(&self, ctx: &mut Context, operand: &Operand) -> CompilerResult<CeriumType> {
-        let mut result = MaybeUninit::uninit();
         self.value.1.compile(ctx, &mut |op, r#type, ctx| {
             let opcode = opcode(r#type, &self.r#type.1).ok_or_else(|| CannotCastType {
                 from: (self.value.0.clone(), r#type.clone()),
                 to: self.r#type.clone(),
             })?;
             ctx.push_inst(Instruction::TwoOp(opcode, operand.clone(), op.clone()));
-            result = MaybeUninit::new(r#type.clone());
             Ok(())
         })?;
-        Ok(unsafe { result.assume_init() })
+        Ok(self.r#type.1.clone())
     }
 }
 
