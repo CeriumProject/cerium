@@ -1,3 +1,4 @@
+use crate::ast::compiler_macro::CompilerMacro;
 use crate::ast::dereference::Dereference;
 use crate::ast::generic_operation::GenericOperator;
 use crate::ast::reference::Reference;
@@ -11,7 +12,6 @@ use crate::parser::{Parser, join_ranges};
 use crate::ranged::Ranged;
 use crate::token::Token;
 use crate::{expect_token, next_matches};
-use crate::ast::compiler_macro::CompilerMacro;
 
 impl Parser<'_> {
     pub(super) fn parse_expression(&mut self) -> CompilerResult<Ranged<Expression>> {
@@ -144,7 +144,7 @@ impl Parser<'_> {
             Ok((_, Token::For)) => self.parse_for(),
             Ok((_, Token::Loop)) => self.parse_loop(),
             Ok((_, Token::Ident(_))) => self.parse_variable(),
-            Ok((_, Token::Number(_))) => self.parse_constant(),
+            Ok((_, Token::Number(_))) => self.parse_constant_value(),
             Ok((range, token)) => Err(CompilerError::UnexpectedTokenError(UnexpectedTokenError {
                 range: range.clone(),
                 token: token.clone(),
@@ -275,10 +275,10 @@ impl Parser<'_> {
             let end = expect_token!(self.lexer, (range, Token::RParen), range)?;
 
             let range = join_ranges(&name, &(end, ()));
-            Ok((range, Expression::CompilerMacro(Box::new(CompilerMacro {
-                name,
-                expressions,
-            }))))
+            Ok((
+                range,
+                Expression::CompilerMacro(Box::new(CompilerMacro { name, expressions })),
+            ))
         } else {
             Ok((
                 name.0.clone(),
@@ -287,7 +287,7 @@ impl Parser<'_> {
         }
     }
 
-    fn parse_constant(&mut self) -> CompilerResult<Ranged<Expression>> {
+    fn parse_constant_value(&mut self) -> CompilerResult<Ranged<Expression>> {
         match self
             .lexer
             .next()

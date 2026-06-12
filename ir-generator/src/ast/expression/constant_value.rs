@@ -1,6 +1,6 @@
 use crate::ast::CeriumType;
-use crate::ast::compilation::Compilable;
 use crate::ast::compilation::context::Context;
+use crate::ast::compilation::{Compilable, ConstCompilable, ConstContext};
 use crate::error::{CompilerResult, UnparseableConstant};
 use crate::ranged::Ranged;
 use chasm_ir::{Operand, inst};
@@ -83,5 +83,12 @@ impl Compilable for ConstantValue {
         let (val, ty) = self.parse()?;
         ctx.push_inst(inst!(Mov, op operand.clone(), val val));
         Ok(ty)
+    }
+}
+
+impl ConstCompilable for ConstantValue {
+    fn compile_const(&self, ctx: &mut ConstContext) -> CompilerResult<(Operand, CeriumType)> {
+        self.parse()
+            .map(|(val, r#type)| (Operand::Constant(val), r#type))
     }
 }

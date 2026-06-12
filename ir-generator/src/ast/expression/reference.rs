@@ -1,5 +1,5 @@
-use crate::ast::compilation::Compilable;
 use crate::ast::compilation::context::Context;
+use crate::ast::compilation::{Compilable, ConstCompilable, ConstContext};
 use crate::ast::{CeriumType, Expression};
 use crate::error::{CompilerResult, ValueNotReferenceable};
 use crate::ranged::Ranged;
@@ -58,5 +58,13 @@ impl Compilable for Reference {
         Ok(CeriumType::Reference(Box::new(unsafe {
             result_type.assume_init()
         })))
+    }
+}
+
+impl ConstCompilable for Reference {
+    fn compile_const(&self, ctx: &mut ConstContext) -> CompilerResult<(Operand, CeriumType)> {
+        let (op, r#type) = self.inner.1.compile_const(ctx)?;
+        let uuid = ctx.push_section(vec![Instruction::RawWords(vec![op.clone()])]);
+        Ok((uuid, CeriumType::Reference(Box::new(r#type))))
     }
 }

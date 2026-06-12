@@ -43,7 +43,10 @@ impl Function {
         )
     }
 
-    pub fn compile(&self, globals: &HashMap<Qualifier, CeriumType>) -> CompilerResult<Section> {
+    pub fn compile(
+        &self,
+        globals: &HashMap<Qualifier, CeriumType>,
+    ) -> CompilerResult<Vec<Section>> {
         let parameters = self
             .parameters
             .iter()
@@ -75,10 +78,10 @@ impl Function {
         }
 
         let body = ctx.resolve()?; // TODO: ctx.section(|...| ...) instead
-        Ok(Section {
+        Ok(vec![Section {
             name: self.name.1.to_string(),
             signature: Some(self.chasm_signature()),
             body,
-        })
+        }])
     }
 }

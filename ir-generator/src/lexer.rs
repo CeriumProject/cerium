@@ -54,6 +54,7 @@ impl<'a> Lexer<'a> {
 
         let token = match result.as_str() {
             "fn" => Token::Fn,
+            "const" => Token::Const,
             "let" => Token::Let,
             "in" => Token::In,
             "for" => Token::For,

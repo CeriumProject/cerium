@@ -1,9 +1,12 @@
+mod const_compilable;
 pub mod context;
 
 use crate::ast::CeriumType;
 use crate::ast::compilation::context::Context;
 use crate::error::CompilerResult;
 use chasm_ir::Operand;
+
+pub use const_compilable::{ConstCompilable, ConstContext};
 
 pub trait Compilable {
     fn compile(

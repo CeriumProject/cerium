@@ -26,10 +26,15 @@ impl Script {
 
     pub fn compile(&self) -> CompilerResult<Vec<chasm_ir::Section>> {
         let globals = self.parse_globals();
-        self.definitions
+        let result = self
+            .definitions
             .iter()
-            .flat_map(|definition| definition.compile(&globals))
-            .collect()
+            .map(|definition| definition.compile(&globals))
+            .collect::<CompilerResult<Vec<_>>>()?
+            .into_iter()
+            .flatten()
+            .collect();
+        Ok(result)
     }
 }
 

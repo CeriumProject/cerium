@@ -1,6 +1,6 @@
 use crate::ast::CeriumType;
-use crate::ast::compilation::Compilable;
 use crate::ast::compilation::context::Context;
+use crate::ast::compilation::{Compilable, ConstCompilable, ConstContext};
 use crate::ast::expression::Expression;
 use crate::error::{CompilerResult, TypeAliasHasDifferentSize};
 use crate::ranged::Ranged;
@@ -61,5 +61,12 @@ impl Compilable for TypeAlias {
             })?
         }
         Ok(new_type)
+    }
+}
+
+impl ConstCompilable for TypeAlias {
+    fn compile_const(&self, ctx: &mut ConstContext) -> CompilerResult<(Operand, CeriumType)> {
+        let (op, _) = self.value.1.compile_const(ctx)?;
+        Ok((op, self.r#type.1.clone()))
     }
 }

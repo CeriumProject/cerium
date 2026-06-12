@@ -1,4 +1,4 @@
-use crate::ast::{Definition, Function};
+use crate::ast::{Constant, Definition, Function};
 use crate::error::{CompilerResult, UnexpectedTokenError};
 use crate::expect_token;
 use crate::parser::Parser;
@@ -8,6 +8,7 @@ impl Parser<'_> {
     pub(super) fn parse_definition(&mut self) -> Option<CompilerResult<Definition>> {
         match self.lexer.peek()? {
             Ok((_, Token::Fn)) => Some(self.parse_function()),
+            Ok((_, Token::Const)) => Some(self.parse_constant()),
             Ok((range, token)) => Some(Err(UnexpectedTokenError {
                 token: token.clone(),
                 range: range.clone(),
@@ -47,6 +48,21 @@ impl Parser<'_> {
             parameters,
             return_type,
             body,
+        }))
+    }
+
+    fn parse_constant(&mut self) -> CompilerResult<Definition> {
+        expect_token!(self.lexer, Token::Const)?;
+        let name = self.parse_qualifier()?;
+        expect_token!(self.lexer, Token::Colon)?;
+        let r#type = self.parse_type()?;
+        expect_token!(self.lexer, Token::Assign)?;
+        let value = self.parse_expression()?;
+        expect_token!(self.lexer, Token::Semicolon)?;
+        Ok(Definition::Constant(Constant {
+            name,
+            r#type,
+            value,
         }))
     }
 }

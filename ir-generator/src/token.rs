@@ -10,7 +10,7 @@ pub enum Token {
     // special characters
     Semicolon, Colon, Comma, Arrow,
     // top-level definitions
-    Fn, // Const, Struct,
+    Fn, Const, // Struct,
     // declarations
     Let, In,
     // loops

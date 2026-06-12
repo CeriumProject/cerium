@@ -1,8 +1,9 @@
 use crate::ast::CeriumType;
-use crate::ast::compilation::Compilable;
 use crate::ast::compilation::context::Context;
+use crate::ast::compilation::{Compilable, ConstCompilable, ConstContext};
 use crate::ast::dereference::Dereference;
 pub use crate::ast::expression::assignment::Assignment;
+use crate::ast::expression::compiler_macro::CompilerMacro;
 pub use crate::ast::expression::constant_value::ConstantValue;
 pub use crate::ast::expression::declaration::Declaration;
 pub use crate::ast::expression::for_downto::ForDownTo;
@@ -16,9 +17,9 @@ pub use crate::ast::invocation::Invocation;
 pub use crate::ast::reference::Reference;
 use crate::error::CompilerResult;
 use chasm_ir::Operand;
-use crate::ast::expression::compiler_macro::CompilerMacro;
 
 pub mod assignment;
+pub mod compiler_macro;
 pub mod constant_value;
 pub mod declaration;
 pub mod dereference;
@@ -32,7 +33,6 @@ pub mod scope;
 pub mod type_alias;
 pub mod type_cast;
 pub mod variable;
-pub mod compiler_macro;
 
 #[macro_export]
 macro_rules! unprocessable_unit {
@@ -145,6 +145,17 @@ impl Compilable for Expression {
             Expression::Dereference(dereference) => dereference.compile_into(ctx, operand),
             Expression::Invocation(invocation) => invocation.compile_into(ctx, operand),
             Expression::CompilerMacro(compiler_macro) => compiler_macro.compile_into(ctx, operand),
+        }
+    }
+}
+
+impl ConstCompilable for Expression {
+    fn compile_const(&self, ctx: &mut ConstContext) -> CompilerResult<(Operand, CeriumType)> {
+        match self {
+            Expression::Constant(constant) => constant.compile_const(ctx),
+            Expression::Reference(reference) => reference.compile_const(ctx),
+            Expression::TypeAlias(type_alias) => type_alias.compile_const(ctx),
+            _ => todo!("throw error"),
         }
     }
 }

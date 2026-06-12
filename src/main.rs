@@ -1,21 +1,22 @@
 fn main() {
     let code = "
-fn memcpy(dst: &fn(f16) -> f16, src: &fn(f16) -> f16, len: u16) {
-    for len downto 0 {
-        *dst = *src;
-        dst = dst + 1;
-        src = src + 1;
-    }
+const HEAP: &&u16 = &(0 alias &u16);
+
+fn malloc(size: u16) -> &u16 {
+    let result = *HEAP;
+    result = result - size;
+    *HEAP = result;
+    result
 }
 
-fn sqr(input: f16) -> f16 {
-    input * input
+fn free(ptr: &u16) {
+    let leckei = ptr;
 }
 
 fn main() {
-    let func = 10000 alias &fn(f16) -> f16;
-    memcpy(func, sqr, 100);
-    dbg!(func(98.53));
+    let arr = malloc(1);
+    *arr = 67;
+    dbg!(*arr);
 }
 ";
     let ir = ir_generator::compile(code).unwrap();
