@@ -2,6 +2,8 @@ const TILE_WIDTH: u16 = 8;
 const TILEMAP_WIDTH: u16 = 128;
 
 fn color_at(x: u16, y: u16) -> u16 {
+    transform(&x, &y);
+
     let top_x = x / TILE_WIDTH;
     let top_y = y / TILE_WIDTH;
 
@@ -15,6 +17,11 @@ fn color_at(x: u16, y: u16) -> u16 {
     };
 
     TILEMAP[top_y * TILEMAP_WIDTH + top_x][sub_y * TILE_WIDTH + sub_x]
+}
+
+fn transform(x: &u16, y: u16) {
+    *x = *x + (*y * *y) / 10;
+    *y = *y - *x / 3;
 }
 
 fn main() {
