@@ -1,0 +1,38 @@
+const GREEN: u16 = 12;
+const WHITE: u16 = 255;
+
+const FACE: &&u16 = &[
+    &[WHITE, WHITE, WHITE, WHITE, WHITE, WHITE],
+    &[WHITE, GREEN, WHITE, WHITE, GREEN, WHITE],
+    &[WHITE, WHITE, WHITE, WHITE, WHITE, WHITE],
+    &[WHITE, GREEN, WHITE, WHITE, GREEN, WHITE],
+    &[WHITE, WHITE, GREEN, GREEN, WHITE, WHITE],
+    &[WHITE, WHITE, WHITE, WHITE, WHITE, WHITE],
+];
+
+fn draw(sprite6x6: &&u16, x: u16, y: u16) {
+    device!(0);
+    context!(0, 1);
+    let rx = 6 in for rx downto 0 {
+        context!(1, rx + x);
+        let ry = 6 in for ry downto 0 {
+            context!(2, ry + y);
+            context!(3, sprite6x6[ry][rx]);
+            send!();
+        };
+    };
+}
+
+fn flip() {
+    device!(0);
+    context!(0, 2);
+    send!();
+}
+
+fn main() {
+    loop {
+        draw(FACE, 0, 0);
+        draw(FACE, 42, 7);
+        flip();
+    };
+}

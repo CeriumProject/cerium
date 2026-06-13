@@ -1,6 +1,6 @@
 use crate::ast::compilation::context::Context;
 use crate::ast::compilation::{Compilable, ConstCompilable, ConstContext};
-use crate::ast::{CeriumType, Expression};
+use crate::ast::{Array, CeriumType, Expression};
 use crate::error::{CompilerResult, ValueNotReferenceable};
 use crate::ranged::Ranged;
 use chasm_ir::{Instruction, Operand};
@@ -63,8 +63,39 @@ impl Compilable for Reference {
 
 impl ConstCompilable for Reference {
     fn compile_const(&self, ctx: &mut ConstContext) -> CompilerResult<(Operand, CeriumType)> {
-        let (op, r#type) = self.inner.1.compile_const(ctx)?;
-        let uuid = ctx.push_section(vec![Instruction::RawWords(vec![op.clone()])]);
+        let (ops, r#type) = match &self.inner.1 {
+            Expression::Array(box Array { elements }) => {
+                let (ops, types) = elements
+                    .iter()
+                    .map(|(_, expression)| expression.compile_const(ctx))
+                    .try_fold((Vec::new(), Vec::new()), |mut result, op_type| {
+                        result.extend([op_type?]);
+                        CompilerResult::<(Vec<_>, Vec<_>)>::Ok(result)
+                    })?;
+                let r#type = match types.as_slice() {
+                    [] => todo!("error"),
+                    [former_type, rest @ ..] => {
+                        let mismatches = rest
+                            .iter()
+                            .enumerate()
+                            .filter(|(_, latter_type)| **latter_type != *former_type)
+                            .collect::<Vec<_>>();
+                        if mismatches.is_empty() {
+                            former_type.clone()
+                        } else {
+                            dbg!(mismatches);
+                            todo!("error")
+                        }
+                    }
+                };
+                (ops, r#type)
+            }
+            expression => {
+                let (op, r#type) = expression.compile_const(ctx)?;
+                (vec![op], r#type)
+            }
+        };
+        let uuid = ctx.push_section(vec![Instruction::RawWords(ops)]);
         Ok((uuid, CeriumType::Reference(Box::new(r#type))))
     }
 }

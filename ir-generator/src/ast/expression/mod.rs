@@ -2,6 +2,7 @@ use crate::ast::CeriumType;
 use crate::ast::compilation::context::Context;
 use crate::ast::compilation::{Compilable, ConstCompilable, ConstContext};
 use crate::ast::dereference::Dereference;
+pub use crate::ast::expression::array::Array;
 pub use crate::ast::expression::array_indexation::ArrayIndexation;
 pub use crate::ast::expression::assignment::Assignment;
 use crate::ast::expression::compiler_macro::CompilerMacro;
@@ -19,6 +20,7 @@ pub use crate::ast::reference::Reference;
 use crate::error::CompilerResult;
 use chasm_ir::Operand;
 
+pub mod array;
 pub mod array_indexation;
 pub mod assignment;
 pub mod compiler_macro;
@@ -60,6 +62,7 @@ pub enum Expression {
     Invocation(Box<Invocation>),
     CompilerMacro(Box<CompilerMacro>),
     ArrayIndexation(Box<ArrayIndexation>),
+    Array(Box<Array>),
 }
 
 impl Compilable for Expression {
@@ -84,6 +87,7 @@ impl Compilable for Expression {
             Expression::Invocation(invocation) => invocation.compile(ctx, then),
             Expression::CompilerMacro(compiler_macro) => compiler_macro.compile(ctx, then),
             Expression::ArrayIndexation(array_indexation) => array_indexation.compile(ctx, then),
+            Expression::Array(array) => array.compile(ctx, then),
         }
     }
 
@@ -112,6 +116,7 @@ impl Compilable for Expression {
             Expression::ArrayIndexation(array_indexation) => {
                 array_indexation.compile_mut(ctx, then)
             }
+            Expression::Array(array) => array.compile_mut(ctx, then),
         }
     }
 
@@ -132,6 +137,7 @@ impl Compilable for Expression {
             Expression::Invocation(invocation) => invocation.compile_unit(ctx),
             Expression::CompilerMacro(compiler_macro) => compiler_macro.compile_unit(ctx),
             Expression::ArrayIndexation(array_indexation) => array_indexation.compile_unit(ctx),
+            Expression::Array(array) => array.compile_unit(ctx),
         }
     }
 
@@ -156,6 +162,7 @@ impl Compilable for Expression {
             Expression::ArrayIndexation(array_indexation) => {
                 array_indexation.compile_into(ctx, operand)
             }
+            Expression::Array(array) => array.compile_into(ctx, operand),
         }
     }
 }
@@ -166,6 +173,7 @@ impl ConstCompilable for Expression {
             Expression::Constant(constant) => constant.compile_const(ctx),
             Expression::Reference(reference) => reference.compile_const(ctx),
             Expression::TypeAlias(type_alias) => type_alias.compile_const(ctx),
+            Expression::Variable(variable) => variable.compile_const(ctx),
             _ => todo!("throw error"),
         }
     }

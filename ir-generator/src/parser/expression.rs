@@ -3,7 +3,7 @@ use crate::ast::dereference::Dereference;
 use crate::ast::generic_operation::GenericOperator;
 use crate::ast::reference::Reference;
 use crate::ast::{
-    ArrayIndexation, Assignment, ConstantValue, Declaration, ForDownTo, GenericOperation,
+    Array, ArrayIndexation, Assignment, ConstantValue, Declaration, ForDownTo, GenericOperation,
     Invocation, Loop, Scope, TypeAlias, Variable,
 };
 use crate::ast::{Expression, TypeCast};
@@ -140,6 +140,7 @@ impl Parser<'_> {
         {
             Ok((_, Token::LBrace)) => self.parse_scope(),
             Ok((_, Token::LParen)) => self.parse_parens(),
+            Ok((_, Token::LBracket)) => self.parse_array(),
             Ok((_, Token::Let)) => self.parse_let(),
             Ok((_, Token::For)) => self.parse_for(),
             Ok((_, Token::Loop)) => self.parse_loop(),
@@ -216,6 +217,24 @@ impl Parser<'_> {
         let result = self.parse_expression();
         expect_token!(self.lexer, Token::RParen)?;
         result
+    }
+
+    fn parse_array(&mut self) -> CompilerResult<Ranged<Expression>> {
+        let mut elements = Vec::new();
+        let start = expect_token!(self.lexer, (range, Token::LBracket), *range.start())?;
+        loop {
+            if matches!(self.lexer.peek(), Some(Ok((_, Token::RBracket)))) {
+                break;
+            }
+
+            elements.push(self.parse_expression()?);
+
+            if !next_matches!(self.lexer, Token::Comma) {
+                break;
+            }
+        }
+        let end = expect_token!(self.lexer, (range, Token::RBracket), *range.end())?;
+        Ok((start..=end, Expression::Array(Box::new(Array { elements }))))
     }
 
     fn parse_let(&mut self) -> CompilerResult<Ranged<Expression>> {

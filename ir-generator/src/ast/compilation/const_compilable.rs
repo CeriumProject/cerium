@@ -33,4 +33,8 @@ impl ConstContext {
     pub fn take_sections(self) -> Vec<Section> {
         self.sections
     }
+
+    pub fn lookup(&self, name: &Qualifier) -> Option<&CeriumType> {
+        self.globals.get(name)
+    }
 }

@@ -1,37 +1,13 @@
 fn main() {
     let code = "
-const mem::HEAD: &&u16 = &(0 alias &u16);
-
-fn mem::alloc(size: u16) -> &u16 {
-    let result = *mem::HEAD;
-    result = result - size;
-    *mem::HEAD = result;
-    result
-}
-
-fn math::cube(x: u16) -> u16 {
-    x * x * x
-}
-
-fn array::new(size: u16, initializer: &fn(u16) -> u16) -> &u16 {
-    let arr = mem::alloc(size);
-    for size downto 0 {
-        arr[size] = initializer(size);
-    };
-    arr
-}
-
-fn array::debug(arr: &u16, size: u16) {
-    let idx = size in for idx downto 0 {
-        dbg!(arr[size - idx - 1]);
-    };
-}
-
-const SIZE: u16 = 10;
+const NUMBERS: &&u16 = &[&[1, 2, 3], &[4, 5]];
 
 fn main() {
-    let array = array::new(SIZE, math::cube);
-    array::debug(array, SIZE);
+    dbg!(NUMBERS[0][0]);
+    dbg!(NUMBERS[0][1]);
+    dbg!(NUMBERS[0][2]);
+    dbg!(NUMBERS[1][0]);
+    dbg!(NUMBERS[1][1]);
 }
 ";
     let ir = ir_generator::compile(code).unwrap();

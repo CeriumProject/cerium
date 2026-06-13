@@ -1,6 +1,6 @@
 use crate::ast::CeriumType;
-use crate::ast::compilation::Compilable;
 use crate::ast::compilation::context::Context;
+use crate::ast::compilation::{Compilable, ConstCompilable, ConstContext};
 use crate::ast::qualifier::Qualifier;
 use crate::error::{CompilerResult, CouldNotResolveVariable};
 use crate::ranged::Ranged;
@@ -56,5 +56,16 @@ impl Compilable for Variable {
             .clone();
         ctx.push_inst(inst!(Mov, op operand.clone(), op op.clone()));
         Ok(r#type)
+    }
+}
+
+impl ConstCompilable for Variable {
+    fn compile_const(&self, ctx: &mut ConstContext) -> CompilerResult<(Operand, CeriumType)> {
+        let r#type = ctx
+            .lookup(&self.name.1)
+            .ok_or_else(|| CouldNotResolveVariable {
+                name: self.name.clone(),
+            })?;
+        Ok((Operand::Variable(self.name.1.to_string()), r#type.clone()))
     }
 }
