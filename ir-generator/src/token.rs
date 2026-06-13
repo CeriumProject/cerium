@@ -6,7 +6,7 @@ pub enum Token {
     // constants
     // Nullptr,
     // parentheses etc.
-    LParen, RParen, /* LBracket, RBracket, */ LBrace, RBrace,
+    LParen, RParen, LBracket, RBracket, LBrace, RBrace,
     // special characters
     Semicolon, Colon, Comma, Arrow, Scope,
     // top-level definitions

@@ -2,6 +2,7 @@ mod cannot_cast_type;
 mod could_not_resolve_variable;
 mod false_return_type;
 mod incompatible_types;
+mod index_must_be_integer;
 mod invalid_counter_type;
 mod invalid_parameter_amount;
 mod mismatched_assignment_type;
@@ -21,6 +22,7 @@ use colored::{Color, Colorize};
 pub use could_not_resolve_variable::CouldNotResolveVariable;
 pub use false_return_type::FalseReturnType;
 pub use incompatible_types::IncompatibleTypes;
+pub use index_must_be_integer::IndexMustBeInteger;
 pub use invalid_counter_type::InvalidCounterType;
 pub use invalid_parameter_amount::InvalidParameterAmount;
 pub use mismatched_assignment_type::MismatchedAssignmentType;
@@ -57,6 +59,7 @@ pub enum CompilerError {
     MismatchedAssignmentType(MismatchedAssignmentType),
     InvalidCounterType(InvalidCounterType),
     ValueNotReferenceable(ValueNotReferenceable),
+    IndexMustBeInteger(IndexMustBeInteger),
 }
 
 pub trait FormatError {
@@ -83,6 +86,7 @@ impl FormatError for CompilerError {
             CompilerError::MismatchedAssignmentType(_) => todo!(),
             CompilerError::InvalidCounterType(_) => todo!(),
             CompilerError::ValueNotReferenceable(_) => todo!(),
+            CompilerError::IndexMustBeInteger(_) => todo!(),
         }
     }
 }

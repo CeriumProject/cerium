@@ -9,14 +9,10 @@ fn mem::alloc(size: u16) -> &u16 {
     result
 }
 
-fn free(ptr: &u16) {
-    let leckei = ptr;
-}
-
 fn main() {
-    let arr = mem::alloc(1);
-    *arr = 67;
-    dbg!(*arr);
+    let arr = mem::alloc(42);
+    arr[42] = 67;
+    dbg!(arr[42]);
 }
 ";
     let ir = ir_generator::compile(code).unwrap();

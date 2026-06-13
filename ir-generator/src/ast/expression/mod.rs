@@ -2,6 +2,7 @@ use crate::ast::CeriumType;
 use crate::ast::compilation::context::Context;
 use crate::ast::compilation::{Compilable, ConstCompilable, ConstContext};
 use crate::ast::dereference::Dereference;
+pub use crate::ast::expression::array_indexation::ArrayIndexation;
 pub use crate::ast::expression::assignment::Assignment;
 use crate::ast::expression::compiler_macro::CompilerMacro;
 pub use crate::ast::expression::constant_value::ConstantValue;
@@ -18,6 +19,7 @@ pub use crate::ast::reference::Reference;
 use crate::error::CompilerResult;
 use chasm_ir::Operand;
 
+pub mod array_indexation;
 pub mod assignment;
 pub mod compiler_macro;
 pub mod constant_value;
@@ -57,6 +59,7 @@ pub enum Expression {
     Dereference(Box<Dereference>),
     Invocation(Box<Invocation>),
     CompilerMacro(Box<CompilerMacro>),
+    ArrayIndexation(Box<ArrayIndexation>),
 }
 
 impl Compilable for Expression {
@@ -80,6 +83,7 @@ impl Compilable for Expression {
             Expression::Dereference(dereference) => dereference.compile(ctx, then),
             Expression::Invocation(invocation) => invocation.compile(ctx, then),
             Expression::CompilerMacro(compiler_macro) => compiler_macro.compile(ctx, then),
+            Expression::ArrayIndexation(array_indexation) => array_indexation.compile(ctx, then),
         }
     }
 
@@ -105,6 +109,9 @@ impl Compilable for Expression {
             Expression::Dereference(dereference) => dereference.compile_mut(ctx, then),
             Expression::Invocation(invocation) => invocation.compile_mut(ctx, then),
             Expression::CompilerMacro(compiler_macro) => compiler_macro.compile_mut(ctx, then),
+            Expression::ArrayIndexation(array_indexation) => {
+                array_indexation.compile_mut(ctx, then)
+            }
         }
     }
 
@@ -124,6 +131,7 @@ impl Compilable for Expression {
             Expression::Dereference(dereference) => dereference.compile_unit(ctx),
             Expression::Invocation(invocation) => invocation.compile_unit(ctx),
             Expression::CompilerMacro(compiler_macro) => compiler_macro.compile_unit(ctx),
+            Expression::ArrayIndexation(array_indexation) => array_indexation.compile_unit(ctx),
         }
     }
 
@@ -145,6 +153,9 @@ impl Compilable for Expression {
             Expression::Dereference(dereference) => dereference.compile_into(ctx, operand),
             Expression::Invocation(invocation) => invocation.compile_into(ctx, operand),
             Expression::CompilerMacro(compiler_macro) => compiler_macro.compile_into(ctx, operand),
+            Expression::ArrayIndexation(array_indexation) => {
+                array_indexation.compile_into(ctx, operand)
+            }
         }
     }
 }

@@ -77,6 +77,8 @@ impl<'a> Lexer<'a> {
         Some(match next {
             '(' => Ok(Token::LParen.ranged(idx..=idx)),
             ')' => Ok(Token::RParen.ranged(idx..=idx)),
+            '[' => Ok(Token::LBracket.ranged(idx..=idx)),
+            ']' => Ok(Token::RBracket.ranged(idx..=idx)),
             '{' => Ok(Token::LBrace.ranged(idx..=idx)),
             '}' => Ok(Token::RBrace.ranged(idx..=idx)),
             ';' => Ok(Token::Semicolon.ranged(idx..=idx)),

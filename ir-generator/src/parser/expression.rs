@@ -3,8 +3,8 @@ use crate::ast::dereference::Dereference;
 use crate::ast::generic_operation::GenericOperator;
 use crate::ast::reference::Reference;
 use crate::ast::{
-    Assignment, ConstantValue, Declaration, ForDownTo, GenericOperation, Invocation, Loop, Scope,
-    TypeAlias, Variable,
+    ArrayIndexation, Assignment, ConstantValue, Declaration, ForDownTo, GenericOperation,
+    Invocation, Loop, Scope, TypeAlias, Variable,
 };
 use crate::ast::{Expression, TypeCast};
 use crate::error::{CompilerError, CompilerResult, UnexpectedEof, UnexpectedTokenError};
@@ -170,6 +170,16 @@ impl Parser<'_> {
                         parameters,
                     })),
                 );
+            } else if next_matches!(self.lexer, Token::LBracket) {
+                let index = self.parse_expression()?;
+                let end = expect_token!(self.lexer, (range, Token::RBracket), *range.end())?;
+                result = (
+                    *result.0.start()..=end,
+                    Expression::ArrayIndexation(Box::new(ArrayIndexation {
+                        array: result,
+                        index,
+                    })),
+                )
             } else {
                 break Ok(result);
             }

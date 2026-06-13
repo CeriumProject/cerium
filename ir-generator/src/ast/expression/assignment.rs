@@ -1,9 +1,11 @@
-use crate::ast::CeriumType;
 use crate::ast::compilation::Compilable;
 use crate::ast::compilation::context::Context;
 use crate::ast::dereference::Dereference;
 use crate::ast::expression::Expression;
-use crate::error::{CompilerResult, MismatchedAssignmentType, ValueNotDereferenceable};
+use crate::ast::{ArrayIndexation, CeriumType};
+use crate::error::{
+    CompilerResult, IndexMustBeInteger, MismatchedAssignmentType, ValueNotDereferenceable,
+};
 use crate::ranged::Ranged;
 use crate::unprocessable_unit;
 use chasm_ir::{Operand, inst};
@@ -81,6 +83,40 @@ impl Compilable for Assignment {
                         }
                         ctx.push_inst(inst!(Write, op var_op.clone(), op val_op.clone()));
                         Ok(())
+                    })
+                }
+                Expression::ArrayIndexation(box ArrayIndexation { array, index }) => {
+                    array.1.compile_mut(ctx, &mut |arr_op, arr_type, ctx| {
+                        index.1.compile(ctx, &mut |idx_op, idx_type, ctx| {
+                            let (CeriumType::I16 | CeriumType::U16) = idx_type else {
+                                Err(IndexMustBeInteger {
+                                    range: index.0.clone(),
+                                    encountered: idx_type.clone(),
+                                })?
+                            };
+                            ctx.push_inst(inst!(Add, op arr_op.clone(), op idx_op.clone()));
+                            self.source.1.compile(ctx, &mut |val_op, val_type, ctx| {
+                                let CeriumType::Reference(var_type) = arr_type else {
+                                    Err(ValueNotDereferenceable {
+                                        range: array.0.clone(),
+                                        r#type: arr_type.clone(),
+                                    })?
+                                };
+                                if *val_type != **var_type {
+                                    Err(MismatchedAssignmentType {
+                                        destination: (
+                                            self.dest.0.clone(),
+                                            var_type.as_ref().clone(),
+                                        ),
+                                        source: (self.source.0.clone(), val_type.clone()),
+                                    })?;
+                                }
+                                ctx.push_inst(inst!(Write, op arr_op.clone(), op val_op.clone()));
+                                Ok(())
+                            })?;
+                            ctx.push_inst(inst!(Sub, op arr_op.clone(), op idx_op.clone()));
+                            Ok(())
+                        })
                     })
                 }
                 _ => todo!("error"),
