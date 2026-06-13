@@ -10,8 +10,9 @@ fn main() {
     dbg!(NUMBERS[1][1]);
 }
 ";
+    let code = include_str!("../examples/mode7.cer");
     let ir = ir_generator::compile(code).unwrap();
-    dbg!(&ir);
+    //dbg!(&ir);
     let asm = chasm_amine_backend::compile_chasm_to_amine(&ir);
     println!("{}", asm.iter().map(|s| s.to_string()).collect::<String>());
 }
