@@ -196,12 +196,7 @@ impl Parser<'_> {
 
             let candidate = self.parse_expression()?;
 
-            if next_matches!(self.lexer, Token::Semicolon)
-                || self
-                    .lexer
-                    .peek()
-                    .is_some_and(|token| !matches!(token, Ok((_, Token::RBrace))))
-            {
+            if next_matches!(self.lexer, Token::Semicolon) {
                 statements.push(candidate);
             } else {
                 break Some(candidate);
