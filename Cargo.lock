@@ -48,7 +48,7 @@ dependencies = [
 [[package]]
 name = "chasm-amine-backend"
 version = "0.1.0"
-source = "git+https://github.com/CeriumProject/chasm-amine-backend.git#fa2bfdd89d10ac14e834996b0fba7e3f806259e0"
+source = "git+https://github.com/CeriumProject/chasm-amine-backend.git#dca101d6b2dc1353a90cfaf67192d2f03151aeb3"
 dependencies = [
  "amine-asm",
  "chasm-ir",
