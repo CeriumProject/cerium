@@ -8,7 +8,7 @@ pub enum Token {
     // parentheses etc.
     LParen, RParen, /* LBracket, RBracket, */ LBrace, RBrace,
     // special characters
-    Semicolon, Colon, Comma, Arrow,
+    Semicolon, Colon, Comma, Arrow, Scope,
     // top-level definitions
     Fn, Const, // Struct,
     // declarations

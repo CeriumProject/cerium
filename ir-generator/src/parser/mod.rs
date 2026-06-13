@@ -4,10 +4,10 @@ mod macros;
 
 use crate::ast::{CeriumType, Qualifier, Script};
 use crate::error::{CompilerError, CompilerResult, UnexpectedTokenError};
-use crate::expect_token;
 use crate::lexer::Lexer;
 use crate::ranged::Ranged;
 use crate::token::Token;
+use crate::{expect_token, next_matches};
 use std::iter::Peekable;
 use std::ops::RangeInclusive;
 
@@ -35,10 +35,18 @@ impl<'a> Parser<'a> {
     }
 
     fn parse_qualifier(&mut self) -> CompilerResult<Ranged<Qualifier>> {
-        let (range, initial_scope) =
-            expect_token!(self.lexer, (range, Token::Ident(ident)), (range, ident))?;
-        // while self.lexer.next_if(|token| matches!(token, Ok((_, Token::Scope)))) { todo!() }
-        Ok((range, Qualifier::short(initial_scope)))
+        let (start, mut end, mut scopes) = expect_token!(
+            self.lexer,
+            (range, Token::Ident(ident)),
+            (*range.start(), *range.end(), vec![ident])
+        )?;
+        while next_matches!(self.lexer, Token::Scope) {
+            expect_token!(self.lexer, (range, Token::Ident(ident)), {
+                end = *range.end();
+                scopes.push(ident);
+            })?;
+        }
+        Ok((start..=end, Qualifier::new(scopes)))
     }
 
     fn parse_type(&mut self) -> CompilerResult<Ranged<CeriumType>> {

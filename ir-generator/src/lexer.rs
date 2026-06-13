@@ -80,7 +80,10 @@ impl<'a> Lexer<'a> {
             '{' => Ok(Token::LBrace.ranged(idx..=idx)),
             '}' => Ok(Token::RBrace.ranged(idx..=idx)),
             ';' => Ok(Token::Semicolon.ranged(idx..=idx)),
-            ':' => Ok(Token::Colon.ranged(idx..=idx)),
+            ':' => match self.src.next_if(|(_, c)| *c == ':') {
+                Some(_) => Ok(Token::Scope.ranged(idx..=idx)),
+                None => Ok(Token::Colon.ranged(idx..=idx)),
+            },
             ',' => Ok(Token::Comma.ranged(idx..=idx)),
             '=' => Ok(Token::Assign.ranged(idx..=idx)),
             '+' => Ok(Token::Plus.ranged(idx..=idx)),
