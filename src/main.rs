@@ -2,10 +2,9 @@ use ir_generator::error::FormatError;
 
 fn main() {
     let code = "
-fn idk(x: i16) -> i16 {
-    x + 4.3
-}
 fn main() {
+    let reset = 0 as &fn();
+    reset();
 }
 ";
     // let code = include_str!("../examples/mode7.cer");

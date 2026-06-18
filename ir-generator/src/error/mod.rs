@@ -68,8 +68,8 @@ pub trait FormatError {
     fn error_explanation(&self) -> Cow<str>;
     fn highlights(&self) -> Vec<RangeInclusive<usize>>;
     fn format(&self, src: &str) -> String {
-        let highlights = self.highlights().get(0).unwrap().clone(); // TODO: highlight ALL
-        let lines = lines_within_range(src, highlights);
+        let highlights = self.highlights();
+        let lines = lines_within_ranges(src, &highlights);
         let underlined = highlight_lines(&lines);
         let message = self.error_message().color(Color::Red);
         let explanation = format!(": {}", self.error_explanation()).color(Color::BrightWhite);
@@ -120,21 +120,27 @@ impl FormatError for CompilerError {
     }
 }
 
-fn lines_within_range(
-    code: &str,
-    range: RangeInclusive<usize>,
-) -> Vec<(usize, &str, RangeInclusive<usize>)> {
+fn lines_within_ranges<'a, 'b>(
+    code: &'a str,
+    ranges: &'b [RangeInclusive<usize>],
+) -> Vec<(usize, &'a str, Vec<RangeInclusive<usize>>)> {
     let mut offset = 0;
     let mut result = Vec::new();
     for (line_number, line) in code.split_inclusive('\n').enumerate() {
         let length = line.len();
         let line = line.trim_end();
 
-        let start = range.start().saturating_sub(offset);
-        let end = range.end().add(1).saturating_sub(offset).min(line.len());
+        let mut sub_result = Vec::new();
+        for range in ranges {
+            let start = range.start().saturating_sub(offset);
+            let end = range.end().add(1).saturating_sub(offset).min(line.len());
 
-        if start < end {
-            result.push((line_number, line, start..=end - 1));
+            if start < end {
+                sub_result.push(start..=end - 1);
+            }
+        }
+        if !sub_result.is_empty() {
+            result.push((line_number, line, sub_result));
         }
 
         offset += length;
@@ -142,16 +148,29 @@ fn lines_within_range(
     result
 }
 
-fn highlight_lines(lines: &[(usize, &str, RangeInclusive<usize>)]) -> String {
+fn highlight_lines(lines: &[(usize, &str, Vec<RangeInclusive<usize>>)]) -> String {
     lines
         .into_iter()
-        .map(|(line_num, line, range)| {
+        .map(|(line_num, line, ranges)| {
+            let highlight_width = ranges
+                .iter()
+                .map(|range| *range.end())
+                .max()
+                .unwrap_or_default()
+                + 1;
+            let highlight = (0..highlight_width)
+                .map(|idx| {
+                    if ranges.iter().any(|range| range.contains(&idx)) {
+                        '^'
+                    } else {
+                        ' '
+                    }
+                })
+                .collect::<String>();
             format!(
-                "{0:0>5} {3} {line}\n      {3} {1}{2}\n",
+                "{0:0>5} {2} {line}\n      {2} {1}\n",
                 line_num.add(1).to_string().color(Color::BrightBlue),
-                " ".repeat(*range.start()),
-                "^".repeat(*range.end() + 1 - *range.start())
-                    .color(Color::Red),
+                highlight.color(Color::Red),
                 "|".color(Color::BrightBlue),
             )
         })
