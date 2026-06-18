@@ -78,11 +78,12 @@ impl<'a> Parser<'a> {
                 }
                 let mut end =
                     expect_token!(self.lexer, (end_range, Token::RParen), *end_range.end())?;
-                let return_type = if let Some(Ok((range, _))) =
+                let return_type = if let Some(Ok(_)) =
                     self.lexer.next_if(|t| matches!(t, Ok((_, Token::Arrow))))
                 {
+                    let (range, return_type) = self.parse_type()?;
                     end = *range.end();
-                    Some(Box::new(self.parse_type()?.1))
+                    Some(Box::new(return_type))
                 } else {
                     None
                 };
