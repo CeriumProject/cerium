@@ -30,29 +30,33 @@ impl Function {
         CeriumType::Reference(Box::new(CeriumType::Function(parameters, return_type)))
     }
 
-    fn chasm_signature(&self) -> (Words, Vec<(String, Words)>) {
-        (
+    fn chasm_signature(
+        &self,
+        structs: &HashMap<Qualifier, Vec<(Qualifier, CeriumType)>>,
+    ) -> CompilerResult<(Words, Vec<(String, Words)>)> {
+        Ok((
             self.return_type
                 .as_ref()
-                .map(|(_, r#type)| r#type.size())
-                .unwrap_or(0),
+                .map(|(_, r#type)| r#type.size(structs))
+                .unwrap_or(Ok(0))?,
             self.parameters
                 .iter()
-                .map(|(name, r#type)| (name.1.to_string(), r#type.1.size()))
-                .collect(),
-        )
+                .map(|(name, r#type)| Ok((name.1.to_string(), r#type.1.size(structs)?)))
+                .collect::<CompilerResult<_>>()?,
+        ))
     }
 
     pub fn compile(
         &self,
         globals: &HashMap<Qualifier, CeriumType>,
+        structs: &HashMap<Qualifier, Vec<(Qualifier, CeriumType)>>,
     ) -> CompilerResult<Vec<Section>> {
         let parameters = self
             .parameters
             .iter()
             .map(|((_, name), (_, r#type))| (name.clone(), r#type.clone()))
             .collect();
-        let mut ctx = Context::new(globals.clone(), parameters);
+        let mut ctx = Context::new(globals.clone(), parameters, &structs);
         // TODO: proper return type checks (None if should be Some and vise-versa)
         match &self.return_type {
             None => {
@@ -80,7 +84,7 @@ impl Function {
         let body = ctx.resolve()?; // TODO: ctx.section(|...| ...) instead
         Ok(vec![Section {
             name: self.name.1.to_string(),
-            signature: Some(self.chasm_signature()),
+            signature: Some(self.chasm_signature(structs)?),
             body,
         }])
     }

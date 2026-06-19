@@ -65,6 +65,8 @@ impl<'a> Lexer<'a> {
             "u16" => Token::U16,
             "as" => Token::As,
             "alias" => Token::Alias,
+            "sizeof" => Token::Sizeof,
+            "struct" => Token::Struct,
             _ => Token::Ident(result),
         };
 
@@ -97,6 +99,7 @@ impl<'a> Lexer<'a> {
             '*' => Ok(Token::Asterisk.ranged(idx..=idx)),
             '/' => Ok(Token::Slash.ranged(idx..=idx)),
             '&' => Ok(Token::Ampersand.ranged(idx..=idx)),
+            '.' => Ok(Token::Dot.ranged(idx..=idx)),
             _ => Err(UnexpectedCharacterError {
                 character: next,
                 idx,

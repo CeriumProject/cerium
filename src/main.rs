@@ -1,13 +1,7 @@
 use ir_generator::error::FormatError;
 
 fn main() {
-    let code = "
-fn main() {
-    let reset = 0 as &fn();
-    reset();
-}
-";
-    // let code = include_str!("../examples/mode7.cer");
+    let code = include_str!("../examples/structs.cer");
     let ir = match ir_generator::compile(code) {
         Ok(ir) => ir,
         Err(err) => {

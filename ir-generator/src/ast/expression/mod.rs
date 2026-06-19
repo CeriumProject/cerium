@@ -12,11 +12,14 @@ pub use crate::ast::expression::for_downto::ForDownTo;
 pub use crate::ast::expression::generic_operation::GenericOperation;
 pub use crate::ast::expression::plain_loop::Loop;
 pub use crate::ast::expression::scope::Scope;
+pub use crate::ast::expression::sizeof::Sizeof;
 pub use crate::ast::expression::type_alias::TypeAlias;
 pub use crate::ast::expression::type_cast::TypeCast;
 pub use crate::ast::expression::variable::Variable;
+use crate::ast::field_access::FieldAccess;
 pub use crate::ast::invocation::Invocation;
 pub use crate::ast::reference::Reference;
+use crate::ast::struct_initialization::StructInitialization;
 use crate::error::CompilerResult;
 use chasm_ir::Operand;
 
@@ -27,6 +30,7 @@ pub mod compiler_macro;
 pub mod constant_value;
 pub mod declaration;
 pub mod dereference;
+pub mod field_access;
 pub mod for_downto;
 pub mod generic_operation;
 pub mod invocation;
@@ -34,6 +38,8 @@ mod iter;
 pub mod plain_loop;
 pub mod reference;
 pub mod scope;
+pub mod sizeof;
+pub mod struct_initialization;
 pub mod type_alias;
 pub mod type_cast;
 pub mod variable;
@@ -63,8 +69,12 @@ pub enum Expression {
     CompilerMacro(Box<CompilerMacro>),
     ArrayIndexation(Box<ArrayIndexation>),
     Array(Box<Array>),
+    Sizeof(Box<Sizeof>),
+    FieldAccess(Box<FieldAccess>),
+    StructInitialization(Box<StructInitialization>),
 }
 
+// TODO: impl Deref Expression -> &dyn Compilable instead of ts
 impl Compilable for Expression {
     fn compile(
         &self,
@@ -88,6 +98,11 @@ impl Compilable for Expression {
             Expression::CompilerMacro(compiler_macro) => compiler_macro.compile(ctx, then),
             Expression::ArrayIndexation(array_indexation) => array_indexation.compile(ctx, then),
             Expression::Array(array) => array.compile(ctx, then),
+            Expression::Sizeof(sizeof) => sizeof.compile(ctx, then),
+            Expression::FieldAccess(field_access) => field_access.compile(ctx, then),
+            Expression::StructInitialization(struct_initialization) => {
+                struct_initialization.compile(ctx, then)
+            }
         }
     }
 
@@ -117,6 +132,11 @@ impl Compilable for Expression {
                 array_indexation.compile_mut(ctx, then)
             }
             Expression::Array(array) => array.compile_mut(ctx, then),
+            Expression::Sizeof(sizeof) => sizeof.compile_mut(ctx, then),
+            Expression::FieldAccess(field_access) => field_access.compile_mut(ctx, then),
+            Expression::StructInitialization(struct_initialization) => {
+                struct_initialization.compile_mut(ctx, then)
+            }
         }
     }
 
@@ -138,6 +158,11 @@ impl Compilable for Expression {
             Expression::CompilerMacro(compiler_macro) => compiler_macro.compile_unit(ctx),
             Expression::ArrayIndexation(array_indexation) => array_indexation.compile_unit(ctx),
             Expression::Array(array) => array.compile_unit(ctx),
+            Expression::Sizeof(sizeof) => sizeof.compile_unit(ctx),
+            Expression::FieldAccess(field_access) => field_access.compile_unit(ctx),
+            Expression::StructInitialization(struct_initialization) => {
+                struct_initialization.compile_unit(ctx)
+            }
         }
     }
 
@@ -163,6 +188,11 @@ impl Compilable for Expression {
                 array_indexation.compile_into(ctx, operand)
             }
             Expression::Array(array) => array.compile_into(ctx, operand),
+            Expression::Sizeof(sizeof) => sizeof.compile_into(ctx, operand),
+            Expression::FieldAccess(field_access) => field_access.compile_into(ctx, operand),
+            Expression::StructInitialization(struct_initialization) => {
+                struct_initialization.compile_into(ctx, operand)
+            }
         }
     }
 }
@@ -174,6 +204,10 @@ impl ConstCompilable for Expression {
             Expression::Reference(reference) => reference.compile_const(ctx),
             Expression::TypeAlias(type_alias) => type_alias.compile_const(ctx),
             Expression::Variable(variable) => variable.compile_const(ctx),
+            Expression::Sizeof(sizeof) => sizeof.compile_const(ctx),
+            Expression::StructInitialization(struct_initialization) => {
+                struct_initialization.compile_const(ctx)
+            }
             _ => todo!("throw error"),
         }
     }

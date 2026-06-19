@@ -1,3 +1,6 @@
+use crate::ast::Qualifier;
+use crate::error::CompilerResult;
+use std::collections::HashMap;
 use std::fmt::{Display, Formatter};
 
 #[derive(Debug, Clone, PartialEq)]
@@ -9,6 +12,7 @@ pub enum CeriumType {
     F16,
     Reference(Box<CeriumType>),
     Function(Vec<CeriumType>, Option<Box<CeriumType>>),
+    Struct(Qualifier),
 }
 
 impl Display for CeriumType {
@@ -33,13 +37,30 @@ impl Display for CeriumType {
                     None => Ok(()),
                 }
             }
+            CeriumType::Struct(name) => write!(f, "{name}"),
         }
     }
 }
 
 impl CeriumType {
-    pub fn size(&self) -> usize {
-        1
+    pub fn size(
+        &self,
+        structs: &HashMap<Qualifier, Vec<(Qualifier, CeriumType)>>,
+    ) -> CompilerResult<usize> {
+        match self {
+            CeriumType::I16
+            | CeriumType::U16
+            | CeriumType::F16
+            | CeriumType::Reference(_)
+            | CeriumType::Function(_, _) => Ok(1),
+            CeriumType::Struct(name) => match structs.get(name) {
+                Some(fields) => fields
+                    .iter()
+                    .map(|(_, field_type)| field_type.size(structs))
+                    .sum(),
+                None => todo!(),
+            },
+        }
     }
 
     // TODO: ::is_subtype_of

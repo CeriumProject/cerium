@@ -1,7 +1,8 @@
 use crate::ast::compilation::context::Context;
 use crate::ast::compilation::{Compilable, ConstCompilable, ConstContext};
+use crate::ast::struct_initialization::StructInitialization;
 use crate::ast::{Array, CeriumType, Expression};
-use crate::error::{CompilerResult, ValueNotReferenceable};
+use crate::error::{CompilerResult, CouldNotResolveType, ValueNotReferenceable};
 use crate::ranged::Ranged;
 use chasm_ir::{Instruction, Operand};
 use std::mem::MaybeUninit;
@@ -89,6 +90,25 @@ impl ConstCompilable for Reference {
                     }
                 };
                 (ops, r#type)
+            }
+            Expression::StructInitialization(box StructInitialization { name, fields }) => {
+                // TODO: checks
+                let struct_fields = ctx
+                    .lookup_struct(&name.1)
+                    .ok_or_else(|| CouldNotResolveType { name: name.clone() })?;
+                let mut words = Vec::new();
+                for (idx, (field_name, field_type)) in struct_fields.iter().enumerate() {
+                    let (_, value) = fields
+                        .iter()
+                        .find(|((_, name), _)| *name == *field_name)
+                        .unwrap(); //.ok_or_else(|| todo!("missing field"))?;
+                    let (op, r#type) = value.1.compile_const(unsafe {
+                        #[allow(mutable_transmutes)]
+                        std::mem::transmute::<&_, &mut _>(ctx)
+                    })?;
+                    words.push(op);
+                }
+                (words, CeriumType::Struct(name.1.clone()))
             }
             expression => {
                 let (op, r#type) = expression.compile_const(ctx)?;

@@ -1,4 +1,5 @@
 mod cannot_cast_type;
+mod could_not_resolve_type;
 mod could_not_resolve_variable;
 mod false_return_type;
 mod incompatible_types;
@@ -19,6 +20,7 @@ mod value_not_referenceable;
 
 pub use cannot_cast_type::CannotCastType;
 use colored::{Color, Colorize};
+pub use could_not_resolve_type::CouldNotResolveType;
 pub use could_not_resolve_variable::CouldNotResolveVariable;
 pub use false_return_type::FalseReturnType;
 pub use incompatible_types::IncompatibleTypes;
@@ -61,6 +63,7 @@ pub enum CompilerError {
     InvalidCounterType(InvalidCounterType),
     ValueNotReferenceable(ValueNotReferenceable),
     IndexMustBeInteger(IndexMustBeInteger),
+    CouldNotResolveType(CouldNotResolveType),
 }
 
 pub trait FormatError {
@@ -98,6 +101,7 @@ impl CompilerError {
             CompilerError::InvalidCounterType(error) => error,
             CompilerError::ValueNotReferenceable(error) => error,
             CompilerError::IndexMustBeInteger(error) => error,
+            CompilerError::CouldNotResolveType(error) => error,
         }
     }
 }

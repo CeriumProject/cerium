@@ -1,10 +1,12 @@
 use crate::ast::compiler_macro::CompilerMacro;
 use crate::ast::dereference::Dereference;
+use crate::ast::field_access::FieldAccess;
 use crate::ast::generic_operation::GenericOperator;
 use crate::ast::reference::Reference;
+use crate::ast::struct_initialization::StructInitialization;
 use crate::ast::{
     Array, ArrayIndexation, Assignment, ConstantValue, Declaration, ForDownTo, GenericOperation,
-    Invocation, Loop, Scope, TypeAlias, Variable,
+    Invocation, Loop, Scope, Sizeof, TypeAlias, Variable,
 };
 use crate::ast::{Expression, TypeCast};
 use crate::error::{CompilerError, CompilerResult, UnexpectedEof, UnexpectedTokenError};
@@ -146,6 +148,7 @@ impl Parser<'_> {
             Ok((_, Token::Loop)) => self.parse_loop(),
             Ok((_, Token::Ident(_))) => self.parse_variable(),
             Ok((_, Token::Number(_))) => self.parse_constant_value(),
+            Ok((_, Token::Sizeof)) => self.parse_sizeof(),
             Ok((range, token)) => Err(CompilerError::UnexpectedTokenError(UnexpectedTokenError {
                 range: range.clone(),
                 token: token.clone(),
@@ -180,7 +183,16 @@ impl Parser<'_> {
                         array: result,
                         index,
                     })),
-                )
+                );
+            } else if next_matches!(self.lexer, Token::Dot) {
+                let field = self.parse_qualifier()?;
+                result = (
+                    *result.0.start()..=*field.0.end(),
+                    Expression::FieldAccess(Box::new(FieldAccess {
+                        structure: result,
+                        field,
+                    })),
+                );
             } else {
                 break Ok(result);
             }
@@ -308,6 +320,25 @@ impl Parser<'_> {
                 range,
                 Expression::CompilerMacro(Box::new(CompilerMacro { name, expressions })),
             ))
+        } else if next_matches!(self.lexer, Token::LBrace) {
+            let mut fields = Vec::new();
+            let end = loop {
+                if let Some(end) = next_matches!(self.lexer, (range, Token::RBrace), *range.end()) {
+                    break end;
+                }
+                let name = self.parse_qualifier()?;
+                expect_token!(self.lexer, Token::Colon)?;
+                let value = self.parse_expression()?;
+                fields.push((name, value));
+                if let Some(end) = next_matches!(self.lexer, (range, Token::RBrace), *range.end()) {
+                    break end;
+                }
+                expect_token!(self.lexer, Token::Comma)?;
+            };
+            Ok((
+                *name.0.start()..=end,
+                Expression::StructInitialization(Box::new(StructInitialization { name, fields })),
+            ))
         } else {
             Ok((
                 name.0.clone(),
@@ -333,5 +364,16 @@ impl Parser<'_> {
                 range,
             })),
         }
+    }
+
+    fn parse_sizeof(&mut self) -> CompilerResult<Ranged<Expression>> {
+        let sizeof_range = expect_token!(self.lexer, (sizeof_range, Token::Sizeof), sizeof_range)?;
+        let (type_range, r#type) = self.parse_type()?;
+        Ok((
+            *sizeof_range.start()..=*type_range.end(),
+            Expression::Sizeof(Box::new(Sizeof {
+                r#type: (type_range, r#type),
+            })),
+        ))
     }
 }

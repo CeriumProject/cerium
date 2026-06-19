@@ -8,9 +8,9 @@ pub enum Token {
     // parentheses etc.
     LParen, RParen, LBracket, RBracket, LBrace, RBrace,
     // special characters
-    Semicolon, Colon, Comma, Arrow, Scope,
+    Semicolon, Colon, Comma, Arrow, Scope, Dot,
     // top-level definitions
-    Fn, Const, // Struct,
+    Fn, Const, Struct,
     // declarations
     Let, In,
     // loops
@@ -27,4 +27,6 @@ pub enum Token {
     F16, I16, U16, // Any, Bool,
     // conversion
     As, Alias,
+    // inspection
+    Sizeof,
 }

@@ -16,8 +16,9 @@ impl Constant {
     pub fn compile(
         &self,
         globals: &HashMap<Qualifier, CeriumType>,
+        structs: &HashMap<Qualifier, Vec<(Qualifier, CeriumType)>>,
     ) -> CompilerResult<Vec<Section>> {
-        let mut ctx = ConstContext::new(globals.clone());
+        let mut ctx = ConstContext::new(globals.clone(), structs);
         let (op, r#type) = self.value.1.compile_const(&mut ctx)?;
         if r#type != self.r#type.1 {
             Err(MismatchedAssignmentType {

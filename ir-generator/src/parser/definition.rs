@@ -1,14 +1,15 @@
-use crate::ast::{Constant, Definition, Function};
+use crate::ast::{Constant, Definition, Function, Structure};
 use crate::error::{CompilerResult, UnexpectedTokenError};
-use crate::expect_token;
 use crate::parser::Parser;
 use crate::token::Token;
+use crate::{expect_token, next_matches};
 
 impl Parser<'_> {
     pub(super) fn parse_definition(&mut self) -> Option<CompilerResult<Definition>> {
         match self.lexer.peek()? {
             Ok((_, Token::Fn)) => Some(self.parse_function()),
             Ok((_, Token::Const)) => Some(self.parse_constant()),
+            Ok((_, Token::Struct)) => Some(self.parse_structure()),
             Ok((range, token)) => Some(Err(UnexpectedTokenError {
                 token: token.clone(),
                 range: range.clone(),
@@ -64,5 +65,23 @@ impl Parser<'_> {
             r#type,
             value,
         }))
+    }
+
+    fn parse_structure(&mut self) -> CompilerResult<Definition> {
+        expect_token!(self.lexer, Token::Struct)?;
+        let name = self.parse_qualifier()?;
+        expect_token!(self.lexer, Token::LBrace)?;
+        let mut attributes = Vec::new();
+        while !next_matches!(self.lexer, Token::RBrace) {
+            let attribute = self.parse_qualifier()?;
+            expect_token!(self.lexer, Token::Colon)?;
+            let r#type = self.parse_type()?;
+            attributes.push((attribute, r#type));
+            if next_matches!(self.lexer, Token::RBrace) {
+                break;
+            }
+            expect_token!(self.lexer, Token::Comma)?;
+        }
+        Ok(Definition::Structure(Structure { name, attributes }))
     }
 }

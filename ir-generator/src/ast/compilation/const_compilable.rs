@@ -7,15 +7,20 @@ pub trait ConstCompilable {
     fn compile_const(&self, ctx: &mut ConstContext) -> CompilerResult<(Operand, CeriumType)>;
 }
 
-pub struct ConstContext {
+pub struct ConstContext<'a> {
     globals: HashMap<Qualifier, CeriumType>,
+    structs: &'a HashMap<Qualifier, Vec<(Qualifier, CeriumType)>>,
     sections: Vec<Section>,
 }
 
-impl ConstContext {
-    pub fn new(globals: HashMap<Qualifier, CeriumType>) -> Self {
+impl<'a> ConstContext<'a> {
+    pub fn new(
+        globals: HashMap<Qualifier, CeriumType>,
+        structs: &'a HashMap<Qualifier, Vec<(Qualifier, CeriumType)>>,
+    ) -> Self {
         ConstContext {
             globals,
+            structs,
             sections: Vec::new(),
         }
     }
@@ -36,5 +41,9 @@ impl ConstContext {
 
     pub fn lookup(&self, name: &Qualifier) -> Option<&CeriumType> {
         self.globals.get(name)
+    }
+
+    pub fn lookup_struct(&self, name: &Qualifier) -> Option<&Vec<(Qualifier, CeriumType)>> {
+        self.structs.get(name)
     }
 }
