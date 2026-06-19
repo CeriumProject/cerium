@@ -1,6 +1,7 @@
 use crate::ast::{CeriumType, Qualifier};
 use crate::error::CompilerResult;
 use chasm_ir::{Instruction, Operand};
+use random_word::Lang;
 use std::cmp::PartialEq;
 use std::collections::HashMap;
 
@@ -100,6 +101,13 @@ impl Context<'_> {
     }
 
     pub fn uuid(&mut self) -> String {
+        #[cfg(debug_assertions)]
+        return format!(
+            "{0}_{1}",
+            random_word::get_len(4, Lang::En).unwrap(),
+            random_word::get(Lang::En)
+        );
+        #[cfg(not(debug_assertions))]
         format!("u_{0:X}", rand::random::<u128>())
     }
 

@@ -56,13 +56,8 @@ impl Compilable for FieldAccess {
             let (offset, field_type) = ctx
                 .field_offset_and_type(struct_type, &self.field.1)
                 .unwrap(); //.ok_or_else(|| todo!())?;
-            ctx.scope(|ctx| {
-                let uuid = ctx.uuid();
-                let var = ctx.push_var(uuid, field_type.clone());
-                ctx.push_inst(inst!(Mov, op var.clone(), op op.clone()));
-                ctx.push_inst(inst!(Lookup, op var.clone(), val offset as u16));
-                Ok(())
-            })?;
+            ctx.push_inst(inst!(Mov, op operand.clone(), op op.clone()));
+            ctx.push_inst(inst!(Lookup, op operand.clone(), val offset as u16));
             result = MaybeUninit::new(field_type);
             Ok(())
         })?;

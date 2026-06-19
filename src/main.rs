@@ -1,3 +1,4 @@
+use chasm_ir::Section;
 use ir_generator::error::FormatError;
 
 fn main() {
@@ -9,7 +10,7 @@ fn main() {
             return;
         }
     };
-    //dbg!(&ir);
+    println!("{}", ir.iter().map(|section| section.to_string()).collect::<String>());
     let asm = chasm_amine_backend::compile_chasm_to_amine(&ir);
     println!("{}", asm.iter().map(|s| s.to_string()).collect::<String>());
 }
