@@ -1,0 +1,11 @@
+struct Box {
+    inner: u16,
+}
+
+const BOX: &Box = &Box {
+    inner: 11037,
+};
+
+fn main() {
+    dbg!(BOX.inner);
+}

@@ -20,7 +20,7 @@ impl Compilable for TypeAlias {
     ) -> CompilerResult<()> {
         self.value.1.compile(ctx, &mut |op, prev_type, ctx| {
             let new_type = &self.r#type.1;
-            if prev_type.size() != new_type.size() {
+            if prev_type.size(ctx.structs()) != new_type.size(ctx.structs()) {
                 Err(TypeAliasHasDifferentSize {
                     source: (self.value.0.clone(), prev_type.clone()),
                     target: self.r#type.clone(),
@@ -37,7 +37,7 @@ impl Compilable for TypeAlias {
     ) -> CompilerResult<()> {
         self.value.1.compile_mut(ctx, &mut |op, prev_type, ctx| {
             let new_type = &self.r#type.1;
-            if prev_type.size() != new_type.size() {
+            if prev_type.size(ctx.structs()) != new_type.size(ctx.structs()) {
                 Err(TypeAliasHasDifferentSize {
                     source: (self.value.0.clone(), prev_type.clone()),
                     target: self.r#type.clone(),
@@ -54,7 +54,7 @@ impl Compilable for TypeAlias {
     fn compile_into(&self, ctx: &mut Context, operand: &Operand) -> CompilerResult<CeriumType> {
         let prev_type = self.value.1.compile_into(ctx, operand)?;
         let new_type = self.r#type.1.clone();
-        if prev_type.size() != new_type.size() {
+        if prev_type.size(ctx.structs()) != new_type.size(ctx.structs()) {
             Err(TypeAliasHasDifferentSize {
                 source: (self.value.0.clone(), prev_type.clone()),
                 target: self.r#type.clone(),

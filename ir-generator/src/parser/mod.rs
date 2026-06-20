@@ -50,6 +50,10 @@ impl<'a> Parser<'a> {
     }
 
     fn parse_type(&mut self) -> CompilerResult<Ranged<CeriumType>> {
+        if matches!(self.lexer.peek(), Some(Ok((_, Token::Ident(_))))) {
+            let (range, name) = self.parse_qualifier()?;
+            return Ok((range, CeriumType::Struct(name)));
+        }
         match expect_token!(self.lexer, token, token)? {
             (range, Token::I16) => Ok((range, CeriumType::I16)),
             (range, Token::U16) => Ok((range, CeriumType::U16)),

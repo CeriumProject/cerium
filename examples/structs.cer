@@ -1,0 +1,34 @@
+struct Vec2 {
+    x: f16,
+    y: f16,
+}
+
+const Vec2::ORIGIN: &Vec2 = &Vec2 {
+    x: 0.0,
+    y: 0.0,
+};
+
+fn Vec2::new(x: f16, y: f16) -> &Vec2 {
+    let vec2 = mem::alloc(sizeof Vec2) alias &Vec2;
+    vec2.x = x;
+    vec2.y = y;
+    vec2
+}
+
+fn Vec2::add(lhs: &Vec2, rhs: &Vec2) -> &Vec2 {
+    Vec2::new(lhs.x + rhs.x, lhs.y + rhs.y)
+}
+
+fn main() {
+    let vec2 = Vec2::add(Vec2::new(6.7, 42.0), Vec2::ORIGIN);
+    dbg!(vec2.x, vec2.y);
+}
+
+const mem::HEAP: &&u16 = &(0 alias &u16);
+
+fn mem::alloc(size: u16) -> &u16 {
+    let result = *mem::HEAP;
+    result = result - size;
+    *mem::HEAP = result;
+    result
+}

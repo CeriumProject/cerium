@@ -1,5 +1,9 @@
 mod cannot_cast_type;
+mod cannot_read_fields_on_type;
+mod could_not_resolve_field;
+mod could_not_resolve_type;
 mod could_not_resolve_variable;
+mod false_field_type;
 mod false_return_type;
 mod incompatible_types;
 mod index_must_be_integer;
@@ -8,6 +12,7 @@ mod invalid_parameter_amount;
 mod mismatched_assignment_type;
 mod mismatched_parameter_type;
 mod type_alias_has_different_size;
+mod unassigned_field;
 mod unexpected_character;
 mod unexpected_eof;
 mod unexpected_token;
@@ -17,8 +22,13 @@ mod value_not_dereferenceable;
 mod value_not_invocable;
 mod value_not_referenceable;
 
+pub use crate::error::cannot_read_fields_on_type::CannotReadFieldsOnType;
+pub use crate::error::could_not_resolve_field::CouldNotResolveField;
+pub use crate::error::false_field_type::FalseFieldType;
+pub use crate::error::unassigned_field::UnassignedField;
 pub use cannot_cast_type::CannotCastType;
 use colored::{Color, Colorize};
+pub use could_not_resolve_type::CouldNotResolveType;
 pub use could_not_resolve_variable::CouldNotResolveVariable;
 pub use false_return_type::FalseReturnType;
 pub use incompatible_types::IncompatibleTypes;
@@ -61,6 +71,11 @@ pub enum CompilerError {
     InvalidCounterType(InvalidCounterType),
     ValueNotReferenceable(ValueNotReferenceable),
     IndexMustBeInteger(IndexMustBeInteger),
+    CouldNotResolveType(CouldNotResolveType),
+    CouldNotResolveField(CouldNotResolveField),
+    CannotReadFieldsOnType(CannotReadFieldsOnType),
+    FalseFieldType(FalseFieldType),
+    UnassignedField(UnassignedField),
 }
 
 pub trait FormatError {
@@ -98,6 +113,11 @@ impl CompilerError {
             CompilerError::InvalidCounterType(error) => error,
             CompilerError::ValueNotReferenceable(error) => error,
             CompilerError::IndexMustBeInteger(error) => error,
+            CompilerError::CouldNotResolveType(error) => error,
+            CompilerError::CouldNotResolveField(error) => error,
+            CompilerError::CannotReadFieldsOnType(error) => error,
+            CompilerError::FalseFieldType(error) => error,
+            CompilerError::UnassignedField(error) => error,
         }
     }
 }

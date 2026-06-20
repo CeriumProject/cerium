@@ -44,45 +44,53 @@ impl Compilable for Invocation {
         ctx: &mut Context,
         then: &mut dyn FnMut(&Operand, &CeriumType, &mut Context) -> CompilerResult<()>,
     ) -> CompilerResult<()> {
-        let param_types = self.compile_params(ctx)?;
-        self.function.1.compile(ctx, &mut |function, r#type, ctx| {
-            ctx.push_inst(inst!(Call, op function.clone()));
-            let result_type =
-                check_parameter_types(&param_types, (self.function.0.clone(), r#type))?;
-            let Some(result_type) = result_type else {
-                unprocessable_unit!();
-            };
-            let uuid = ctx.uuid();
-            let op = ctx.push_var(uuid, result_type.clone());
-            ctx.push_inst(Instruction::Receive(op.clone(), 0));
-            then(&op, &result_type, ctx)
+        ctx.scope(|ctx| {
+            let param_types = self.compile_params(ctx)?;
+            self.function.1.compile(ctx, &mut |function, r#type, ctx| {
+                ctx.push_inst(inst!(Call, op function.clone()));
+                let result_type =
+                    check_parameter_types(&param_types, (self.function.0.clone(), r#type))?;
+                let Some(result_type) = result_type else {
+                    unprocessable_unit!();
+                };
+                ctx.scope(|ctx| {
+                    let uuid = ctx.uuid();
+                    let op = ctx.push_var(uuid, result_type.clone());
+                    ctx.push_inst(Instruction::Receive(op.clone(), 0));
+                    then(&op, &result_type, ctx)
+                })
+            })
         })
     }
 
     fn compile_unit(&self, ctx: &mut Context) -> CompilerResult<()> {
-        let param_types = self.compile_params(ctx)?;
-        self.function.1.compile(ctx, &mut |function, r#type, ctx| {
-            ctx.push_inst(inst!(Call, op function.clone()));
-            check_parameter_types(&param_types, (self.function.0.clone(), r#type))?;
-            Ok(())
+        ctx.scope(|ctx| {
+            let param_types = self.compile_params(ctx)?;
+            self.function.1.compile(ctx, &mut |function, r#type, ctx| {
+                ctx.push_inst(inst!(Call, op function.clone()));
+                check_parameter_types(&param_types, (self.function.0.clone(), r#type))?;
+                Ok(())
+            })
         })
     }
 
     fn compile_into(&self, ctx: &mut Context, operand: &Operand) -> CompilerResult<CeriumType> {
-        let param_types = self.compile_params(ctx)?;
-        let mut outer_result_type = MaybeUninit::uninit();
-        self.function.1.compile(ctx, &mut |function, r#type, ctx| {
-            ctx.push_inst(inst!(Call, op function.clone()));
-            let result_type =
-                check_parameter_types(&param_types, (self.function.0.clone(), r#type))?;
-            let Some(result_type) = result_type else {
-                unprocessable_unit!();
-            };
-            ctx.push_inst(Instruction::Receive(operand.clone(), 0));
-            outer_result_type = MaybeUninit::new(result_type);
-            Ok(())
-        })?;
-        Ok(unsafe { outer_result_type.assume_init() })
+        ctx.scope(|ctx| {
+            let param_types = self.compile_params(ctx)?;
+            let mut outer_result_type = MaybeUninit::uninit();
+            self.function.1.compile(ctx, &mut |function, r#type, ctx| {
+                ctx.push_inst(inst!(Call, op function.clone()));
+                let result_type =
+                    check_parameter_types(&param_types, (self.function.0.clone(), r#type))?;
+                let Some(result_type) = result_type else {
+                    unprocessable_unit!();
+                };
+                ctx.push_inst(Instruction::Receive(operand.clone(), 0));
+                outer_result_type = MaybeUninit::new(result_type);
+                Ok(())
+            })?;
+            Ok(unsafe { outer_result_type.assume_init() })
+        })
     }
 }
 

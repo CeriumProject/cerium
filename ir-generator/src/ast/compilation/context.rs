@@ -1,6 +1,7 @@
 use crate::ast::{CeriumType, Qualifier};
 use crate::error::CompilerResult;
 use chasm_ir::{Instruction, Operand};
+use random_word::Lang;
 use std::cmp::PartialEq;
 use std::collections::HashMap;
 
@@ -33,21 +34,26 @@ impl VarConfig {
 }
 
 #[derive(Debug, Clone)]
-pub struct Context {
+pub struct Context<'a> {
     globals: HashMap<Qualifier, CeriumType>,
     attributes: HashMap<Qualifier, CeriumType>,
+    structs: &'a HashMap<Qualifier, Vec<(Qualifier, CeriumType)>>,
     vars: Vec<(VarConfig, Vec<Instruction>)>,
     counter: usize,
 }
 
-impl Context {
+// TODO: Context::sizeof instead of CeriumType::size
+
+impl Context<'_> {
     pub fn new(
         globals: HashMap<Qualifier, CeriumType>,
         attributes: HashMap<Qualifier, CeriumType>,
-    ) -> Context {
+        structs: &HashMap<Qualifier, Vec<(Qualifier, CeriumType)>>,
+    ) -> Context<'_> {
         Context {
             globals,
             attributes,
+            structs,
             vars: vec![(VarConfig::Scope, Vec::new())],
             // vars: Vars::new(),
             counter: 0,
@@ -75,6 +81,19 @@ impl Context {
             })
     }
 
+    pub fn field_offset_and_type(
+        &mut self,
+        struct_type: &Qualifier,
+        field_name: &Qualifier,
+    ) -> Option<(usize, CeriumType)> {
+        self.structs()
+            .get(struct_type)?
+            .iter()
+            .enumerate()
+            .find(|(idx, (field, _))| *field == *field_name)
+            .map(|(idx, (_, r#type))| (idx, r#type.clone()))
+    }
+
     pub fn label(&mut self) -> String {
         let result = format!("L{0}", self.counter);
         self.counter += 1;
@@ -82,6 +101,13 @@ impl Context {
     }
 
     pub fn uuid(&mut self) -> String {
+        #[cfg(debug_assertions)]
+        return format!(
+            "{0}_{1}",
+            random_word::get_len(4, Lang::En).unwrap(),
+            random_word::get(Lang::En)
+        );
+        #[cfg(not(debug_assertions))]
         format!("u_{0:X}", rand::random::<u128>())
     }
 
@@ -119,17 +145,17 @@ impl Context {
                 VarConfig::Scope => code,
                 VarConfig::Var(var_name, r#type) => vec![Instruction::Alloc(
                     var_name.to_string(),
-                    r#type.size(),
+                    r#type.size(&self.structs)?,
                     code,
                 )],
                 VarConfig::Param(param_name, r#type) => vec![Instruction::Param(
                     param_name.to_string(),
-                    r#type.size(),
+                    r#type.size(&self.structs)?,
                     code,
                 )],
                 VarConfig::Result(result_name, r#type) => vec![Instruction::Result(
                     result_name.to_string(),
-                    r#type.size(),
+                    r#type.size(&self.structs)?,
                     code,
                 )],
             };
@@ -152,17 +178,17 @@ impl Context {
                 VarConfig::Scope => code,
                 VarConfig::Var(var_name, r#type) => vec![Instruction::Alloc(
                     var_name.to_string(),
-                    r#type.size(),
+                    r#type.size(&self.structs)?,
                     code,
                 )],
                 VarConfig::Param(param_name, r#type) => vec![Instruction::Param(
                     param_name.to_string(),
-                    r#type.size(),
+                    r#type.size(&self.structs)?,
                     code,
                 )],
                 VarConfig::Result(result_name, r#type) => vec![Instruction::Result(
                     result_name.to_string(),
-                    r#type.size(),
+                    r#type.size(&self.structs)?,
                     code,
                 )],
             };
@@ -172,5 +198,9 @@ impl Context {
             }
         }
         unreachable!()
+    }
+
+    pub fn structs(&self) -> &HashMap<Qualifier, Vec<(Qualifier, CeriumType)>> {
+        self.structs
     }
 }

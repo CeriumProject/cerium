@@ -24,12 +24,20 @@ impl Script {
             .collect()
     }
 
+    fn parse_structs(&self) -> HashMap<Qualifier, Vec<(Qualifier, CeriumType)>> {
+        self.definitions
+            .iter()
+            .flat_map(Definition::as_struct)
+            .collect()
+    }
+
     pub fn compile(&self) -> CompilerResult<Vec<chasm_ir::Section>> {
         let globals = self.parse_globals();
+        let structs = self.parse_structs();
         let result = self
             .definitions
             .iter()
-            .map(|definition| definition.compile(&globals))
+            .map(|definition| definition.compile(&globals, &structs))
             .collect::<CompilerResult<Vec<_>>>()?
             .into_iter()
             .flatten()
