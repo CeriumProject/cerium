@@ -205,9 +205,6 @@ impl ConstCompilable for Expression {
             Expression::TypeAlias(type_alias) => type_alias.compile_const(ctx),
             Expression::Variable(variable) => variable.compile_const(ctx),
             Expression::Sizeof(sizeof) => sizeof.compile_const(ctx),
-            Expression::StructInitialization(struct_initialization) => {
-                struct_initialization.compile_const(ctx)
-            }
             _ => todo!("throw error"),
         }
     }

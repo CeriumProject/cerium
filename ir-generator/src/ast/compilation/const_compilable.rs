@@ -4,6 +4,7 @@ use chasm_ir::{Instruction, Operand, Section};
 use std::collections::HashMap;
 
 pub trait ConstCompilable {
+    // TODO: return Vec<Operand> instead of Operand -> Reference::compile_const becomes less bs
     fn compile_const(&self, ctx: &mut ConstContext) -> CompilerResult<(Operand, CeriumType)>;
 }
 
@@ -45,5 +46,9 @@ impl<'a> ConstContext<'a> {
 
     pub fn lookup_struct(&self, name: &Qualifier) -> Option<&Vec<(Qualifier, CeriumType)>> {
         self.structs.get(name)
+    }
+
+    pub fn sizeof(&self, r#type: &CeriumType) -> CompilerResult<usize> {
+        r#type.size(self.structs)
     }
 }

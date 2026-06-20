@@ -1,4 +1,6 @@
 mod cannot_cast_type;
+mod cannot_read_fields_on_type;
+mod could_not_resolve_field;
 mod could_not_resolve_type;
 mod could_not_resolve_variable;
 mod false_return_type;
@@ -18,6 +20,8 @@ mod value_not_dereferenceable;
 mod value_not_invocable;
 mod value_not_referenceable;
 
+pub use crate::error::cannot_read_fields_on_type::CannotReadFieldsOnType;
+pub use crate::error::could_not_resolve_field::CouldNotResolveField;
 pub use cannot_cast_type::CannotCastType;
 use colored::{Color, Colorize};
 pub use could_not_resolve_type::CouldNotResolveType;
@@ -64,6 +68,8 @@ pub enum CompilerError {
     ValueNotReferenceable(ValueNotReferenceable),
     IndexMustBeInteger(IndexMustBeInteger),
     CouldNotResolveType(CouldNotResolveType),
+    CouldNotResolveField(CouldNotResolveField),
+    CannotReadFieldsOnType(CannotReadFieldsOnType),
 }
 
 pub trait FormatError {
@@ -102,6 +108,8 @@ impl CompilerError {
             CompilerError::ValueNotReferenceable(error) => error,
             CompilerError::IndexMustBeInteger(error) => error,
             CompilerError::CouldNotResolveType(error) => error,
+            CompilerError::CouldNotResolveField(error) => error,
+            CompilerError::CannotReadFieldsOnType(error) => error,
         }
     }
 }

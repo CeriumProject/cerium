@@ -36,29 +36,3 @@ impl Compilable for StructInitialization {
         todo!()
     }
 }
-
-impl ConstCompilable for StructInitialization {
-    // TODO: remove ts
-    fn compile_const(&self, ctx: &mut ConstContext) -> CompilerResult<(Operand, CeriumType)> {
-        let fields = ctx
-            .lookup_struct(&self.name.1)
-            .ok_or_else(|| CouldNotResolveType {
-                name: self.name.clone(),
-            })?;
-        let mut words = Vec::new();
-        for (idx, (field_name, field_type)) in fields.iter().enumerate() {
-            let (_, value) = self
-                .fields
-                .iter()
-                .find(|((_, name), _)| *name == *field_name)
-                .unwrap(); //.ok_or_else(|| todo!("missing field"))?;
-            let (op, r#type) = value.1.compile_const(unsafe {
-                #[allow(mutable_transmutes)]
-                std::mem::transmute::<&_, &mut _>(ctx)
-            })?;
-            words.push(op);
-        }
-        let op = ctx.push_section(vec![Instruction::RawWords(words)]);
-        Ok((op, CeriumType::Struct(self.name.1.clone())))
-    }
-}
