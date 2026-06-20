@@ -9,7 +9,7 @@ const Vec2::ORIGIN: &Vec2 = &Vec2 {
 };
 
 fn Vec2::new(x: f16, y: f16) -> &Vec2 {
-    let vec2 = mem::alloc(sizeof Vec2) alias &Vec2;
+    let vec2 = mem::alloc(skibidi Vec2) alias &Vec2;
     vec2.x = x;
     vec2.y = y;
     vec2

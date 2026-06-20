@@ -65,7 +65,7 @@ impl<'a> Lexer<'a> {
             "u16" => Token::U16,
             "as" => Token::As,
             "alias" => Token::Alias,
-            "sizeof" => Token::Sizeof,
+            "sizeof" | "skibidi" => Token::Sizeof,
             "struct" => Token::Struct,
             _ => Token::Ident(result),
         };

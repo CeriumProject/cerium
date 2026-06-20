@@ -1,0 +1,78 @@
+struct Vertex {
+    x: f16,
+    y: f16,
+    z: f16,
+}
+
+const ZOOM: f16 = 40.0;
+const HALF_WIDTH: i16 = 64 alias i16;
+const HALF_HEIGHT: i16 = 48 alias i16;
+
+const WHITE: u16 = 255;
+const BLACK: u16 = 0;
+
+fn project(vertex: &Vertex, x: &i16, y: &i16) {
+    let dx = vertex.x - 2.0;
+    let dy = vertex.y - 5.0;
+    let dz = vertex.z - 2.0;
+
+    *x = (dx / dy * ZOOM) as i16 + HALF_WIDTH;
+    *y = (dz / dy * ZOOM) as i16 + HALF_HEIGHT;
+}
+
+fn fill(color: u16) {
+    device!(0);
+    context!(0, 1);
+    context!(3, color);
+    let x = 128 in for x downto 0 {
+        context!(1, x);
+        let y = 96 in for y downto 0 {
+            context!(2, y);
+            send!();
+        };
+    };
+}
+
+fn set_at(x: i16, y: i16, color: u16) {
+    device!(0);
+    context!(0, 1);
+    context!(1, x);
+    context!(2, y);
+    context!(3, color);
+    send!();
+}
+
+fn flip() {
+    device!(0);
+    context!(0, 2);
+    send!();
+}
+
+fn render() {
+    fill(WHITE);
+    let x = 0 as i16;
+    let y = 0 as i16;
+    let idx = 8 in for idx downto 0 {
+        project(CUBE[idx], &x, &y);
+        set_at(x, y, BLACK);
+    };
+    flip();
+}
+
+fn main() {
+    loop {
+        render();
+    }
+}
+
+
+const CUBE: &&Vertex = &[
+    &Vertex { x: 3.0, y: 3.0, z: 3.0 },
+    &Vertex { x: 3.0, y: 3.0, z: 1.0 },
+    &Vertex { x: 3.0, y: 1.0, z: 3.0 },
+    &Vertex { x: 3.0, y: 1.0, z: 1.0 },
+    &Vertex { x: 1.0, y: 3.0, z: 3.0 },
+    &Vertex { x: 1.0, y: 3.0, z: 1.0 },
+    &Vertex { x: 1.0, y: 1.0, z: 3.0 },
+    &Vertex { x: 1.0, y: 1.0, z: 1.0 },
+];
