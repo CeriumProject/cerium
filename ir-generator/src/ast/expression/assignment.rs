@@ -5,7 +5,8 @@ use crate::ast::expression::Expression;
 use crate::ast::field_access::FieldAccess;
 use crate::ast::{ArrayIndexation, CeriumType};
 use crate::error::{
-    CompilerResult, IndexMustBeInteger, MismatchedAssignmentType, ValueNotDereferenceable,
+    CannotReadFieldsOnType, CompilerResult, CouldNotResolveField, IndexMustBeInteger,
+    MismatchedAssignmentType, ValueNotDereferenceable,
 };
 use crate::ranged::Ranged;
 use crate::unprocessable_unit;
@@ -120,34 +121,37 @@ impl Compilable for Assignment {
                         })
                     })
                 }
-                Expression::FieldAccess(box FieldAccess { structure, field }) => {
-                    structure
-                        .1
-                        .compile_mut(ctx, &mut |struct_op, struct_type, ctx| {
-                            let CeriumType::Reference(box CeriumType::Struct(struct_type)) =
-                                struct_type
-                            else {
-                                todo!()
-                            };
-                            let (offset, field_type) =
-                                ctx.field_offset_and_type(struct_type, &field.1).unwrap(); //.ok_or_else(|| todo!())?;
-                            ctx.push_inst(inst!(Add, op struct_op.clone(), val offset as u16));
-                            self.source.1.compile(ctx, &mut |val_op, val_type, ctx| {
-                                if *val_type != field_type {
-                                    Err(MismatchedAssignmentType {
-                                        destination: (self.dest.0.clone(), field_type.clone()),
-                                        source: (self.source.0.clone(), val_type.clone()),
-                                    })?;
-                                }
-                                ctx.push_inst(
-                                    inst!(Write, op struct_op.clone(), op val_op.clone()),
-                                );
-                                Ok(())
+                Expression::FieldAccess(box FieldAccess { structure, field }) => structure
+                    .1
+                    .compile_mut(ctx, &mut |struct_op, struct_type, ctx| {
+                        let CeriumType::Reference(box CeriumType::Struct(struct_type)) =
+                            struct_type
+                        else {
+                            Err(CannotReadFieldsOnType {
+                                range: structure.0.clone(),
+                                r#type: struct_type.clone(),
+                            })?
+                        };
+                        let (offset, field_type) = ctx
+                            .field_offset_and_type(struct_type, &field.1)
+                            .ok_or_else(|| CouldNotResolveField {
+                                maybe_struct_type: CeriumType::Struct(struct_type.clone()),
+                                name: field.clone(),
                             })?;
-                            ctx.push_inst(inst!(Sub, op struct_op.clone(), val offset as u16));
+                        ctx.push_inst(inst!(Add, op struct_op.clone(), val offset as u16));
+                        self.source.1.compile(ctx, &mut |val_op, val_type, ctx| {
+                            if *val_type != field_type {
+                                Err(MismatchedAssignmentType {
+                                    destination: (self.dest.0.clone(), field_type.clone()),
+                                    source: (self.source.0.clone(), val_type.clone()),
+                                })?;
+                            }
+                            ctx.push_inst(inst!(Write, op struct_op.clone(), op val_op.clone()));
                             Ok(())
-                        })
-                }
+                        })?;
+                        ctx.push_inst(inst!(Sub, op struct_op.clone(), val offset as u16));
+                        Ok(())
+                    }),
                 _ => todo!("error"),
             })
     }
