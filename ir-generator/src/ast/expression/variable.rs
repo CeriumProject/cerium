@@ -1,7 +1,8 @@
-use crate::ast::CeriumType;
 use crate::ast::compilation::context::Context;
 use crate::ast::compilation::{Compilable, ConstCompilable, ConstContext};
+use crate::ast::expression::optimize::OptimizeExpression;
 use crate::ast::qualifier::Qualifier;
+use crate::ast::{CeriumType, Expression};
 use crate::error::{CompilerResult, CouldNotResolveVariable};
 use crate::ranged::Ranged;
 use chasm_ir::{Operand, inst};
@@ -67,5 +68,11 @@ impl ConstCompilable for Variable {
                 name: self.name.clone(),
             })?;
         Ok((Operand::Variable(self.name.1.to_string()), r#type.clone()))
+    }
+}
+
+impl OptimizeExpression for Variable {
+    fn optimize(self) -> Expression {
+        Expression::Variable(Box::new(self))
     }
 }

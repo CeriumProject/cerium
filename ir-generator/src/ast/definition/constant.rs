@@ -1,4 +1,5 @@
 use crate::ast::compilation::{ConstCompilable, ConstContext};
+use crate::ast::optimize::OptimizeRangedExpression;
 use crate::ast::{CeriumType, Expression, Qualifier};
 use crate::error::{CompilerResult, MismatchedAssignmentType};
 use crate::ranged::Ranged;
@@ -36,5 +37,13 @@ impl Constant {
             body: vec![Instruction::Definition(self.name.1.to_string(), op)],
         });
         Ok(sections)
+    }
+
+    pub fn optimize(self) -> Self {
+        Constant {
+            name: self.name,
+            r#type: self.r#type,
+            value: self.value.optimize(),
+        }
     }
 }

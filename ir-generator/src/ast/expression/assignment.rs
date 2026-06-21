@@ -2,6 +2,7 @@ use crate::ast::compilation::Compilable;
 use crate::ast::compilation::context::Context;
 use crate::ast::dereference::Dereference;
 use crate::ast::expression::Expression;
+use crate::ast::expression::optimize::{OptimizeExpression, OptimizeRangedExpression};
 use crate::ast::field_access::FieldAccess;
 use crate::ast::{ArrayIndexation, CeriumType};
 use crate::error::{
@@ -158,5 +159,14 @@ impl Compilable for Assignment {
 
     fn compile_into(&self, ctx: &mut Context, operand: &Operand) -> CompilerResult<CeriumType> {
         unprocessable_unit!()
+    }
+}
+
+impl OptimizeExpression for Assignment {
+    fn optimize(self) -> Expression {
+        Expression::Assignment(Box::new(Assignment {
+            dest: self.dest.optimize(),
+            source: self.source.optimize(),
+        }))
     }
 }

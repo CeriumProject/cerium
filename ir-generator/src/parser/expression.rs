@@ -4,9 +4,10 @@ use crate::ast::field_access::FieldAccess;
 use crate::ast::generic_operation::GenericOperator;
 use crate::ast::reference::Reference;
 use crate::ast::struct_initialization::StructInitialization;
+use crate::ast::unary_operation::UnaryOperation;
 use crate::ast::{
     Array, ArrayIndexation, Assignment, ConstantValue, Declaration, ForDownTo, GenericOperation,
-    Invocation, Loop, Scope, Sizeof, TypeAlias, Variable,
+    Invocation, Loop, Scope, Sizeof, TypeAlias, UnaryOperator, Variable,
 };
 use crate::ast::{Expression, TypeCast};
 use crate::error::{CompilerError, CompilerResult, UnexpectedEof, UnexpectedTokenError};
@@ -123,11 +124,29 @@ impl Parser<'_> {
                     Expression::Dereference(Box::new(Dereference { inner })),
                 ))
             }
-            Ok((_, Token::Plus)) => {
-                todo!()
+            Ok((prefix_range, Token::Plus)) => {
+                let _ = self.lexer.next();
+                let value = self.parse_prefix_operation()?;
+                let range = *prefix_range.start()..=*value.0.end();
+                Ok((
+                    range,
+                    Expression::UnaryOperation(Box::new(UnaryOperation {
+                        operator: (prefix_range, UnaryOperator::Plus),
+                        value,
+                    })),
+                ))
             }
-            Ok((_, Token::Minus)) => {
-                todo!()
+            Ok((prefix_range, Token::Minus)) => {
+                let _ = self.lexer.next();
+                let value = self.parse_prefix_operation()?;
+                let range = *prefix_range.start()..=*value.0.end();
+                Ok((
+                    range,
+                    Expression::UnaryOperation(Box::new(UnaryOperation {
+                        operator: (prefix_range, UnaryOperator::Minus),
+                        value,
+                    })),
+                ))
             }
             Ok(_) => self.parse_operand(),
             Err(err) => Err(err.clone()),

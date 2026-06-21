@@ -10,16 +10,19 @@ pub use crate::ast::expression::constant_value::ConstantValue;
 pub use crate::ast::expression::declaration::Declaration;
 pub use crate::ast::expression::for_downto::ForDownTo;
 pub use crate::ast::expression::generic_operation::GenericOperation;
+use crate::ast::expression::optimize::OptimizeExpression;
 pub use crate::ast::expression::plain_loop::Loop;
 pub use crate::ast::expression::scope::Scope;
 pub use crate::ast::expression::sizeof::Sizeof;
 pub use crate::ast::expression::type_alias::TypeAlias;
 pub use crate::ast::expression::type_cast::TypeCast;
+pub use crate::ast::expression::unary_operation::UnaryOperator;
 pub use crate::ast::expression::variable::Variable;
 use crate::ast::field_access::FieldAccess;
 pub use crate::ast::invocation::Invocation;
 pub use crate::ast::reference::Reference;
 use crate::ast::struct_initialization::StructInitialization;
+use crate::ast::unary_operation::UnaryOperation;
 use crate::error::CompilerResult;
 use chasm_ir::Operand;
 
@@ -35,6 +38,7 @@ pub mod for_downto;
 pub mod generic_operation;
 pub mod invocation;
 mod iter;
+pub mod optimize;
 pub mod plain_loop;
 pub mod reference;
 pub mod scope;
@@ -42,6 +46,7 @@ pub mod sizeof;
 pub mod struct_initialization;
 pub mod type_alias;
 pub mod type_cast;
+pub mod unary_operation;
 pub mod variable;
 
 #[macro_export]
@@ -72,6 +77,7 @@ pub enum Expression {
     Sizeof(Box<Sizeof>),
     FieldAccess(Box<FieldAccess>),
     StructInitialization(Box<StructInitialization>),
+    UnaryOperation(Box<UnaryOperation>),
 }
 
 // TODO: impl Deref Expression -> &dyn Compilable instead of ts
@@ -103,6 +109,7 @@ impl Compilable for Expression {
             Expression::StructInitialization(struct_initialization) => {
                 struct_initialization.compile(ctx, then)
             }
+            Expression::UnaryOperation(unary_operation) => unary_operation.compile(ctx, then),
         }
     }
 
@@ -137,6 +144,7 @@ impl Compilable for Expression {
             Expression::StructInitialization(struct_initialization) => {
                 struct_initialization.compile_mut(ctx, then)
             }
+            Expression::UnaryOperation(unary_operation) => unary_operation.compile_mut(ctx, then),
         }
     }
 
@@ -163,6 +171,7 @@ impl Compilable for Expression {
             Expression::StructInitialization(struct_initialization) => {
                 struct_initialization.compile_unit(ctx)
             }
+            Expression::UnaryOperation(unary_operation) => unary_operation.compile_unit(ctx),
         }
     }
 
@@ -193,6 +202,9 @@ impl Compilable for Expression {
             Expression::StructInitialization(struct_initialization) => {
                 struct_initialization.compile_into(ctx, operand)
             }
+            Expression::UnaryOperation(unary_operation) => {
+                unary_operation.compile_into(ctx, operand)
+            }
         }
     }
 }
@@ -206,6 +218,33 @@ impl ConstCompilable for Expression {
             Expression::Variable(variable) => variable.compile_const(ctx),
             Expression::Sizeof(sizeof) => sizeof.compile_const(ctx),
             _ => todo!("throw error"),
+        }
+    }
+}
+
+impl OptimizeExpression for Expression {
+    fn optimize(self) -> Expression {
+        match self {
+            Expression::Variable(expression) => expression.optimize(),
+            Expression::Constant(expression) => expression.optimize(),
+            Expression::Scope(expression) => expression.optimize(),
+            Expression::Declaration(expression) => expression.optimize(),
+            Expression::ForDownTo(expression) => expression.optimize(),
+            Expression::Loop(expression) => expression.optimize(),
+            Expression::Assignment(expression) => expression.optimize(),
+            Expression::GenericOperation(expression) => expression.optimize(),
+            Expression::TypeCast(expression) => expression.optimize(),
+            Expression::TypeAlias(expression) => expression.optimize(),
+            Expression::Reference(expression) => expression.optimize(),
+            Expression::Dereference(expression) => expression.optimize(),
+            Expression::Invocation(expression) => expression.optimize(),
+            Expression::CompilerMacro(expression) => expression.optimize(),
+            Expression::ArrayIndexation(expression) => expression.optimize(),
+            Expression::Array(expression) => expression.optimize(),
+            Expression::Sizeof(expression) => expression.optimize(),
+            Expression::FieldAccess(expression) => expression.optimize(),
+            Expression::StructInitialization(expression) => expression.optimize(),
+            Expression::UnaryOperation(expression) => expression.optimize(),
         }
     }
 }

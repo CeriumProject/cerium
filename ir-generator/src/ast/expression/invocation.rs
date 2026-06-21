@@ -1,5 +1,6 @@
 use crate::ast::compilation::Compilable;
 use crate::ast::compilation::context::Context;
+use crate::ast::expression::optimize::{OptimizeExpression, OptimizeRangedExpression};
 use crate::ast::{CeriumType, Expression, Qualifier};
 use crate::error::{
     CompilerResult, InvalidParameterAmount, MismatchedParameterType, ValueNotInvocable,
@@ -130,5 +131,18 @@ fn check_parameter_types(
             range,
             r#type: actual_type.clone(),
         })?,
+    }
+}
+
+impl OptimizeExpression for Invocation {
+    fn optimize(self) -> Expression {
+        Expression::Invocation(Box::new(Invocation {
+            function: self.function.optimize(),
+            parameters: self
+                .parameters
+                .into_iter()
+                .map(Ranged::<Expression>::optimize)
+                .collect(),
+        }))
     }
 }

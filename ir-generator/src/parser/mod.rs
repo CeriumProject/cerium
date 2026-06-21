@@ -29,7 +29,7 @@ impl<'a> Parser<'a> {
     pub fn parse(&mut self) -> CompilerResult<Script> {
         let mut definitions = Vec::new();
         while let Some(definition) = self.parse_definition() {
-            definitions.push(definition?);
+            definitions.push(definition?.optimize());
         }
         Ok(Script { definitions })
     }

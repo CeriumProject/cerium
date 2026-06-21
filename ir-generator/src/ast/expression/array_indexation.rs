@@ -1,5 +1,6 @@
 use crate::ast::compilation::Compilable;
 use crate::ast::compilation::context::Context;
+use crate::ast::expression::optimize::{OptimizeExpression, OptimizeRangedExpression};
 use crate::ast::{CeriumType, Expression};
 use crate::error::{CompilerResult, IndexMustBeInteger, ValueNotDereferenceable};
 use crate::ranged::Ranged;
@@ -70,5 +71,14 @@ impl Compilable for ArrayIndexation {
             Ok(())
         })?;
         Ok(*inner_type)
+    }
+}
+
+impl OptimizeExpression for ArrayIndexation {
+    fn optimize(self) -> Expression {
+        Expression::ArrayIndexation(Box::new(ArrayIndexation {
+            array: self.array.optimize(),
+            index: self.index.optimize(),
+        }))
     }
 }

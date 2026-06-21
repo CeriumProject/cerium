@@ -1,10 +1,10 @@
 use crate::ast::compilation::context::Context;
 use crate::ast::compilation::{Compilable, ConstCompilable, ConstContext};
+use crate::ast::expression::optimize::{OptimizeExpression, OptimizeRangedExpression};
 use crate::ast::struct_initialization::StructInitialization;
 use crate::ast::{Array, CeriumType, Expression};
 use crate::error::{
-    CompilerResult, CouldNotResolveType, FalseFieldType, MismatchedAssignmentType, UnassignedField,
-    ValueNotReferenceable,
+    CompilerResult, CouldNotResolveType, FalseFieldType, UnassignedField, ValueNotReferenceable,
 };
 use crate::ranged::Ranged;
 use chasm_ir::{Instruction, Operand};
@@ -129,5 +129,13 @@ impl ConstCompilable for Reference {
         };
         let uuid = ctx.push_section(vec![Instruction::RawWords(ops)]);
         Ok((uuid, CeriumType::Reference(Box::new(r#type))))
+    }
+}
+
+impl OptimizeExpression for Reference {
+    fn optimize(self) -> Expression {
+        Expression::Reference(Box::new(Reference {
+            inner: self.inner.optimize(),
+        }))
     }
 }

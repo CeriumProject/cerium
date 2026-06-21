@@ -2,6 +2,7 @@ use crate::ast::CeriumType;
 use crate::ast::compilation::Compilable;
 use crate::ast::compilation::context::Context;
 use crate::ast::expression::Expression;
+use crate::ast::expression::optimize::{OptimizeExpression, OptimizeRangedExpression};
 use crate::error::{CompilerResult, IncompatibleTypes};
 use crate::ranged::Ranged;
 use chasm_ir::{Instruction, Operand, inst};
@@ -110,5 +111,15 @@ fn generate_inst_for(
         (O::Div, T::I16, T::I16) => Some(inst!(Idiv, op lhs.0, op rhs.0)),
         (O::Div, T::U16, T::U16) => Some(inst!(Div, op lhs.0, op rhs.0)),
         _ => None,
+    }
+}
+
+impl OptimizeExpression for GenericOperation {
+    fn optimize(self) -> Expression {
+        Expression::GenericOperation(Box::new(GenericOperation {
+            lhs: self.lhs.optimize(),
+            rhs: self.rhs.optimize(),
+            operator: self.operator,
+        }))
     }
 }

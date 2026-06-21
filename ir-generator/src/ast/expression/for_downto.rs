@@ -2,6 +2,7 @@ use crate::ast::CeriumType;
 use crate::ast::compilation::Compilable;
 use crate::ast::compilation::context::Context;
 use crate::ast::expression::Expression;
+use crate::ast::expression::optimize::{OptimizeExpression, OptimizeRangedExpression};
 use crate::ast::qualifier::Qualifier;
 use crate::error::{CompilerResult, CouldNotResolveVariable, InvalidCounterType};
 use crate::ranged::Ranged;
@@ -71,5 +72,15 @@ impl Compilable for ForDownTo {
 
     fn compile_into(&self, ctx: &mut Context, operand: &Operand) -> CompilerResult<CeriumType> {
         unprocessable_unit!()
+    }
+}
+
+impl OptimizeExpression for ForDownTo {
+    fn optimize(self) -> Expression {
+        Expression::ForDownTo(Box::new(ForDownTo {
+            counter: self.counter,
+            limit: self.limit.optimize(),
+            body: self.body.optimize(),
+        }))
     }
 }

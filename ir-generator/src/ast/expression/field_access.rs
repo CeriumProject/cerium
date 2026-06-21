@@ -1,5 +1,6 @@
 use crate::ast::compilation::Compilable;
 use crate::ast::compilation::context::Context;
+use crate::ast::expression::optimize::{OptimizeExpression, OptimizeRangedExpression};
 use crate::ast::{CeriumType, Expression, Qualifier};
 use crate::error::{CannotReadFieldsOnType, CompilerResult, CouldNotResolveField};
 use crate::ranged::Ranged;
@@ -87,5 +88,14 @@ impl Compilable for FieldAccess {
         })?;
 
         Ok(unsafe { result.assume_init() })
+    }
+}
+
+impl OptimizeExpression for FieldAccess {
+    fn optimize(self) -> Expression {
+        Expression::FieldAccess(Box::new(FieldAccess {
+            structure: self.structure.optimize(),
+            field: self.field,
+        }))
     }
 }

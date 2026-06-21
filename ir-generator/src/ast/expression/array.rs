@@ -1,5 +1,6 @@
 use crate::ast::compilation::context::Context;
 use crate::ast::compilation::{Compilable, ConstCompilable, ConstContext};
+use crate::ast::expression::optimize::{OptimizeExpression, OptimizeRangedExpression};
 use crate::ast::{CeriumType, Expression};
 use crate::error::CompilerResult;
 use crate::ranged::Ranged;
@@ -39,5 +40,16 @@ impl Compilable for Array {
 impl ConstCompilable for Array {
     fn compile_const(&self, ctx: &mut ConstContext) -> CompilerResult<(Operand, CeriumType)> {
         todo!("can only be ref")
+    }
+}
+
+impl OptimizeExpression for Array {
+    fn optimize(self) -> Expression {
+        let elements = self
+            .elements
+            .into_iter()
+            .map(Ranged::<Expression>::optimize)
+            .collect();
+        Expression::Array(Box::new(Array { elements }))
     }
 }

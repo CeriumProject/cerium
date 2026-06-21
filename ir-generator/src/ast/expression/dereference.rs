@@ -1,5 +1,6 @@
 use crate::ast::compilation::Compilable;
 use crate::ast::compilation::context::Context;
+use crate::ast::expression::optimize::{OptimizeExpression, OptimizeRangedExpression};
 use crate::ast::{CeriumType, Expression};
 use crate::error::{CompilerResult, ValueNotDereferenceable};
 use crate::ranged::Ranged;
@@ -59,5 +60,13 @@ fn deref_type(range: RangeInclusive<usize>, ty: &CeriumType) -> CompilerResult<C
             range,
             r#type: ty.clone(),
         })?,
+    }
+}
+
+impl OptimizeExpression for Dereference {
+    fn optimize(self) -> Expression {
+        Expression::Dereference(Box::new(Dereference {
+            inner: self.inner.optimize(),
+        }))
     }
 }

@@ -2,6 +2,7 @@ use crate::ast::CeriumType;
 use crate::ast::compilation::Compilable;
 use crate::ast::compilation::context::Context;
 use crate::ast::expression::Expression;
+use crate::ast::expression::optimize::{OptimizeExpression, OptimizeRangedExpression};
 use crate::ast::qualifier::Qualifier;
 use crate::error::CompilerResult;
 use crate::ranged::Ranged;
@@ -43,5 +44,14 @@ impl Compilable for Declaration {
 
     fn compile_into(&self, ctx: &mut Context, operand: &Operand) -> CompilerResult<CeriumType> {
         unprocessable_unit!()
+    }
+}
+
+impl OptimizeExpression for Declaration {
+    fn optimize(self) -> Expression {
+        Expression::Declaration(Box::new(Declaration {
+            name: self.name,
+            value: self.value.optimize(),
+        }))
     }
 }

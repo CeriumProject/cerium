@@ -1,6 +1,7 @@
-use crate::ast::CeriumType;
 use crate::ast::compilation::context::Context;
 use crate::ast::compilation::{Compilable, ConstCompilable, ConstContext};
+use crate::ast::expression::optimize::OptimizeExpression;
+use crate::ast::{CeriumType, Expression};
 use crate::error::CompilerResult;
 use crate::ranged::Ranged;
 use chasm_ir::{Operand, inst};
@@ -49,5 +50,11 @@ impl ConstCompilable for Sizeof {
     fn compile_const(&self, ctx: &mut ConstContext) -> CompilerResult<(Operand, CeriumType)> {
         let size = ctx.sizeof(&self.r#type.1)?;
         Ok((Operand::Constant(size as u16), CeriumType::U16))
+    }
+}
+
+impl OptimizeExpression for Sizeof {
+    fn optimize(self) -> Expression {
+        Expression::Sizeof(Box::new(self))
     }
 }

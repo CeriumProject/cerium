@@ -2,6 +2,7 @@ use crate::ast::cerium_type::CeriumType;
 use crate::ast::compilation::Compilable;
 use crate::ast::compilation::context::Context;
 use crate::ast::expression::Expression;
+use crate::ast::optimize::OptimizeRangedExpression;
 use crate::ast::qualifier::Qualifier;
 use crate::error::{CompilerResult, FalseReturnType};
 use crate::ranged::Ranged;
@@ -87,5 +88,14 @@ impl Function {
             signature: Some(self.chasm_signature(structs)?),
             body,
         }])
+    }
+
+    pub fn optimize(self) -> Self {
+        Function {
+            name: self.name,
+            parameters: self.parameters,
+            return_type: self.return_type,
+            body: self.body.optimize(),
+        }
     }
 }

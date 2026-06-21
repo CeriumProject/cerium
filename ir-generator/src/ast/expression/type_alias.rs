@@ -2,6 +2,7 @@ use crate::ast::CeriumType;
 use crate::ast::compilation::context::Context;
 use crate::ast::compilation::{Compilable, ConstCompilable, ConstContext};
 use crate::ast::expression::Expression;
+use crate::ast::expression::optimize::{OptimizeExpression, OptimizeRangedExpression};
 use crate::error::{CompilerResult, TypeAliasHasDifferentSize};
 use crate::ranged::Ranged;
 use chasm_ir::Operand;
@@ -68,5 +69,14 @@ impl ConstCompilable for TypeAlias {
     fn compile_const(&self, ctx: &mut ConstContext) -> CompilerResult<(Operand, CeriumType)> {
         let (op, _) = self.value.1.compile_const(ctx)?;
         Ok((op, self.r#type.1.clone()))
+    }
+}
+
+impl OptimizeExpression for TypeAlias {
+    fn optimize(self) -> Expression {
+        Expression::TypeAlias(Box::new(TypeAlias {
+            value: self.value.optimize(),
+            r#type: self.r#type,
+        }))
     }
 }

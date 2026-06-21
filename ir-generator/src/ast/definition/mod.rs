@@ -45,4 +45,12 @@ impl Definition {
             Definition::Structure(_) => Ok(Vec::new()),
         }
     }
+
+    pub fn optimize(self) -> Self {
+        match self {
+            Definition::Function(function) => Definition::Function(function.optimize()),
+            Definition::Constant(constant) => Definition::Constant(constant.optimize()),
+            definition => definition,
+        }
+    }
 }

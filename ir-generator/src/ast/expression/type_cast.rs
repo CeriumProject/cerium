@@ -2,10 +2,10 @@ use crate::ast::CeriumType;
 use crate::ast::compilation::Compilable;
 use crate::ast::compilation::context::Context;
 use crate::ast::expression::Expression;
+use crate::ast::expression::optimize::{OptimizeExpression, OptimizeRangedExpression};
 use crate::error::{CannotCastType, CompilerResult};
 use crate::ranged::Ranged;
 use chasm_ir::{Instruction, Operand, TwoOpOpcode};
-use std::mem::MaybeUninit;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct TypeCast {
@@ -64,5 +64,14 @@ fn opcode(from: &CeriumType, to: &CeriumType) -> Option<TwoOpOpcode> {
         (CeriumType::I16, CeriumType::U16) => Some(TwoOpOpcode::Mov),
         (CeriumType::U16, CeriumType::I16) => Some(TwoOpOpcode::Mov),
         _ => None,
+    }
+}
+
+impl OptimizeExpression for TypeCast {
+    fn optimize(self) -> Expression {
+        Expression::TypeCast(Box::new(TypeCast {
+            value: self.value.optimize(),
+            r#type: self.r#type,
+        }))
     }
 }

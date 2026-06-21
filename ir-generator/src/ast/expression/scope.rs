@@ -2,6 +2,7 @@ use crate::ast::CeriumType;
 use crate::ast::compilation::Compilable;
 use crate::ast::compilation::context::Context;
 use crate::ast::expression::Expression;
+use crate::ast::expression::optimize::{OptimizeExpression, OptimizeRangedExpression};
 use crate::error::{CompilerResult, UnprocessableUnit};
 use crate::ranged::Ranged;
 use chasm_ir::Operand;
@@ -70,5 +71,18 @@ impl Compilable for Scope {
                 .1
                 .compile_into(ctx, operand)
         })
+    }
+}
+
+impl OptimizeExpression for Scope {
+    fn optimize(self) -> Expression {
+        Expression::Scope(Box::new(Scope {
+            statements: self
+                .statements
+                .into_iter()
+                .map(Ranged::<Expression>::optimize)
+                .collect(),
+            result: self.result.map(Ranged::<Expression>::optimize),
+        }))
     }
 }

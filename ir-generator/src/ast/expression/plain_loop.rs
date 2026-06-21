@@ -2,6 +2,7 @@ use crate::ast::CeriumType;
 use crate::ast::compilation::Compilable;
 use crate::ast::compilation::context::Context;
 use crate::ast::expression::Expression;
+use crate::ast::expression::optimize::{OptimizeExpression, OptimizeRangedExpression};
 use crate::error::{CompilerResult, UnprocessableUnit};
 use crate::ranged::Ranged;
 use chasm_ir::{Instruction, Operand, inst};
@@ -47,5 +48,13 @@ impl Compilable for Loop {
         Err(UnprocessableUnit {
             range: self.body.0.clone(),
         })?
+    }
+}
+
+impl OptimizeExpression for Loop {
+    fn optimize(self) -> Expression {
+        Expression::Loop(Box::new(Loop {
+            body: self.body.optimize(),
+        }))
     }
 }

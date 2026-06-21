@@ -1,5 +1,6 @@
 use crate::ast::compilation::Compilable;
 use crate::ast::compilation::context::Context;
+use crate::ast::expression::optimize::{OptimizeExpression, OptimizeRangedExpression};
 use crate::ast::{CeriumType, Expression, Qualifier};
 use crate::error::CompilerResult;
 use crate::ranged::Ranged;
@@ -62,5 +63,19 @@ impl Compilable for CompilerMacro {
 
     fn compile_into(&self, ctx: &mut Context, operand: &Operand) -> CompilerResult<CeriumType> {
         unprocessable_unit!()
+    }
+}
+
+impl OptimizeExpression for CompilerMacro {
+    fn optimize(self) -> Expression {
+        let expressions = self
+            .expressions
+            .into_iter()
+            .map(Ranged::<Expression>::optimize)
+            .collect();
+        Expression::CompilerMacro(Box::new(CompilerMacro {
+            name: self.name,
+            expressions,
+        }))
     }
 }

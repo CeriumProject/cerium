@@ -1,6 +1,7 @@
-use crate::ast::CeriumType;
 use crate::ast::compilation::context::Context;
 use crate::ast::compilation::{Compilable, ConstCompilable, ConstContext};
+use crate::ast::expression::optimize::OptimizeExpression;
+use crate::ast::{CeriumType, Expression};
 use crate::error::{CompilerResult, UnparseableConstant};
 use crate::ranged::Ranged;
 use chasm_ir::{Operand, inst};
@@ -90,5 +91,11 @@ impl ConstCompilable for ConstantValue {
     fn compile_const(&self, ctx: &mut ConstContext) -> CompilerResult<(Operand, CeriumType)> {
         self.parse()
             .map(|(val, r#type)| (Operand::Constant(val), r#type))
+    }
+}
+
+impl OptimizeExpression for ConstantValue {
+    fn optimize(self) -> Expression {
+        Expression::Constant(Box::new(self))
     }
 }
