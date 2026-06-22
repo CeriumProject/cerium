@@ -4,9 +4,11 @@ struct Vertex {
     z: f16,
 }
 
+const DISPLAY_PORT: u16 = 0;
+
 const ZOOM: f16 = 40.0;
-const HALF_WIDTH: i16 = 64 alias i16;
-const HALF_HEIGHT: i16 = 48 alias i16;
+const HALF_WIDTH: i16 = +64;
+const HALF_HEIGHT: i16 = +48;
 
 const WHITE: u16 = 255;
 const BLACK: u16 = 0;
@@ -17,7 +19,7 @@ const CAMERA: &Vertex = &Vertex {
     z: 3.0,
 };
 
-fn project(vertex: &Vertex, camera: &Vertex, rot: i16, x: &i16, y: &i16) {
+fn project(vertex: &Vertex, camera: &Vertex, rot: i16, x: &i16, y: &i16, z: &f16) {
     let dx = vertex.x - camera.x;
     let dy = vertex.y - camera.y;
     let dz = vertex.z - camera.z;
@@ -30,10 +32,11 @@ fn project(vertex: &Vertex, camera: &Vertex, rot: i16, x: &i16, y: &i16) {
 
     *x = (dx_r / dz_r * ZOOM) as i16 + HALF_WIDTH;
     *y = (dy / dz_r * ZOOM) as i16 + HALF_HEIGHT;
+    *z = dz_r;
 }
 
 fn fill(color: u16) {
-    device!(0);
+    device!(DISPLAY_PORT);
     context!(0, 1);
     context!(3, color);
     let x = 128 in for x downto 0 {
@@ -46,7 +49,7 @@ fn fill(color: u16) {
 }
 
 fn set_at(x: i16, y: i16, color: u16) {
-    device!(0);
+    device!(DISPLAY_PORT);
     context!(0, 1);
     context!(1, x);
     context!(2, y);
@@ -55,31 +58,37 @@ fn set_at(x: i16, y: i16, color: u16) {
 }
 
 fn flip() {
-    device!(0);
+    device!(DISPLAY_PORT);
     context!(0, 2);
     send!();
 }
 
 fn render(rot: i16) {
     fill(WHITE);
-    let x = 0 as i16;
-    let y = 0 as i16;
-    let idx = 8 in for idx downto 0 {
-        project(CUBE[idx], CAMERA, rot, &x, &y);
-        set_at(x, y, BLACK);
+    let x = +0;
+    let y = +0;
+    let z = 0.0;
+    let idx = CUBE_VERTEX_COUNT in for idx downto 0 {
+        project(CUBE[idx], CAMERA, rot, &x, &y, &z);
+        let is_in_front = (z alias u16) / 32768 in for is_in_front downto 0 {
+            set_at(x, y, BLACK);
+        };
     };
     flip();
 }
 
 fn main() {
     let rot = +0;
+    let tick = +0;
     loop {
         render(rot);
         rot = rot + +50;
-        CAMERA.x = CAMERA.x + 0.01;
+        CAMERA.y = sin(tick) * 2.0;
+        tick = tick + +50;
     }
 }
 
+const CUBE_VERTEX_COUNT: u16 = 8;
 const CUBE: &&Vertex = &[
     &Vertex { x:  1.0, y:  1.0, z:  1.0 },
     &Vertex { x:  1.0, y:  1.0, z: -1.0 },
