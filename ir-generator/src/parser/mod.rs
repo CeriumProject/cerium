@@ -58,6 +58,7 @@ impl<'a> Parser<'a> {
             (range, Token::I16) => Ok((range, CeriumType::I16)),
             (range, Token::U16) => Ok((range, CeriumType::U16)),
             (range, Token::F16) => Ok((range, CeriumType::F16)),
+            (range, Token::Bool) => Ok((range, CeriumType::Bool)),
             (start_range, Token::Ampersand) => {
                 let (end_range, inner_type) = self.parse_type()?;
                 Ok((

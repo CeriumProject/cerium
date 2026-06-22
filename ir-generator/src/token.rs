@@ -4,7 +4,7 @@ pub enum Token {
     // wrappers
     Ident(String), Number(String),
     // constants
-    // Nullptr,
+    True, False, // Nullptr,
     // parentheses etc.
     LParen, RParen, LBracket, RBracket, LBrace, RBrace,
     // special characters
@@ -24,7 +24,7 @@ pub enum Token {
     // multipurpose operators
     Ampersand, Bang,
     // types
-    F16, I16, U16, // Any, Bool,
+    F16, I16, U16, Bool, // Any, Char,
     // conversion
     As, Alias,
     // inspection

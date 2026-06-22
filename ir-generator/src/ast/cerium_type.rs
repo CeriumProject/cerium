@@ -10,6 +10,7 @@ pub enum CeriumType {
     I16,
     U16,
     F16,
+    Bool,
     Reference(Box<CeriumType>),
     Function(Vec<CeriumType>, Option<Box<CeriumType>>),
     Struct(Qualifier),
@@ -21,6 +22,7 @@ impl Display for CeriumType {
             CeriumType::I16 => write!(f, "i16"),
             CeriumType::U16 => write!(f, "u16"),
             CeriumType::F16 => write!(f, "f16"),
+            CeriumType::Bool => write!(f, "bool"),
             CeriumType::Reference(inner) => write!(f, "&{inner}"),
             CeriumType::Function(params, result) => {
                 write!(
@@ -51,6 +53,7 @@ impl CeriumType {
             CeriumType::I16
             | CeriumType::U16
             | CeriumType::F16
+            | CeriumType::Bool
             | CeriumType::Reference(_)
             | CeriumType::Function(_, _) => Ok(1),
             CeriumType::Struct(name) => match structs.get(name) {

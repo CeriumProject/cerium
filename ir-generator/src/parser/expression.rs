@@ -168,6 +168,7 @@ impl Parser<'_> {
             Ok((_, Token::Ident(_))) => self.parse_variable(),
             Ok((_, Token::Number(_))) => self.parse_constant_value(),
             Ok((_, Token::Sizeof)) => self.parse_sizeof(),
+            Ok((_, Token::True | Token::False)) => self.parse_bool(),
             Ok((range, token)) => Err(CompilerError::UnexpectedTokenError(UnexpectedTokenError {
                 range: range.clone(),
                 token: token.clone(),
@@ -382,6 +383,31 @@ impl Parser<'_> {
                 token,
                 range,
             })),
+        }
+    }
+
+    fn parse_bool(&mut self) -> CompilerResult<Ranged<Expression>> {
+        match self.lexer.next() {
+            Some(Ok((range, Token::True))) => Ok((
+                range.clone(),
+                Expression::Constant(Box::new(ConstantValue {
+                    value: (range.clone(), String::from("true")),
+                })),
+            )),
+            Some(Ok((range, Token::False))) => Ok((
+                range.clone(),
+                Expression::Constant(Box::new(ConstantValue {
+                    value: (range.clone(), String::from("false")),
+                })),
+            )),
+            Some(Ok((range, token))) => {
+                Err(CompilerError::UnexpectedTokenError(UnexpectedTokenError {
+                    token,
+                    range,
+                }))
+            }
+            Some(Err(err)) => Err(err),
+            None => Err(CompilerError::UnexpectedEof(UnexpectedEof)),
         }
     }
 

@@ -15,6 +15,12 @@ impl ConstantValue {
     fn parse(&self) -> CompilerResult<(u16, CeriumType)> {
         let (range, raw_constant) = self.value.clone();
 
+        match raw_constant.as_str() {
+            "true" => return Ok((1, CeriumType::Bool)),
+            "false" => return Ok((0, CeriumType::Bool)),
+            _ => {}
+        }
+
         if raw_constant.contains('.') {
             raw_constant
                 .parse::<f16>()
