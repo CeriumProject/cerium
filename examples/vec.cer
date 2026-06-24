@@ -1,0 +1,77 @@
+const Vec::DEFAULT_CAP: u16 = 1;
+
+struct Vec {
+    arr: &u16,
+    len: u16,
+    cap: u16,
+}
+
+fn Vec::new() -> &Vec {
+    let result = mem::alloc(sizeof Vec) alias &Vec;
+    result.arr = mem::alloc(Vec::DEFAULT_CAP);
+    result.len = 0;
+    result.cap = Vec::DEFAULT_CAP;
+    result
+}
+
+fn Vec::push(vec: &Vec, value: u16) {
+    let has_capacity = 1;
+    let counter = vec.len - vec.cap in for counter downto 0 {
+        has_capacity = 0;
+        counter = 0;
+    };
+    for has_capacity downto 0 {
+        let cap = vec.cap * 2 + 1;
+        let arr = mem::alloc(cap);
+        mem::copy(arr, vec.arr, vec.len);
+        vec.cap = cap;
+        vec.arr = arr;
+    };
+    vec.arr[vec.len] = value;
+    vec.len = vec.len + 1;
+}
+
+fn Vec::get_unchecked(vec: &Vec, idx: u16) -> &u16 {
+    vec.arr + idx
+}
+
+const mem::HEAP: &&u16 = &(0 alias &u16);
+
+fn mem::alloc(size: u16) -> &u16 {
+    let result = *mem::HEAP;
+    result = result - size;
+    *mem::HEAP = result;
+    result
+}
+
+fn mem::copy(dst: &u16, src: &u16, len: u16) {
+    for len downto 0 {
+        *dst = *src;
+        dst = dst + 1;
+        src = src + 1;
+    }
+}
+
+fn main() {
+    let vec = Vec::new();
+    Vec::push(vec, 13);
+    Vec::push(vec, 6700);
+    Vec::push(vec, 67);
+    Vec::push(vec, 19);
+    Vec::push(vec, 3);
+    Vec::push(vec, 630);
+    Vec::push(vec, 15113);
+    Vec::push(vec, 1300);
+    Vec::push(vec, 29355);
+    Vec::push(vec, 12378);
+    dbg!(*Vec::get_unchecked(vec, 0));
+    dbg!(*Vec::get_unchecked(vec, 1));
+    dbg!(*Vec::get_unchecked(vec, 2));
+    dbg!(*Vec::get_unchecked(vec, 3));
+    dbg!(*Vec::get_unchecked(vec, 4));
+    dbg!(*Vec::get_unchecked(vec, 5));
+    dbg!(*Vec::get_unchecked(vec, 6));
+    dbg!(*Vec::get_unchecked(vec, 7));
+    dbg!(*Vec::get_unchecked(vec, 8));
+    dbg!(*Vec::get_unchecked(vec, 9));
+}
