@@ -18,6 +18,7 @@ impl ConstantValue {
         match raw_constant.as_str() {
             "true" => return Ok((1, CeriumType::Bool)),
             "false" => return Ok((0, CeriumType::Bool)),
+            "nullptr" => return Ok((0, CeriumType::Reference(Box::new(CeriumType::Undefined(1))))),
             _ => {}
         }
 

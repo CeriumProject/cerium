@@ -169,6 +169,7 @@ impl Parser<'_> {
             Ok((_, Token::Number(_))) => self.parse_constant_value(),
             Ok((_, Token::Sizeof)) => self.parse_sizeof(),
             Ok((_, Token::True | Token::False)) => self.parse_bool(),
+            Ok((_, Token::Nullptr)) => self.parse_nullptr(),
             Ok((range, token)) => Err(CompilerError::UnexpectedTokenError(UnexpectedTokenError {
                 range: range.clone(),
                 token: token.clone(),
@@ -272,6 +273,11 @@ impl Parser<'_> {
     fn parse_let(&mut self) -> CompilerResult<Ranged<Expression>> {
         let start = expect_token!(self.lexer, (range, Token::Let), *range.start())?;
         let name = self.parse_qualifier()?;
+        let r#type = if next_matches!(self.lexer, Token::Colon) {
+            Some(self.parse_type()?)
+        } else {
+            None
+        };
         expect_token!(self.lexer, Token::Assign)?;
         let value = self.parse_expression()?;
         if next_matches!(self.lexer, Token::In) {
@@ -282,7 +288,11 @@ impl Parser<'_> {
                 Expression::Scope(Box::new(Scope {
                     statements: vec![(
                         range,
-                        Expression::Declaration(Box::new(Declaration { name, value })),
+                        Expression::Declaration(Box::new(Declaration {
+                            name,
+                            r#type,
+                            value,
+                        })),
                     )],
                     result: Some(body),
                 })),
@@ -291,7 +301,11 @@ impl Parser<'_> {
             let range = start..=*value.0.end();
             Ok((
                 range,
-                Expression::Declaration(Box::new(Declaration { name, value })),
+                Expression::Declaration(Box::new(Declaration {
+                    name,
+                    r#type,
+                    value,
+                })),
             ))
         }
     }
@@ -409,6 +423,16 @@ impl Parser<'_> {
             Some(Err(err)) => Err(err),
             None => Err(CompilerError::UnexpectedEof(UnexpectedEof)),
         }
+    }
+
+    fn parse_nullptr(&mut self) -> CompilerResult<Ranged<Expression>> {
+        let range = expect_token!(self.lexer, (range, Token::Nullptr), range)?;
+        Ok((
+            range.clone(),
+            Expression::Constant(Box::new(ConstantValue {
+                value: (range, String::from("nullptr")),
+            })),
+        ))
     }
 
     fn parse_sizeof(&mut self) -> CompilerResult<Ranged<Expression>> {

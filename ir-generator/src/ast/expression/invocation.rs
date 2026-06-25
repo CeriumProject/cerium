@@ -8,6 +8,7 @@ use crate::error::{
 use crate::ranged::Ranged;
 use crate::unprocessable_unit;
 use chasm_ir::{Instruction, Operand, inst};
+use std::collections::HashMap;
 use std::mem::MaybeUninit;
 
 #[derive(Debug, Clone, PartialEq)]
@@ -49,8 +50,11 @@ impl Compilable for Invocation {
             let param_types = self.compile_params(ctx)?;
             self.function.1.compile(ctx, &mut |function, r#type, ctx| {
                 ctx.push_inst(inst!(Call, op function.clone()));
-                let result_type =
-                    check_parameter_types(&param_types, (self.function.0.clone(), r#type))?;
+                let result_type = check_parameter_types(
+                    &param_types,
+                    (self.function.0.clone(), r#type),
+                    ctx.structs(),
+                )?;
                 let Some(result_type) = result_type else {
                     unprocessable_unit!();
                 };
@@ -69,7 +73,11 @@ impl Compilable for Invocation {
             let param_types = self.compile_params(ctx)?;
             self.function.1.compile(ctx, &mut |function, r#type, ctx| {
                 ctx.push_inst(inst!(Call, op function.clone()));
-                check_parameter_types(&param_types, (self.function.0.clone(), r#type))?;
+                check_parameter_types(
+                    &param_types,
+                    (self.function.0.clone(), r#type),
+                    ctx.structs(),
+                )?;
                 Ok(())
             })
         })
@@ -81,8 +89,11 @@ impl Compilable for Invocation {
             let mut outer_result_type = MaybeUninit::uninit();
             self.function.1.compile(ctx, &mut |function, r#type, ctx| {
                 ctx.push_inst(inst!(Call, op function.clone()));
-                let result_type =
-                    check_parameter_types(&param_types, (self.function.0.clone(), r#type))?;
+                let result_type = check_parameter_types(
+                    &param_types,
+                    (self.function.0.clone(), r#type),
+                    ctx.structs(),
+                )?;
                 let Some(result_type) = result_type else {
                     unprocessable_unit!();
                 };
@@ -98,6 +109,7 @@ impl Compilable for Invocation {
 fn check_parameter_types(
     param_types: &[Ranged<CeriumType>],
     function_type: Ranged<&CeriumType>,
+    structs: &HashMap<Qualifier, Vec<(Qualifier, CeriumType)>>,
 ) -> CompilerResult<Option<CeriumType>> {
     match function_type {
         (range, CeriumType::Reference(inner)) => {
@@ -115,7 +127,7 @@ fn check_parameter_types(
                 })?
             }
             for (lhs, (range, rhs)) in parameters.iter().zip(param_types.iter()) {
-                if *lhs != *rhs {
+                if !rhs.is_subtype_of(lhs, structs)? {
                     Err(MismatchedParameterType {
                         parameter: range.clone(),
                         expected: lhs.clone(),

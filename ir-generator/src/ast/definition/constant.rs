@@ -21,7 +21,7 @@ impl Constant {
     ) -> CompilerResult<Vec<Section>> {
         let mut ctx = ConstContext::new(globals.clone(), structs);
         let (op, r#type) = self.value.1.compile_const(&mut ctx)?;
-        if r#type != self.r#type.1 {
+        if !r#type.is_subtype_of(&self.r#type.1, structs)? {
             Err(MismatchedAssignmentType {
                 destination: (
                     *self.name.0.start()..=*self.r#type.0.end(),

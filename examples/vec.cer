@@ -35,7 +35,7 @@ fn Vec::get_unchecked(vec: &Vec, idx: u16) -> &u16 {
     vec.arr + idx
 }
 
-const mem::HEAP: &&u16 = &(0 alias &u16);
+const mem::HEAP: &&u16 = &nullptr;
 
 fn mem::alloc(size: u16) -> &u16 {
     let result = *mem::HEAP;

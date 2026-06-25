@@ -57,7 +57,7 @@ impl Compilable for Assignment {
             .compile(ctx, &mut |val_op, val_type, ctx| match &self.dest.1 {
                 Expression::Variable(variable) => {
                     variable.compile(ctx, &mut |var_op, var_type, ctx| {
-                        if *val_type != *var_type {
+                        if !val_type.is_subtype_of(var_type, ctx.structs())? {
                             Err(MismatchedAssignmentType {
                                 destination: (self.dest.0.clone(), var_type.clone()),
                                 source: (self.source.0.clone(), val_type.clone()),
@@ -78,7 +78,7 @@ impl Compilable for Assignment {
                                 r#type: var_type.clone(),
                             })?
                         };
-                        if *val_type != **var_type {
+                        if !val_type.is_subtype_of(var_type, ctx.structs())? {
                             Err(MismatchedAssignmentType {
                                 destination: (self.dest.0.clone(), var_type.as_ref().clone()),
                                 source: (self.source.0.clone(), val_type.clone()),
@@ -105,7 +105,7 @@ impl Compilable for Assignment {
                                         r#type: arr_type.clone(),
                                     })?
                                 };
-                                if *val_type != **var_type {
+                                if !val_type.is_subtype_of(var_type.as_ref(), ctx.structs())? {
                                     Err(MismatchedAssignmentType {
                                         destination: (
                                             self.dest.0.clone(),
@@ -141,7 +141,7 @@ impl Compilable for Assignment {
                             })?;
                         ctx.push_inst(inst!(Add, op struct_op.clone(), val offset as u16));
                         self.source.1.compile(ctx, &mut |val_op, val_type, ctx| {
-                            if *val_type != field_type {
+                            if !val_type.is_subtype_of(&field_type, ctx.structs())? {
                                 Err(MismatchedAssignmentType {
                                     destination: (self.dest.0.clone(), field_type.clone()),
                                     source: (self.source.0.clone(), val_type.clone()),

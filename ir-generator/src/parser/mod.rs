@@ -59,6 +59,38 @@ impl<'a> Parser<'a> {
             (range, Token::U16) => Ok((range, CeriumType::U16)),
             (range, Token::F16) => Ok((range, CeriumType::F16)),
             (range, Token::Bool) => Ok((range, CeriumType::Bool)),
+            (mut range, Token::Any) => {
+                let size = if next_matches!(self.lexer, Token::LBracket) {
+                    let size = expect_token!(self.lexer, (sub_range, Token::Number(ident)), {
+                        range = *range.start()..=*sub_range.end();
+                        ident
+                    })?;
+                    let Ok(size) = size.parse::<usize>() else {
+                        todo!()
+                    };
+                    expect_token!(self.lexer, Token::RBracket)?;
+                    size
+                } else {
+                    1
+                };
+                Ok((range, CeriumType::Any(size)))
+            }
+            (mut range, Token::Undefined) => {
+                let size = if next_matches!(self.lexer, Token::LBracket) {
+                    let size = expect_token!(self.lexer, (sub_range, Token::Number(ident)), {
+                        range = *range.start()..=*sub_range.end();
+                        ident
+                    })?;
+                    let Ok(size) = size.parse::<usize>() else {
+                        todo!()
+                    };
+                    expect_token!(self.lexer, Token::RBracket)?;
+                    size
+                } else {
+                    1
+                };
+                Ok((range, CeriumType::Undefined(size)))
+            }
             (start_range, Token::Ampersand) => {
                 let (end_range, inner_type) = self.parse_type()?;
                 Ok((

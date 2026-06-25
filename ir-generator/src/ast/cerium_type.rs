@@ -14,6 +14,10 @@ pub enum CeriumType {
     Reference(Box<CeriumType>),
     Function(Vec<CeriumType>, Option<Box<CeriumType>>),
     Struct(Qualifier),
+    /// is subtype of every other type
+    /// allows implicit conversion for nullptr
+    Undefined(usize),
+    Any(usize),
 }
 
 impl Display for CeriumType {
@@ -40,10 +44,13 @@ impl Display for CeriumType {
                 }
             }
             CeriumType::Struct(name) => write!(f, "{name}"),
+            CeriumType::Undefined(size) => write!(f, "undefined[{size}]"),
+            CeriumType::Any(size) => write!(f, "any[{size}]"),
         }
     }
 }
 
+// TODO: Result -> Option
 impl CeriumType {
     pub fn size(
         &self,
@@ -63,8 +70,22 @@ impl CeriumType {
                     .sum(),
                 None => todo!(),
             },
+            CeriumType::Undefined(size) | CeriumType::Any(size) => Ok(*size),
         }
     }
 
-    // TODO: ::is_subtype_of
+    pub fn is_subtype_of(
+        &self,
+        other: &CeriumType,
+        structs: &HashMap<Qualifier, Vec<(Qualifier, CeriumType)>>,
+    ) -> CompilerResult<bool> {
+        match (self, other) {
+            (CeriumType::Undefined(size), rhs) => Ok(*size == rhs.size(structs)?),
+            (lhs, CeriumType::Any(size)) => Ok(lhs.size(structs)? == *size),
+            (CeriumType::Reference(lhs), CeriumType::Reference(rhs)) => {
+                lhs.is_subtype_of(rhs.as_ref(), structs)
+            }
+            (lhs, rhs) => Ok(*lhs == *rhs),
+        }
+    }
 }

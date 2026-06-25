@@ -4,7 +4,7 @@ use crate::ast::compilation::context::Context;
 use crate::ast::expression::Expression;
 use crate::ast::expression::optimize::{OptimizeExpression, OptimizeRangedExpression};
 use crate::ast::qualifier::Qualifier;
-use crate::error::CompilerResult;
+use crate::error::{CompilerResult, MismatchedAssignmentType};
 use crate::ranged::Ranged;
 use crate::unprocessable_unit;
 use chasm_ir::Operand;
@@ -12,7 +12,7 @@ use chasm_ir::Operand;
 #[derive(Debug, Clone, PartialEq)]
 pub struct Declaration {
     pub name: Ranged<Qualifier>,
-    // pub r#type: Ranged<CeriumType>,
+    pub r#type: Option<Ranged<CeriumType>>,
     pub value: Ranged<Expression>,
 }
 
@@ -35,10 +35,22 @@ impl Compilable for Declaration {
 
     fn compile_unit(&self, ctx: &mut Context) -> CompilerResult<()> {
         // placeholder
-        let op = ctx.push_var(self.name.1.clone(), CeriumType::I16);
+        let initial_type = match &self.r#type {
+            Some(r#type) => r#type.1.clone(),
+            None => CeriumType::Any(1),
+        };
+        let op = ctx.push_var(self.name.1.clone(), initial_type.clone());
 
         let r#type = self.value.1.compile_into(ctx, &op)?;
-        ctx.change_type(&self.name.1, r#type);
+        if !r#type.is_subtype_of(&initial_type, ctx.structs())? {
+            Err(MismatchedAssignmentType {
+                destination: (self.name.0.clone(), initial_type.clone()),
+                source: (self.value.0.clone(), r#type.clone()),
+            })?
+        }
+        if self.r#type.is_none() {
+            ctx.change_type(&self.name.1, r#type);
+        }
         Ok(())
     }
 
@@ -51,6 +63,7 @@ impl OptimizeExpression for Declaration {
     fn optimize(self) -> Expression {
         Expression::Declaration(Box::new(Declaration {
             name: self.name,
+            r#type: self.r#type,
             value: self.value.optimize(),
         }))
     }

@@ -66,7 +66,7 @@ impl Function {
             }
             Some((_, expected_type)) => {
                 self.body.1.compile(&mut ctx, &mut |op, actual_type, ctx| {
-                    if *expected_type != *actual_type {
+                    if !actual_type.is_subtype_of(expected_type, ctx.structs())? {
                         Err(FalseReturnType {
                             function: self.name.clone(),
                             expected: self.return_type.clone(),

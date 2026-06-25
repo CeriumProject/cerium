@@ -25,7 +25,7 @@ impl FormatError for MismatchedParameterType {
         let expected = &self.expected;
         let supplied = &self.supplied;
         Cow::from(format!(
-            "Parameter should be of type '{supplied}', not '{expected}'."
+            "Parameter should be of type '{expected}', not '{supplied}'."
         ))
     }
 

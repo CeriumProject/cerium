@@ -1,0 +1,41 @@
+const IDK: &u16 = nullptr;
+
+const HEAP: &&undefined = &nullptr;
+
+fn malloc(size: u16) -> &undefined {
+    *HEAP = *HEAP - size;
+    *HEAP
+}
+
+fn read(ptr: &u16) -> u16 {
+    *ptr
+}
+
+struct Array {
+    data: &u16,
+}
+
+fn Array::new() {
+    let array: &Array = malloc(sizeof Array);
+    array.data = nullptr;
+    array
+}
+
+struct Optional {
+    value: u16,
+    is_some: bool,
+}
+
+fn Optional::as_ptr(self: &Optional) -> &u16 {
+    let result = self alias &u16;
+    let is_none = 1 - (self.is_some alias u16) in for is_none downto 0 {
+        result = nullptr
+    };
+    result
+}
+
+fn main() {
+    read(nullptr);
+    *HEAP = *HEAP - 15;
+    let high_potential = *nullptr;
+}
