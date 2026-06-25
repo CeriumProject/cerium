@@ -30,16 +30,18 @@ impl Compilable for Reference {
         then: &mut dyn FnMut(&Operand, &CeriumType, &mut Context) -> CompilerResult<()>,
     ) -> CompilerResult<()> {
         self.inner.1.compile(ctx, &mut |op, r#type, ctx| {
-            let Operand::Variable(variable) = op else {
-                Err(ValueNotReferenceable {
-                    range: self.inner.0.clone(),
-                })?
-            };
-            let result_type = CeriumType::Reference(Box::new(r#type.clone()));
-            let uuid = ctx.uuid();
-            let new_op = ctx.push_var(uuid.clone(), result_type.clone());
-            ctx.push_inst(Instruction::Reference(new_op.clone(), variable.clone()));
-            then(&new_op, &result_type, ctx)
+            ctx.scope(|ctx| {
+                let Operand::Variable(variable) = op else {
+                    Err(ValueNotReferenceable {
+                        range: self.inner.0.clone(),
+                    })?
+                };
+                let result_type = CeriumType::Reference(Box::new(r#type.clone()));
+                let uuid = ctx.uuid();
+                let new_op = ctx.push_var(uuid.clone(), result_type.clone());
+                ctx.push_inst(Instruction::Reference(new_op.clone(), variable.clone()));
+                then(&new_op, &result_type, ctx)
+            })
         })
     }
 

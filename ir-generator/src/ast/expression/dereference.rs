@@ -28,10 +28,10 @@ impl Compilable for Dereference {
         then: &mut dyn FnMut(&Operand, &CeriumType, &mut Context) -> CompilerResult<()>,
     ) -> CompilerResult<()> {
         self.inner.1.compile(ctx, &mut |src, ty, ctx| {
-            let uuid = ctx.uuid();
-            let inner_type = deref_type(self.inner.0.clone(), ty)?;
-            let dst = ctx.push_var(uuid, inner_type.clone());
             ctx.scope(|ctx| {
+                let uuid = ctx.uuid();
+                let inner_type = deref_type(self.inner.0.clone(), ty)?;
+                let dst = ctx.push_var(uuid, inner_type.clone());
                 ctx.push_inst(inst!(Read, op dst.clone(), op src.clone()));
                 then(&dst, &inner_type, ctx)
             })
