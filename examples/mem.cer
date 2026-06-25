@@ -29,3 +29,13 @@ fn mem::clone(ptr: &any) -> &undefined {
     mem::copy(result, ptr, size);
     result
 }
+
+fn main() {
+    let arr: &u16 = mem::alloc(10);
+    arr[7] = 4;
+    let clone: &u16 = mem::clone(arr);
+    arr[7] = 3;
+    dbg!(clone[7]);
+    mem::free(arr);
+    mem::free(clone);
+}
