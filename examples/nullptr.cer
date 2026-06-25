@@ -27,9 +27,9 @@ struct Optional {
 }
 
 fn Optional::as_ptr(self: &Optional) -> &u16 {
-    let result = self alias &u16;
-    let is_none = 1 - (self.is_some alias u16) in for is_none downto 0 {
-        result = nullptr
+    let result: &u16 = nullptr;
+    let is_some = self.is_some alias u16 in for is_some downto 0 {
+        result = self alias &u16
     };
     result
 }
