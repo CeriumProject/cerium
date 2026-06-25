@@ -1,0 +1,31 @@
+const mem::HEAP: &&undefined = &nullptr;
+
+fn mem::alloc(size: u16) -> &undefined {
+    let result = *mem::HEAP - size - 1;
+    *result = size alias undefined;
+    *mem::HEAP = result;
+    result + 1
+}
+
+fn mem::free(ptr: &any) {
+
+}
+
+fn mem::size(ptr: &any) -> u16 {
+    ptr[-1] alias u16
+}
+
+fn mem::copy(dst: &any[1], src: &any, len: u16) {
+    for len downto 0 {
+        *dst = *src;
+        dst = dst + 1;
+        src = src + 1;
+    }
+}
+
+fn mem::clone(ptr: &any) -> &undefined {
+    let size = mem::size(ptr);
+    let result = mem::alloc(size);
+    mem::copy(result, ptr, size);
+    result
+}
