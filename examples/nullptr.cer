@@ -1,5 +1,5 @@
 // if you are confused by this example, please note that it's a bunch of bullshit
-// it's purpose is showing and testing what is possible, not what is ideal
+// its purpose is showing and testing what is possible, not what is ideal
 
 const IDK: &u16 = nullptr;
 
