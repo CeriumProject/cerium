@@ -15,7 +15,7 @@ fn mem::size(ptr: &any) -> u16 {
     ptr[-1] alias u16
 }
 
-fn mem::copy(dst: &any[1], src: &any, len: u16) {
+fn mem::copy(dst: &any, src: &any, len: u16) {
     for len downto 0 {
         *dst = *src;
         dst = dst + 1;

@@ -13,5 +13,5 @@ fn sqr(input: f16) -> f16 {
 fn main() {
     let func = 10000 alias &fn(f16) -> f16;
     memcpy(func, sqr, 100);
-    dbg!(func(98.53));
+    dbg!(func(8.1854));
 }
