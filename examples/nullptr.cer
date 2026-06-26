@@ -5,6 +5,8 @@ const IDK: &u16 = nullptr;
 
 const HEAP: &&undefined = &nullptr;
 
+const cpu::reset: &fn() = nullptr;
+
 fn malloc(size: u16) -> &undefined {
     *HEAP = *HEAP - size;
     *HEAP
@@ -41,4 +43,5 @@ fn main() {
     read(nullptr);
     *HEAP = *HEAP - 15;
     let high_potential = *nullptr;
+    cpu::reset();
 }
