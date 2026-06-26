@@ -103,7 +103,13 @@ impl<'a> Lexer<'a> {
                 None => Ok(Token::Minus.ranged(idx..=idx)),
             },
             '*' => Ok(Token::Asterisk.ranged(idx..=idx)),
-            '/' => Ok(Token::Slash.ranged(idx..=idx)),
+            '/' => match self.src.next_if(|(_, c)| *c == '/') {
+                Some(_) => {
+                    while !matches!(self.src.next(), Some((_, '\n'))) {}
+                    return self.next();
+                }
+                None => Ok(Token::Slash.ranged(idx..=idx)),
+            },
             '&' => Ok(Token::Ampersand.ranged(idx..=idx)),
             '.' => Ok(Token::Dot.ranged(idx..=idx)),
             _ => Err(UnexpectedCharacterError {
