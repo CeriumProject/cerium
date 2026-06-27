@@ -8,7 +8,7 @@ fn mem::alloc(size: u16) -> &u16 {
 }
 
 fn mem::free(ptr: &u16) {
-    let leckei = ptr;
+    // leck ei
 }
 
 fn main() {
