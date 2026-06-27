@@ -5,6 +5,7 @@ mod could_not_resolve_type;
 mod could_not_resolve_variable;
 mod false_field_type;
 mod false_return_type;
+mod incompatible_bitwise_operation_types;
 mod incompatible_types;
 mod index_must_be_integer;
 mod invalid_char_length;
@@ -32,6 +33,7 @@ use colored::{Color, Colorize};
 pub use could_not_resolve_type::CouldNotResolveType;
 pub use could_not_resolve_variable::CouldNotResolveVariable;
 pub use false_return_type::FalseReturnType;
+pub use incompatible_bitwise_operation_types::IncompatibleBitwiseOperationTypes;
 pub use incompatible_types::IncompatibleTypes;
 pub use index_must_be_integer::IndexMustBeInteger;
 pub use invalid_char_length::InvalidCharLength;
@@ -79,6 +81,7 @@ pub enum CompilerError {
     FalseFieldType(FalseFieldType),
     UnassignedField(UnassignedField),
     InvalidCharLength(InvalidCharLength),
+    IncompatibleBitwiseOperationTypes(IncompatibleBitwiseOperationTypes),
 }
 
 pub trait FormatError {
@@ -122,6 +125,7 @@ impl CompilerError {
             CompilerError::FalseFieldType(error) => error,
             CompilerError::UnassignedField(error) => error,
             CompilerError::InvalidCharLength(error) => error,
+            CompilerError::IncompatibleBitwiseOperationTypes(error) => error,
         }
     }
 }

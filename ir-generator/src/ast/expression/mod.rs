@@ -5,6 +5,7 @@ use crate::ast::dereference::Dereference;
 pub use crate::ast::expression::array::Array;
 pub use crate::ast::expression::array_indexation::ArrayIndexation;
 pub use crate::ast::expression::assignment::Assignment;
+pub use crate::ast::expression::bitwise_operation::BitwiseOperation;
 use crate::ast::expression::compiler_macro::CompilerMacro;
 pub use crate::ast::expression::constant_value::ConstantValue;
 pub use crate::ast::expression::declaration::Declaration;
@@ -30,6 +31,7 @@ use chasm_ir::Operand;
 pub mod array;
 pub mod array_indexation;
 pub mod assignment;
+pub mod bitwise_operation;
 pub mod compiler_macro;
 pub mod constant_value;
 pub mod declaration;
@@ -81,6 +83,7 @@ pub enum Expression {
     StructInitialization(Box<StructInitialization>),
     UnaryOperation(Box<UnaryOperation>),
     StringConstant(Box<StringConstant>),
+    BitwiseOperation(Box<BitwiseOperation>),
 }
 
 // TODO: impl Deref Expression -> &dyn Compilable instead of ts
@@ -114,6 +117,7 @@ impl Compilable for Expression {
             }
             Expression::UnaryOperation(unary_operation) => unary_operation.compile(ctx, then),
             Expression::StringConstant(string_constant) => string_constant.compile(ctx, then),
+            Expression::BitwiseOperation(bitwise_operation) => bitwise_operation.compile(ctx, then),
         }
     }
 
@@ -150,6 +154,7 @@ impl Compilable for Expression {
             }
             Expression::UnaryOperation(unary_operation) => unary_operation.compile_mut(ctx, then),
             Expression::StringConstant(string_constant) => string_constant.compile_mut(ctx, then),
+            Expression::BitwiseOperation(bitwise_operation) => bitwise_operation.compile(ctx, then),
         }
     }
 
@@ -178,6 +183,7 @@ impl Compilable for Expression {
             }
             Expression::UnaryOperation(unary_operation) => unary_operation.compile_unit(ctx),
             Expression::StringConstant(string_constant) => string_constant.compile_unit(ctx),
+            Expression::BitwiseOperation(bitwise_operation) => bitwise_operation.compile_unit(ctx),
         }
     }
 
@@ -213,6 +219,9 @@ impl Compilable for Expression {
             }
             Expression::StringConstant(string_constant) => {
                 string_constant.compile_into(ctx, operand)
+            }
+            Expression::BitwiseOperation(bitwise_operation) => {
+                bitwise_operation.compile_into(ctx, operand)
             }
         }
     }
@@ -255,6 +264,7 @@ impl OptimizeExpression for Expression {
             Expression::StructInitialization(expression) => expression.optimize(),
             Expression::UnaryOperation(expression) => expression.optimize(),
             Expression::StringConstant(expression) => expression.optimize(),
+            Expression::BitwiseOperation(expression) => expression.optimize(),
         }
     }
 }

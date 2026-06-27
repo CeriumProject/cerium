@@ -21,8 +21,10 @@ pub enum Token {
     // Equals, NotEquals, GreaterThan, GreaterThanEquals, LessThan, LessThanEquals,
     // boolean operators
     // And, Or, Xor,
+    // bitwise operators
+    Pipe, RShift, LShift,
     // multipurpose operators
-    Ampersand, Bang,
+    Ampersand, Bang, Circumflex,
     // types
     F16, I16, U16, Bool, Char, Any, Undefined,
     // conversion

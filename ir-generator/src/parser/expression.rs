@@ -1,3 +1,4 @@
+use crate::ast::bitwise_operation::BitwiseOperator;
 use crate::ast::compiler_macro::CompilerMacro;
 use crate::ast::constant_value::RawConstantValue;
 use crate::ast::dereference::Dereference;
@@ -7,8 +8,9 @@ use crate::ast::reference::Reference;
 use crate::ast::struct_initialization::StructInitialization;
 use crate::ast::unary_operation::UnaryOperation;
 use crate::ast::{
-    Array, ArrayIndexation, Assignment, ConstantValue, Declaration, ForDownTo, GenericOperation,
-    Invocation, Loop, Scope, Sizeof, StringConstant, TypeAlias, UnaryOperator, Variable,
+    Array, ArrayIndexation, Assignment, BitwiseOperation, ConstantValue, Declaration, ForDownTo,
+    GenericOperation, Invocation, Loop, Scope, Sizeof, StringConstant, TypeAlias, UnaryOperator,
+    Variable,
 };
 use crate::ast::{Expression, TypeCast};
 use crate::error::{CompilerError, CompilerResult, UnexpectedEof, UnexpectedTokenError};
@@ -18,8 +20,9 @@ use crate::token::Token;
 use crate::{expect_token, next_matches};
 
 impl Parser<'_> {
+    // TODO: do this kind of function with macro
     pub(super) fn parse_expression(&mut self) -> CompilerResult<Ranged<Expression>> {
-        let dest = self.parse_addition_subtraction()?;
+        let dest = self.parse_bitwise_or()?;
 
         if next_matches!(self.lexer, Token::Assign) {
             let source = self.parse_expression()?;
@@ -28,6 +31,73 @@ impl Parser<'_> {
             Ok((range, expression))
         } else {
             Ok(dest)
+        }
+    }
+
+    fn parse_bitwise_or(&mut self) -> CompilerResult<Ranged<Expression>> {
+        let mut lhs = self.parse_bitwise_xor()?;
+        while let Some(op_range) = next_matches!(self.lexer, (op_range, Token::Pipe), op_range) {
+            let rhs = self.parse_bitwise_xor()?;
+            let operator = (op_range, BitwiseOperator::Or);
+            lhs = (
+                join_ranges(&lhs, &rhs),
+                Expression::BitwiseOperation(Box::new(BitwiseOperation { lhs, rhs, operator })),
+            );
+        }
+        Ok(lhs)
+    }
+
+    fn parse_bitwise_xor(&mut self) -> CompilerResult<Ranged<Expression>> {
+        let mut lhs = self.parse_bitwise_and()?;
+        while let Some(op_range) =
+            next_matches!(self.lexer, (op_range, Token::Circumflex), op_range)
+        {
+            let rhs = self.parse_bitwise_and()?;
+            let operator = (op_range, BitwiseOperator::Xor);
+            lhs = (
+                join_ranges(&lhs, &rhs),
+                Expression::BitwiseOperation(Box::new(BitwiseOperation { lhs, rhs, operator })),
+            );
+        }
+        Ok(lhs)
+    }
+
+    fn parse_bitwise_and(&mut self) -> CompilerResult<Ranged<Expression>> {
+        let mut lhs = self.parse_bit_shift_operation()?;
+        while let Some(op_range) = next_matches!(self.lexer, (op_range, Token::Ampersand), op_range)
+        {
+            let rhs = self.parse_bit_shift_operation()?;
+            let operator = (op_range, BitwiseOperator::And);
+            lhs = (
+                join_ranges(&lhs, &rhs),
+                Expression::BitwiseOperation(Box::new(BitwiseOperation { lhs, rhs, operator })),
+            );
+        }
+        Ok(lhs)
+    }
+
+    fn parse_bit_shift_operation(&mut self) -> CompilerResult<Ranged<Expression>> {
+        let mut lhs = self.parse_addition_subtraction()?;
+        loop {
+            if let Some(op_range) = next_matches!(self.lexer, (op_range, Token::LShift), op_range) {
+                let rhs = self.parse_addition_subtraction()?;
+                let operator = (op_range, BitwiseOperator::LeftShift);
+                lhs = (
+                    join_ranges(&lhs, &rhs),
+                    Expression::BitwiseOperation(Box::new(BitwiseOperation { lhs, rhs, operator })),
+                );
+            } else if let Some(op_range) =
+                next_matches!(self.lexer, (op_range, Token::RShift), op_range)
+            {
+                let rhs = self.parse_addition_subtraction()?;
+                let operator = (op_range, BitwiseOperator::RightShift);
+                lhs = (
+                    join_ranges(&lhs, &rhs),
+                    Expression::BitwiseOperation(Box::new(BitwiseOperation { lhs, rhs, operator })),
+                );
+            } else {
+                break Ok(lhs);
+            }
         }
     }
 

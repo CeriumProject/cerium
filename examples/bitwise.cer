@@ -1,0 +1,11 @@
+fn sqrt(radicand: f16) -> f16 {
+    let approx = ((radicand alias u16 >> 1) + 7680) alias f16 in
+        (radicand / approx + approx) * 0.5
+}
+
+fn main() {
+    dbg!(sqrt(4489.0));
+    dbg!(65 | 3);
+    dbg!(99 & 75);
+    dbg!(42 ^ 105);
+}

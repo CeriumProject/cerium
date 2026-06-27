@@ -92,7 +92,7 @@ impl<'a> Lexer<'a> {
             '}' => Ok(Token::RBrace.ranged(idx..=idx)),
             ';' => Ok(Token::Semicolon.ranged(idx..=idx)),
             ':' => match self.src.next_if(|(_, c)| *c == ':') {
-                Some(_) => Ok(Token::Scope.ranged(idx..=idx)),
+                Some(_) => Ok(Token::Scope.ranged(idx..=idx + 1)),
                 None => Ok(Token::Colon.ranged(idx..=idx)),
             },
             ',' => Ok(Token::Comma.ranged(idx..=idx)),
@@ -100,7 +100,7 @@ impl<'a> Lexer<'a> {
             '+' => Ok(Token::Plus.ranged(idx..=idx)),
             '!' => Ok(Token::Bang.ranged(idx..=idx)),
             '-' => match self.src.next_if(|(_, c)| *c == '>') {
-                Some(_) => Ok(Token::Arrow.ranged(idx..=idx)),
+                Some(_) => Ok(Token::Arrow.ranged(idx..=idx + 1)),
                 None => Ok(Token::Minus.ranged(idx..=idx)),
             },
             '*' => Ok(Token::Asterisk.ranged(idx..=idx)),
@@ -112,6 +112,16 @@ impl<'a> Lexer<'a> {
                 None => Ok(Token::Slash.ranged(idx..=idx)),
             },
             '&' => Ok(Token::Ampersand.ranged(idx..=idx)),
+            '|' => Ok(Token::Pipe.ranged(idx..=idx)),
+            '^' => Ok(Token::Circumflex.ranged(idx..=idx)),
+            '>' => match self.src.next_if(|(_, c)| *c == '>') {
+                Some(_) => Ok(Token::RShift.ranged(idx..=idx + 1)),
+                None => todo!("greater than"),
+            },
+            '<' => match self.src.next_if(|(_, c)| *c == '<') {
+                Some(_) => Ok(Token::LShift.ranged(idx..=idx + 1)),
+                None => todo!("less than"),
+            },
             '.' => Ok(Token::Dot.ranged(idx..=idx)),
             _ => Err(UnexpectedCharacterError {
                 character: next,
