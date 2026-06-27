@@ -1,6 +1,7 @@
 use crate::ast::compilation::context::Context;
 use crate::ast::compilation::{Compilable, ConstCompilable, ConstContext};
 use crate::ast::expression::optimize::{OptimizeExpression, OptimizeRangedExpression};
+use crate::ast::expression::string_constant::StringConstant;
 use crate::ast::struct_initialization::StructInitialization;
 use crate::ast::{Array, CeriumType, Expression};
 use crate::error::{
@@ -95,6 +96,14 @@ impl ConstCompilable for Reference {
                     }
                 };
                 (ops, r#type)
+            }
+            Expression::StringConstant(box StringConstant { value }) => {
+                let ops = value
+                    .1
+                    .chars()
+                    .map(|c| Operand::Constant(c as u16))
+                    .collect::<Vec<_>>();
+                (ops, CeriumType::Char)
             }
             Expression::StructInitialization(box StructInitialization { name, fields }) => {
                 let struct_fields = ctx

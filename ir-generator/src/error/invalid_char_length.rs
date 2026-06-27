@@ -3,26 +3,26 @@ use std::borrow::Cow;
 use std::ops::RangeInclusive;
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct UnparseableConstant {
-    pub raw_constant: String,
+pub struct InvalidCharLength {
     pub range: RangeInclusive<usize>,
+    pub encountered: usize,
 }
 
-impl From<UnparseableConstant> for CompilerError {
-    fn from(value: UnparseableConstant) -> Self {
-        CompilerError::UnparseableConstant(value)
+impl From<InvalidCharLength> for CompilerError {
+    fn from(error: InvalidCharLength) -> Self {
+        CompilerError::InvalidCharLength(error)
     }
 }
 
-impl FormatError for UnparseableConstant {
+impl FormatError for InvalidCharLength {
     fn error_message(&self) -> Cow<str> {
-        Cow::from("Parsing Error")
+        Cow::from("Char Literal Error")
     }
 
     fn error_explanation(&self) -> Cow<str> {
+        let length = self.encountered;
         Cow::from(format!(
-            "Unable to parse constant '{}'.",
-            &self.raw_constant
+            "Char literals must have length 1. Has length {length}."
         ))
     }
 

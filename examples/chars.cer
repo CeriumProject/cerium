@@ -1,0 +1,28 @@
+const TERMINAL_DEVICE: u16 = 1;
+
+struct String {
+    ptr: &char,
+    len: u16,
+}
+
+fn print(string: &String) {
+    device!(TERMINAL_DEVICE);
+    context!(0, 1);
+    let ptr = string.ptr;
+    let i = string.len in for i downto 0 {
+        context!(1, *ptr);
+        ptr = ptr + 1;
+        send!();
+    }
+}
+
+const HELLO_WORLD: &String = &String {
+    ptr: &['H', 'e', 'l', 'l', 'o', ' ', 'W', 'o', 'r', 'l', 'd', '!', '\n'],
+    len: 13,
+};
+
+fn main() {
+    loop {
+        print(HELLO_WORLD);
+    }
+}

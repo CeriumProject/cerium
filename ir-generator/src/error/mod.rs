@@ -7,6 +7,7 @@ mod false_field_type;
 mod false_return_type;
 mod incompatible_types;
 mod index_must_be_integer;
+mod invalid_char_length;
 mod invalid_counter_type;
 mod invalid_parameter_amount;
 mod mismatched_assignment_type;
@@ -16,7 +17,7 @@ mod unassigned_field;
 mod unexpected_character;
 mod unexpected_eof;
 mod unexpected_token;
-mod unparseable_constant;
+mod unparseable_number;
 mod unprocessable_unit;
 mod value_not_dereferenceable;
 mod value_not_invocable;
@@ -33,6 +34,7 @@ pub use could_not_resolve_variable::CouldNotResolveVariable;
 pub use false_return_type::FalseReturnType;
 pub use incompatible_types::IncompatibleTypes;
 pub use index_must_be_integer::IndexMustBeInteger;
+pub use invalid_char_length::InvalidCharLength;
 pub use invalid_counter_type::InvalidCounterType;
 pub use invalid_parameter_amount::InvalidParameterAmount;
 pub use mismatched_assignment_type::MismatchedAssignmentType;
@@ -43,7 +45,7 @@ pub use type_alias_has_different_size::TypeAliasHasDifferentSize;
 pub use unexpected_character::UnexpectedCharacterError;
 pub use unexpected_eof::UnexpectedEof;
 pub use unexpected_token::UnexpectedTokenError;
-pub use unparseable_constant::UnparseableConstant;
+pub use unparseable_number::UnparseableNumber;
 pub use unprocessable_unit::UnprocessableUnit;
 pub use value_not_dereferenceable::ValueNotDereferenceable;
 pub use value_not_invocable::ValueNotInvocable;
@@ -56,7 +58,7 @@ pub enum CompilerError {
     UnexpectedCharacterError(UnexpectedCharacterError),
     UnexpectedTokenError(UnexpectedTokenError),
     UnexpectedEof(UnexpectedEof),
-    UnparseableConstant(UnparseableConstant),
+    UnparseableNumber(UnparseableNumber),
     IncompatibleTypes(IncompatibleTypes),
     UnprocessableUnit(UnprocessableUnit),
     FalseReturnType(FalseReturnType),
@@ -76,6 +78,7 @@ pub enum CompilerError {
     CannotReadFieldsOnType(CannotReadFieldsOnType),
     FalseFieldType(FalseFieldType),
     UnassignedField(UnassignedField),
+    InvalidCharLength(InvalidCharLength),
 }
 
 pub trait FormatError {
@@ -98,7 +101,7 @@ impl CompilerError {
             CompilerError::UnexpectedCharacterError(error) => error,
             CompilerError::UnexpectedTokenError(error) => error,
             CompilerError::UnexpectedEof(error) => error,
-            CompilerError::UnparseableConstant(error) => error,
+            CompilerError::UnparseableNumber(error) => error,
             CompilerError::IncompatibleTypes(error) => error,
             CompilerError::UnprocessableUnit(error) => todo!(),
             CompilerError::FalseReturnType(error) => error,
@@ -118,6 +121,7 @@ impl CompilerError {
             CompilerError::CannotReadFieldsOnType(error) => error,
             CompilerError::FalseFieldType(error) => error,
             CompilerError::UnassignedField(error) => error,
+            CompilerError::InvalidCharLength(error) => error,
         }
     }
 }

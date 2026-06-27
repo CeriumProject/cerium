@@ -59,6 +59,7 @@ impl<'a> Parser<'a> {
             (range, Token::U16) => Ok((range, CeriumType::U16)),
             (range, Token::F16) => Ok((range, CeriumType::F16)),
             (range, Token::Bool) => Ok((range, CeriumType::Bool)),
+            (range, Token::Char) => Ok((range, CeriumType::Char)),
             (mut range, Token::Any) => {
                 let size = if next_matches!(self.lexer, Token::LBracket) {
                     let size = expect_token!(self.lexer, (sub_range, Token::Number(ident)), {

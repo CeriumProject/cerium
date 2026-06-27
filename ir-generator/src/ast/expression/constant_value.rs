@@ -2,59 +2,49 @@ use crate::ast::compilation::context::Context;
 use crate::ast::compilation::{Compilable, ConstCompilable, ConstContext};
 use crate::ast::expression::optimize::OptimizeExpression;
 use crate::ast::{CeriumType, Expression};
-use crate::error::{CompilerResult, UnparseableConstant};
+use crate::error::{CompilerResult, UnparseableNumber};
 use crate::ranged::Ranged;
 use chasm_ir::{Operand, inst};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct ConstantValue {
-    pub value: Ranged<String>,
+    pub value: Ranged<RawConstantValue>,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum RawConstantValue {
+    Number(String),
+    Character(char),
+    Boolean(bool),
+    Nullptr,
 }
 
 impl ConstantValue {
     fn parse(&self) -> CompilerResult<(u16, CeriumType)> {
         let (range, raw_constant) = self.value.clone();
 
-        match raw_constant.as_str() {
-            "true" => return Ok((1, CeriumType::Bool)),
-            "false" => return Ok((0, CeriumType::Bool)),
-            "nullptr" => return Ok((0, CeriumType::Reference(Box::new(CeriumType::Undefined(1))))),
-            _ => {}
-        }
-
-        if raw_constant.contains('.') {
-            raw_constant
+        match raw_constant {
+            RawConstantValue::Boolean(boolean) => Ok((boolean as u16, CeriumType::Bool)),
+            RawConstantValue::Nullptr => {
+                Ok((0, CeriumType::Reference(Box::new(CeriumType::Undefined(1)))))
+            }
+            RawConstantValue::Character(c) => Ok((c as u16, CeriumType::Char)),
+            RawConstantValue::Number(number) if number.contains('.') => number
                 .parse::<f16>()
                 .map(|f| (f.to_bits(), CeriumType::F16))
-                .map_err(|_| {
-                    UnparseableConstant {
-                        raw_constant,
-                        range,
-                    }
-                    .into()
-                })
-        } else if raw_constant.starts_with('-') || raw_constant.starts_with('+') {
-            raw_constant
-                .parse::<i16>()
-                .map(|i| (i as u16, CeriumType::I16))
-                .map_err(|_| {
-                    UnparseableConstant {
-                        raw_constant,
-                        range,
-                    }
-                    .into()
-                })
-        } else {
-            raw_constant
+                .map_err(|_| UnparseableNumber { number, range }.into()),
+            RawConstantValue::Number(number)
+                if number.starts_with('-') || number.starts_with('+') =>
+            {
+                number
+                    .parse::<i16>()
+                    .map(|i| (i as u16, CeriumType::I16))
+                    .map_err(|_| UnparseableNumber { number, range }.into())
+            }
+            RawConstantValue::Number(number) => number
                 .parse::<u16>()
                 .map(|u| (u, CeriumType::U16))
-                .map_err(|_| {
-                    UnparseableConstant {
-                        raw_constant,
-                        range,
-                    }
-                    .into()
-                })
+                .map_err(|_| UnparseableNumber { number, range }.into()),
         }
     }
 }

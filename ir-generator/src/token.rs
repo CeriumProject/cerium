@@ -2,7 +2,7 @@
 #[derive(Clone, Debug, PartialEq)]
 pub enum Token {
     // wrappers
-    Ident(String), Number(String),
+    Ident(String), Number(String), String(String), Character(char),
     // constants
     True, False, Nullptr,
     // parentheses etc.
@@ -24,7 +24,7 @@ pub enum Token {
     // multipurpose operators
     Ampersand, Bang,
     // types
-    F16, I16, U16, Bool, Any, Undefined, // Char,
+    F16, I16, U16, Bool, Char, Any, Undefined,
     // conversion
     As, Alias,
     // inspection

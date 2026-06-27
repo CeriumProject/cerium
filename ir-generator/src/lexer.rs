@@ -1,5 +1,5 @@
-use crate::error::CompilerResult;
 use crate::error::UnexpectedCharacterError;
+use crate::error::{CompilerResult, InvalidCharLength, UnexpectedEof};
 use crate::ranged::{Ranged, ToRanged};
 use crate::token::Token;
 use std::iter::{Enumerate, Peekable};
@@ -63,9 +63,10 @@ impl<'a> Lexer<'a> {
             "f16" => Token::F16,
             "i16" => Token::I16,
             "u16" => Token::U16,
+            "bool" => Token::Bool,
+            "char" => Token::Char,
             "any" => Token::Any,
             "undefined" => Token::Undefined,
-            "bool" => Token::Bool,
             "true" => Token::True,
             "false" => Token::False,
             "nullptr" => Token::Nullptr,
@@ -119,6 +120,79 @@ impl<'a> Lexer<'a> {
             .into()),
         })
     }
+
+    fn parse_literal(&mut self, delimiter: char) -> String {
+        let mut result = String::new();
+        while let Some((_, c)) = self.src.next_if(|(_, c)| *c != delimiter) {
+            if c == '\\' {
+                match self.src.next() {
+                    Some((_, '0')) => result.push('\0'),
+                    Some((_, 'n')) => result.push('\n'),
+                    Some((_, 't')) => result.push('\t'),
+                    Some((_, 'r')) => result.push('\r'),
+                    Some((_, c)) => result.push(c),
+                    _ => break,
+                }
+            } else {
+                result.push(c);
+            }
+        }
+        result
+    }
+
+    fn parse_string(&mut self) -> Option<CompilerResult<Ranged<Token>>> {
+        let start = match self.src.next() {
+            Some((start, '"')) => start,
+            Some((idx, character)) => {
+                return Some(Err(UnexpectedCharacterError { character, idx }.into()));
+            }
+            None => return Some(Err(UnexpectedEof.into())),
+        };
+
+        let literal = self.parse_literal('"');
+
+        let end = match self.src.next() {
+            Some((end, '"')) => end,
+            Some((idx, character)) => {
+                return Some(Err(UnexpectedCharacterError { character, idx }.into()));
+            }
+            None => return Some(Err(UnexpectedEof.into())),
+        };
+
+        Some(Ok((start..=end, Token::String(literal))))
+    }
+
+    fn parse_char(&mut self) -> Option<CompilerResult<Ranged<Token>>> {
+        let start = match self.src.next() {
+            Some((start, '\'')) => start,
+            Some((idx, character)) => {
+                return Some(Err(UnexpectedCharacterError { character, idx }.into()));
+            }
+            None => return Some(Err(UnexpectedEof.into())),
+        };
+
+        let literal = self.parse_literal('\'');
+
+        let end = match self.src.next() {
+            Some((end, '\'')) => end,
+            Some((idx, character)) => {
+                return Some(Err(UnexpectedCharacterError { character, idx }.into()));
+            }
+            None => return Some(Err(UnexpectedEof.into())),
+        };
+
+        match literal.len() {
+            1 => Some(Ok((
+                start..=end,
+                Token::Character(literal.chars().next().unwrap()),
+            ))),
+            encountered => Some(Err(InvalidCharLength {
+                range: start..=end,
+                encountered,
+            }
+            .into())),
+        }
+    }
 }
 
 impl<'a> Iterator for Lexer<'a> {
@@ -128,6 +202,8 @@ impl<'a> Iterator for Lexer<'a> {
         self.skip_whitespace();
 
         match self.src.peek()? {
+            (_, '\'') => self.parse_char(),
+            (_, '"') => self.parse_string(),
             (_, c) if c.is_numeric() => self.parse_number(),
             (_, c) if c.is_alphabetic() || *c == '_' => self.parse_ident(),
             _ => self.parse_operator(),

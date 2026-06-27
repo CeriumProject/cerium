@@ -1,0 +1,28 @@
+const TERMINAL_DEVICE: u16 = 1;
+
+const HELLO_WORLD: &char = &"Hello World!\0";
+
+fn writec(c: char) {
+    device!(TERMINAL_DEVICE);
+    context!(0, 1);
+    context!(1, c);
+    send!();
+}
+
+fn write(s: &char) {
+    let is_truthy = *s alias u16;
+    for is_truthy downto 0 {
+        writec(*s);
+        write(s + 1);
+        is_truthy = 0;
+    }
+}
+
+fn writeln(s: &char) {
+    write(s);
+    writec('\n');
+}
+
+fn main() {
+    writeln(HELLO_WORLD);
+}

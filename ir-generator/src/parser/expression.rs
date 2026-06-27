@@ -1,4 +1,5 @@
 use crate::ast::compiler_macro::CompilerMacro;
+use crate::ast::constant_value::RawConstantValue;
 use crate::ast::dereference::Dereference;
 use crate::ast::field_access::FieldAccess;
 use crate::ast::generic_operation::GenericOperator;
@@ -7,7 +8,7 @@ use crate::ast::struct_initialization::StructInitialization;
 use crate::ast::unary_operation::UnaryOperation;
 use crate::ast::{
     Array, ArrayIndexation, Assignment, ConstantValue, Declaration, ForDownTo, GenericOperation,
-    Invocation, Loop, Scope, Sizeof, TypeAlias, UnaryOperator, Variable,
+    Invocation, Loop, Scope, Sizeof, StringConstant, TypeAlias, UnaryOperator, Variable,
 };
 use crate::ast::{Expression, TypeCast};
 use crate::error::{CompilerError, CompilerResult, UnexpectedEof, UnexpectedTokenError};
@@ -166,7 +167,9 @@ impl Parser<'_> {
             Ok((_, Token::For)) => self.parse_for(),
             Ok((_, Token::Loop)) => self.parse_loop(),
             Ok((_, Token::Ident(_))) => self.parse_variable(),
-            Ok((_, Token::Number(_))) => self.parse_constant_value(),
+            Ok((_, Token::Number(_))) => self.parse_number(),
+            Ok((_, Token::Character(_))) => self.parse_char(),
+            Ok((_, Token::String(_))) => self.parse_string(),
             Ok((_, Token::Sizeof)) => self.parse_sizeof(),
             Ok((_, Token::True | Token::False)) => self.parse_bool(),
             Ok((_, Token::Nullptr)) => self.parse_nullptr(),
@@ -381,7 +384,7 @@ impl Parser<'_> {
         }
     }
 
-    fn parse_constant_value(&mut self) -> CompilerResult<Ranged<Expression>> {
+    fn parse_number(&mut self) -> CompilerResult<Ranged<Expression>> {
         match self
             .lexer
             .next()
@@ -390,7 +393,7 @@ impl Parser<'_> {
             (range, Token::Number(number)) => Ok((
                 range.clone(),
                 Expression::Constant(Box::new(ConstantValue {
-                    value: (range, number),
+                    value: (range, RawConstantValue::Number(number)),
                 })),
             )),
             (range, token) => Err(CompilerError::UnexpectedTokenError(UnexpectedTokenError {
@@ -400,18 +403,38 @@ impl Parser<'_> {
         }
     }
 
+    fn parse_char(&mut self) -> CompilerResult<Ranged<Expression>> {
+        let value = expect_token!(
+            self.lexer,
+            (range, Token::Character(c)),
+            (range, RawConstantValue::Character(c))
+        )?;
+        Ok((
+            value.0.clone(),
+            Expression::Constant(Box::new(ConstantValue { value })),
+        ))
+    }
+
+    fn parse_string(&mut self) -> CompilerResult<Ranged<Expression>> {
+        let value = expect_token!(self.lexer, (range, Token::String(string)), (range, string))?;
+        Ok((
+            value.0.clone(),
+            Expression::StringConstant(Box::new(StringConstant { value })),
+        ))
+    }
+
     fn parse_bool(&mut self) -> CompilerResult<Ranged<Expression>> {
         match self.lexer.next() {
             Some(Ok((range, Token::True))) => Ok((
                 range.clone(),
                 Expression::Constant(Box::new(ConstantValue {
-                    value: (range.clone(), String::from("true")),
+                    value: (range.clone(), RawConstantValue::Boolean(true)),
                 })),
             )),
             Some(Ok((range, Token::False))) => Ok((
                 range.clone(),
                 Expression::Constant(Box::new(ConstantValue {
-                    value: (range.clone(), String::from("false")),
+                    value: (range.clone(), RawConstantValue::Boolean(false)),
                 })),
             )),
             Some(Ok((range, token))) => {
@@ -430,7 +453,7 @@ impl Parser<'_> {
         Ok((
             range.clone(),
             Expression::Constant(Box::new(ConstantValue {
-                value: (range, String::from("nullptr")),
+                value: (range, RawConstantValue::Nullptr),
             })),
         ))
     }

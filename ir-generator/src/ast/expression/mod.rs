@@ -14,6 +14,7 @@ use crate::ast::expression::optimize::OptimizeExpression;
 pub use crate::ast::expression::plain_loop::Loop;
 pub use crate::ast::expression::scope::Scope;
 pub use crate::ast::expression::sizeof::Sizeof;
+pub use crate::ast::expression::string_constant::StringConstant;
 pub use crate::ast::expression::type_alias::TypeAlias;
 pub use crate::ast::expression::type_cast::TypeCast;
 pub use crate::ast::expression::unary_operation::UnaryOperator;
@@ -43,6 +44,7 @@ pub mod plain_loop;
 pub mod reference;
 pub mod scope;
 pub mod sizeof;
+pub mod string_constant;
 pub mod struct_initialization;
 pub mod type_alias;
 pub mod type_cast;
@@ -78,6 +80,7 @@ pub enum Expression {
     FieldAccess(Box<FieldAccess>),
     StructInitialization(Box<StructInitialization>),
     UnaryOperation(Box<UnaryOperation>),
+    StringConstant(Box<StringConstant>),
 }
 
 // TODO: impl Deref Expression -> &dyn Compilable instead of ts
@@ -110,6 +113,7 @@ impl Compilable for Expression {
                 struct_initialization.compile(ctx, then)
             }
             Expression::UnaryOperation(unary_operation) => unary_operation.compile(ctx, then),
+            Expression::StringConstant(string_constant) => string_constant.compile(ctx, then),
         }
     }
 
@@ -145,6 +149,7 @@ impl Compilable for Expression {
                 struct_initialization.compile_mut(ctx, then)
             }
             Expression::UnaryOperation(unary_operation) => unary_operation.compile_mut(ctx, then),
+            Expression::StringConstant(string_constant) => string_constant.compile_mut(ctx, then),
         }
     }
 
@@ -172,6 +177,7 @@ impl Compilable for Expression {
                 struct_initialization.compile_unit(ctx)
             }
             Expression::UnaryOperation(unary_operation) => unary_operation.compile_unit(ctx),
+            Expression::StringConstant(string_constant) => string_constant.compile_unit(ctx),
         }
     }
 
@@ -204,6 +210,9 @@ impl Compilable for Expression {
             }
             Expression::UnaryOperation(unary_operation) => {
                 unary_operation.compile_into(ctx, operand)
+            }
+            Expression::StringConstant(string_constant) => {
+                string_constant.compile_into(ctx, operand)
             }
         }
     }
@@ -245,6 +254,7 @@ impl OptimizeExpression for Expression {
             Expression::FieldAccess(expression) => expression.optimize(),
             Expression::StructInitialization(expression) => expression.optimize(),
             Expression::UnaryOperation(expression) => expression.optimize(),
+            Expression::StringConstant(expression) => expression.optimize(),
         }
     }
 }

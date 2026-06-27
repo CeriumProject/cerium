@@ -1,5 +1,6 @@
 use crate::ast::compilation::Compilable;
 use crate::ast::compilation::context::Context;
+use crate::ast::constant_value::RawConstantValue;
 use crate::ast::expression::optimize::OptimizeExpression;
 use crate::ast::optimize::OptimizeRangedExpression;
 use crate::ast::{CeriumType, ConstantValue, Expression};
@@ -58,10 +59,18 @@ impl Display for UnaryOperator {
 impl OptimizeExpression for UnaryOperation {
     fn optimize(self) -> Expression {
         let value = self.value.optimize();
-        if let (_, Expression::Constant(box ConstantValue { value })) = value {
+        if let (
+            _,
+            Expression::Constant(box ConstantValue {
+                value: (range, RawConstantValue::Number(number)),
+            }),
+        ) = value
+        {
             // TODO: range
-            let value = (value.0, format!("{}{}", self.operator.1, &value.1));
-            Expression::Constant(Box::new(ConstantValue { value }))
+            let number = RawConstantValue::Number(format!("{}{}", self.operator.1, number));
+            Expression::Constant(Box::new(ConstantValue {
+                value: (range, number),
+            }))
         } else {
             Expression::UnaryOperation(Box::new(UnaryOperation {
                 operator: self.operator,
