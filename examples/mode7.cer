@@ -19,25 +19,31 @@ fn color_at(x: u16, y: u16) -> u16 {
     TILEMAP[top_y * TILEMAP_WIDTH + top_x][sub_y * TILE_WIDTH + sub_x]
 }
 
-fn transform(x: &u16, y: u16) {
-    *x = *x + (*y * *y) / 10;
-    *y = *y - *x / 3;
+fn transform(x: &u16, y: &u16) {
+    let _x = *x as f16 / 64.0 - 1.0;
+    let _y = *y as f16 / 48.0;
+
+    *x = (_x / _y * 70.0 + *X) as u16;
+    *y = (1.0 / _y * 70.0 + 512.0) as u16;
 }
 
+const X: &f16 = &0.0;
+
 fn main() {
-    device!(0);
-    context!(0, 1);
-    let x = 128 in for x downto 0 {
-        context!(1, x);
-        let y = 96 in for y downto 0 {
-            context!(2, y);
-            context!(3, color_at(x, y));
-            send!();
-        };
-    };
-    context!(0, 2);
     loop {
+        device!(0);
+        context!(0, 1);
+        let x = 128 in for x downto 0 {
+            context!(1, x);
+            let y = 96 in for y downto 0 {
+                context!(2, y);
+                context!(3, color_at(x, y));
+                send!();
+            };
+        };
+        context!(0, 2);
         send!();
+        *X = *X + 5.0;
     }
 }
 
