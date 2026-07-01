@@ -19,6 +19,7 @@ pub enum CeriumType {
     /// allows implicit conversion for nullptr
     Undefined(usize),
     Any(usize),
+    // TODO: make size for any and undefined Option<usize>; default is None; None can be still be used behind pointers
 }
 
 impl Display for CeriumType {
