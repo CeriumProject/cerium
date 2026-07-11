@@ -60,6 +60,8 @@ impl<'a> Lexer<'a> {
             "for" => Token::For,
             "downto" => Token::Downto,
             "loop" => Token::Loop,
+            "if" => Token::If,
+            "else" => Token::Else,
             "f16" => Token::F16,
             "i16" => Token::I16,
             "u16" => Token::U16,

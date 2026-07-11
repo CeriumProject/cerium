@@ -7,11 +7,7 @@ use crate::ast::generic_operation::GenericOperator;
 use crate::ast::reference::Reference;
 use crate::ast::struct_initialization::StructInitialization;
 use crate::ast::unary_operation::UnaryOperation;
-use crate::ast::{
-    Array, ArrayIndexation, Assignment, BitwiseOperation, ConstantValue, Declaration, ForDownTo,
-    GenericOperation, Invocation, Loop, Scope, Sizeof, StringConstant, TypeAlias, UnaryOperator,
-    Variable,
-};
+use crate::ast::{Array, ArrayIndexation, Assignment, BitwiseOperation, ConstantValue, Declaration, ForDownTo, GenericOperation, IfElse, Invocation, Loop, Scope, Sizeof, StringConstant, TypeAlias, UnaryOperator, Variable};
 use crate::ast::{Expression, TypeCast};
 use crate::error::{CompilerError, CompilerResult, UnexpectedEof, UnexpectedTokenError};
 use crate::parser::{Parser, join_ranges};
@@ -21,6 +17,7 @@ use crate::{expect_token, next_matches};
 
 impl Parser<'_> {
     // TODO: do this kind of function with macro
+    // TODO: ParserContext { allow_struct_init: bool }; disable only for if cond and for limit (expect for brackets etc)
     pub(super) fn parse_expression(&mut self) -> CompilerResult<Ranged<Expression>> {
         let dest = self.parse_bitwise_or()?;
 
@@ -234,6 +231,7 @@ impl Parser<'_> {
             Ok((_, Token::LParen)) => self.parse_parens(),
             Ok((_, Token::LBracket)) => self.parse_array(),
             Ok((_, Token::Let)) => self.parse_let(),
+            Ok((_, Token::If)) => self.parse_if(),
             Ok((_, Token::For)) => self.parse_for(),
             Ok((_, Token::Loop)) => self.parse_loop(),
             Ok((_, Token::Ident(_))) => self.parse_variable(),
@@ -381,6 +379,27 @@ impl Parser<'_> {
                 })),
             ))
         }
+    }
+
+    fn parse_if(&mut self) -> CompilerResult<Ranged<Expression>> {
+        let start = *expect_token!(self.lexer, Token::If)?.start();
+        let condition = self.parse_expression()?;
+        expect_token!(self.lexer, Token::LBrace)?;
+        let if_body = self.parse_expression()?;
+        let end = *expect_token!(self.lexer, Token::RBrace)?.end();
+        let (else_body, end) = if next_matches!(self.lexer, Token::Else) {
+            expect_token!(self.lexer, Token::LBrace)?;
+            let else_body = self.parse_expression()?;
+            let end = *expect_token!(self.lexer, Token::RBrace)?.end();
+            (Some(else_body), end)
+        } else {
+            (None, end)
+        };
+        Ok((start..=end, Expression::IfElse(Box::new(IfElse {
+            condition,
+            if_body,
+            else_body,
+        }))))
     }
 
     fn parse_for(&mut self) -> CompilerResult<Ranged<Expression>> {
