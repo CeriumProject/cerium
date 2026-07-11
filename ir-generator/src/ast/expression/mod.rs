@@ -27,6 +27,7 @@ use crate::ast::struct_initialization::StructInitialization;
 use crate::ast::unary_operation::UnaryOperation;
 use crate::error::CompilerResult;
 use chasm_ir::Operand;
+pub use crate::ast::expression::if_else::IfElse;
 
 pub mod array;
 pub mod array_indexation;
@@ -52,6 +53,7 @@ pub mod type_alias;
 pub mod type_cast;
 pub mod unary_operation;
 pub mod variable;
+pub mod if_else;
 
 #[macro_export]
 macro_rules! unprocessable_unit {
@@ -84,6 +86,7 @@ pub enum Expression {
     UnaryOperation(Box<UnaryOperation>),
     StringConstant(Box<StringConstant>),
     BitwiseOperation(Box<BitwiseOperation>),
+    IfElse(Box<IfElse>),
 }
 
 // TODO: impl Deref Expression -> &dyn Compilable instead of ts
@@ -118,6 +121,7 @@ impl Compilable for Expression {
             Expression::UnaryOperation(unary_operation) => unary_operation.compile(ctx, then),
             Expression::StringConstant(string_constant) => string_constant.compile(ctx, then),
             Expression::BitwiseOperation(bitwise_operation) => bitwise_operation.compile(ctx, then),
+            Expression::IfElse(if_else) => if_else.compile(ctx, then),
         }
     }
 
@@ -155,6 +159,7 @@ impl Compilable for Expression {
             Expression::UnaryOperation(unary_operation) => unary_operation.compile_mut(ctx, then),
             Expression::StringConstant(string_constant) => string_constant.compile_mut(ctx, then),
             Expression::BitwiseOperation(bitwise_operation) => bitwise_operation.compile(ctx, then),
+            Expression::IfElse(if_else) => if_else.compile_mut(ctx, then),
         }
     }
 
@@ -184,6 +189,7 @@ impl Compilable for Expression {
             Expression::UnaryOperation(unary_operation) => unary_operation.compile_unit(ctx),
             Expression::StringConstant(string_constant) => string_constant.compile_unit(ctx),
             Expression::BitwiseOperation(bitwise_operation) => bitwise_operation.compile_unit(ctx),
+            Expression::IfElse(if_else) => if_else.compile_unit(ctx),
         }
     }
 
@@ -223,6 +229,7 @@ impl Compilable for Expression {
             Expression::BitwiseOperation(bitwise_operation) => {
                 bitwise_operation.compile_into(ctx, operand)
             }
+            Expression::IfElse(if_else) => if_else.compile_into(ctx, operand),
         }
     }
 }
@@ -265,6 +272,7 @@ impl OptimizeExpression for Expression {
             Expression::UnaryOperation(expression) => expression.optimize(),
             Expression::StringConstant(expression) => expression.optimize(),
             Expression::BitwiseOperation(expression) => expression.optimize(),
+            Expression::IfElse(if_else) => if_else.optimize(),
         }
     }
 }

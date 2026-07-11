@@ -15,6 +15,8 @@ pub enum Token {
     Let, In,
     // loops
     For, Downto, Loop, // Break,
+    // conditions
+    If, Else,
     // generic operators
     Assign, Plus, Minus, Asterisk, Slash,
     // comparison operators

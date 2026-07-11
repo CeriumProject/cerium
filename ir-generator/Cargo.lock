@@ -31,11 +31,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "amine-asm"
-version = "0.1.0"
-source = "git+https://github.com/CeriumProject/amine-asm.git#987e12835ed969a178c9d082165f1d25e1751814"
-
-[[package]]
 name = "brotli"
 version = "8.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -57,15 +52,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "cerium"
-version = "0.1.0"
-dependencies = [
- "chasm-amine-backend",
- "chasm-ir",
- "ir-generator",
-]
-
-[[package]]
 name = "cfg-if"
 version = "1.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -80,15 +66,6 @@ dependencies = [
  "cfg-if",
  "cpufeatures",
  "rand_core 0.10.1",
-]
-
-[[package]]
-name = "chasm-amine-backend"
-version = "0.1.0"
-source = "git+https://github.com/CeriumProject/chasm-amine-backend.git#28c7d47988000e490d0ce30f7a2201ce2bc43ccf"
-dependencies = [
- "amine-asm",
- "chasm-ir",
 ]
 
 [[package]]
