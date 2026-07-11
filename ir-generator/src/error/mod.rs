@@ -1,5 +1,6 @@
 mod cannot_cast_type;
 mod cannot_read_fields_on_type;
+mod condition_must_be_bool;
 mod could_not_resolve_field;
 mod could_not_resolve_type;
 mod could_not_resolve_variable;
@@ -12,6 +13,7 @@ mod invalid_char_length;
 mod invalid_counter_type;
 mod invalid_parameter_amount;
 mod mismatched_assignment_type;
+mod mismatched_branch_types;
 mod mismatched_parameter_type;
 mod type_alias_has_different_size;
 mod unassigned_field;
@@ -25,8 +27,10 @@ mod value_not_invocable;
 mod value_not_referenceable;
 
 pub use crate::error::cannot_read_fields_on_type::CannotReadFieldsOnType;
+pub use crate::error::condition_must_be_bool::ConditionMustBeBool;
 pub use crate::error::could_not_resolve_field::CouldNotResolveField;
 pub use crate::error::false_field_type::FalseFieldType;
+pub use crate::error::mismatched_branch_types::MismatchedBranchTypes;
 pub use crate::error::unassigned_field::UnassignedField;
 pub use cannot_cast_type::CannotCastType;
 use colored::{Color, Colorize};
@@ -82,6 +86,8 @@ pub enum CompilerError {
     UnassignedField(UnassignedField),
     InvalidCharLength(InvalidCharLength),
     IncompatibleBitwiseOperationTypes(IncompatibleBitwiseOperationTypes),
+    ConditionMustBeBool(ConditionMustBeBool),
+    MismatchesBranchTypes(MismatchedBranchTypes),
 }
 
 pub trait FormatError {
@@ -126,6 +132,8 @@ impl CompilerError {
             CompilerError::UnassignedField(error) => error,
             CompilerError::InvalidCharLength(error) => error,
             CompilerError::IncompatibleBitwiseOperationTypes(error) => error,
+            CompilerError::ConditionMustBeBool(error) => error,
+            CompilerError::MismatchesBranchTypes(error) => error,
         }
     }
 }

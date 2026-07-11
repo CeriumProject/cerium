@@ -7,7 +7,11 @@ use crate::ast::generic_operation::GenericOperator;
 use crate::ast::reference::Reference;
 use crate::ast::struct_initialization::StructInitialization;
 use crate::ast::unary_operation::UnaryOperation;
-use crate::ast::{Array, ArrayIndexation, Assignment, BitwiseOperation, ConstantValue, Declaration, ForDownTo, GenericOperation, IfElse, Invocation, Loop, Scope, Sizeof, StringConstant, TypeAlias, UnaryOperator, Variable};
+use crate::ast::{
+    Array, ArrayIndexation, Assignment, BitwiseOperation, ConstantValue, Declaration, ForDownTo,
+    GenericOperation, IfElse, Invocation, Loop, Scope, Sizeof, StringConstant, TypeAlias,
+    UnaryOperator, Variable,
+};
 use crate::ast::{Expression, TypeCast};
 use crate::error::{CompilerError, CompilerResult, UnexpectedEof, UnexpectedTokenError};
 use crate::parser::{Parser, join_ranges};
@@ -384,22 +388,23 @@ impl Parser<'_> {
     fn parse_if(&mut self) -> CompilerResult<Ranged<Expression>> {
         let start = *expect_token!(self.lexer, Token::If)?.start();
         let condition = self.parse_expression()?;
-        expect_token!(self.lexer, Token::LBrace)?;
-        let if_body = self.parse_expression()?;
-        let end = *expect_token!(self.lexer, Token::RBrace)?.end();
+        let if_body = self.parse_scope()?;
+        let end = *if_body.0.end();
         let (else_body, end) = if next_matches!(self.lexer, Token::Else) {
-            expect_token!(self.lexer, Token::LBrace)?;
-            let else_body = self.parse_expression()?;
-            let end = *expect_token!(self.lexer, Token::RBrace)?.end();
+            let else_body = self.parse_scope()?;
+            let end = *else_body.0.end();
             (Some(else_body), end)
         } else {
             (None, end)
         };
-        Ok((start..=end, Expression::IfElse(Box::new(IfElse {
-            condition,
-            if_body,
-            else_body,
-        }))))
+        Ok((
+            start..=end,
+            Expression::IfElse(Box::new(IfElse {
+                condition,
+                if_body,
+                else_body,
+            })),
+        ))
     }
 
     fn parse_for(&mut self) -> CompilerResult<Ranged<Expression>> {

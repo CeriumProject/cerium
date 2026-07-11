@@ -1,4 +1,5 @@
 fn maybe_square(base: u16, square: bool) -> u16 {
+    // parser will currently think that square is a struct if parens are dropped
     if (square) {
         base * base
     } else {
@@ -9,9 +10,11 @@ fn maybe_square(base: u16, square: bool) -> u16 {
 fn main() {
     dbg!(maybe_square(16, false));
     dbg!(maybe_square(16, true));
-    let limit = 0 in
-    let x = 10 in
-    for x downto (limit) {
-        dbg!(x);
+    if false {
+        let limit = 0 in
+        let x = 10 in
+        for x downto (limit) {
+            dbg!(x);
+        }
     }
 }

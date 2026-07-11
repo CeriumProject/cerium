@@ -13,6 +13,19 @@ pub struct Scope {
     pub result: Option<Ranged<Expression>>,
 }
 
+pub fn peek_scope_rec(expression: &Ranged<Expression>) -> &Ranged<Expression> {
+    match expression {
+        (
+            _,
+            Expression::Scope(box Scope {
+                result: Some(result),
+                ..
+            }),
+        ) => peek_scope_rec(result),
+        _ => expression,
+    }
+}
+
 impl Compilable for Scope {
     fn compile(
         &self,

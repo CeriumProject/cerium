@@ -1,10 +1,12 @@
-use chasm_ir::{inst, Instruction, Operand};
 use crate::ast::compilation::Compilable;
 use crate::ast::compilation::context::Context;
-use crate::ast::{CeriumType, Expression, Qualifier};
 use crate::ast::optimize::{OptimizeExpression, OptimizeRangedExpression};
-use crate::error::CompilerResult;
+use crate::ast::scope::peek_scope_rec;
+use crate::ast::{CeriumType, Expression, Qualifier};
+use crate::error::{CompilerResult, ConditionMustBeBool, MismatchedBranchTypes};
 use crate::ranged::Ranged;
+use chasm_ir::{Instruction, Operand, inst};
+use std::ops::Add;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct IfElse {
@@ -20,11 +22,19 @@ impl From<IfElse> for Expression {
 }
 
 impl Compilable for IfElse {
-    fn compile(&self, ctx: &mut Context, then: &mut dyn FnMut(&Operand, &CeriumType, &mut Context) -> CompilerResult<()>) -> CompilerResult<()> {
+    fn compile(
+        &self,
+        ctx: &mut Context,
+        then: &mut dyn FnMut(&Operand, &CeriumType, &mut Context) -> CompilerResult<()>,
+    ) -> CompilerResult<()> {
         self.compile_mut(ctx, then)
     }
 
-    fn compile_mut(&self, ctx: &mut Context, then: &mut dyn FnMut(&Operand, &CeriumType, &mut Context) -> CompilerResult<()>) -> CompilerResult<()> {
+    fn compile_mut(
+        &self,
+        ctx: &mut Context,
+        then: &mut dyn FnMut(&Operand, &CeriumType, &mut Context) -> CompilerResult<()>,
+    ) -> CompilerResult<()> {
         ctx.scope(|ctx| {
             let uuid = ctx.uuid();
             let op = ctx.push_var(uuid.clone(), CeriumType::Undefined(1));
@@ -47,7 +57,12 @@ impl Compilable for IfElse {
         let else_label = ctx.label();
         let end_label = ctx.label();
         self.condition.compile(ctx, &mut |op, r#type, ctx| {
-            // TODO: check type is bool
+            if *r#type != CeriumType::Bool {
+                Err(ConditionMustBeBool {
+                    condition_range: self.condition.0.clone(),
+                    encountered_type: r#type.clone(),
+                })?;
+            }
             ctx.push_inst(inst!(Jrz, op op.clone(), format!(".{}", &else_label)));
             Ok(())
         })?;
@@ -67,7 +82,12 @@ impl Compilable for IfElse {
         let else_label = ctx.label();
         let end_label = ctx.label();
         self.condition.compile(ctx, &mut |op, r#type, ctx| {
-            // TODO: check type is bool
+            if *r#type != CeriumType::Bool {
+                Err(ConditionMustBeBool {
+                    condition_range: self.condition.0.clone(),
+                    encountered_type: r#type.clone(),
+                })?;
+            }
             ctx.push_inst(inst!(Jrz, op op.clone(), format!(".{}", &else_label)));
             Ok(())
         })?;
@@ -83,9 +103,20 @@ impl Compilable for IfElse {
             CeriumType::Undefined(0)
         };
         if if_type != else_type {
-            todo!()
+            let else_range = match &self.else_body {
+                Some(else_body) => peek_scope_rec(else_body).0.clone(),
+                None => {
+                    let idx = self.if_body.0.end().add(1);
+                    idx..=idx
+                }
+            };
+            Err(MismatchedBranchTypes {
+                if_type: (peek_scope_rec(&self.if_body).0.clone(), if_type),
+                else_type: (else_range, else_type),
+            })?
+        } else {
+            Ok(if_type)
         }
-        Ok(if_type)
     }
 }
 

@@ -1,0 +1,14 @@
+struct SizeVTable {
+    size: fn(&any) -> f16,
+}
+
+struct Circle {
+    radius: f16,
+}
+
+fn Circle::size(self: &any)
+
+struct Rectangle {
+    width: f16,
+    height: f16,
+}

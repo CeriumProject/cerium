@@ -11,6 +11,7 @@ pub use crate::ast::expression::constant_value::ConstantValue;
 pub use crate::ast::expression::declaration::Declaration;
 pub use crate::ast::expression::for_downto::ForDownTo;
 pub use crate::ast::expression::generic_operation::GenericOperation;
+pub use crate::ast::expression::if_else::IfElse;
 use crate::ast::expression::optimize::OptimizeExpression;
 pub use crate::ast::expression::plain_loop::Loop;
 pub use crate::ast::expression::scope::Scope;
@@ -27,7 +28,6 @@ use crate::ast::struct_initialization::StructInitialization;
 use crate::ast::unary_operation::UnaryOperation;
 use crate::error::CompilerResult;
 use chasm_ir::Operand;
-pub use crate::ast::expression::if_else::IfElse;
 
 pub mod array;
 pub mod array_indexation;
@@ -40,6 +40,7 @@ pub mod dereference;
 pub mod field_access;
 pub mod for_downto;
 pub mod generic_operation;
+pub mod if_else;
 pub mod invocation;
 mod iter;
 pub mod optimize;
@@ -53,7 +54,6 @@ pub mod type_alias;
 pub mod type_cast;
 pub mod unary_operation;
 pub mod variable;
-pub mod if_else;
 
 #[macro_export]
 macro_rules! unprocessable_unit {
