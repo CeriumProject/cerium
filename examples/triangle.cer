@@ -1,0 +1,76 @@
+struct Vec2i {
+    x: u16,
+    y: u16,
+}
+
+fn gt(lhs: u16, rhs: u16) -> bool {
+    ((rhs - lhs) >> 15) alias bool
+}
+
+fn swap(pt0: &any, pt1: &any) {
+    let temp = *pt0;
+    *pt0 = *pt1;
+    *pt1 = temp;
+}
+
+fn triangle(t0: &Vec2i, t1: &Vec2i, t2: &Vec2i) {
+    if gt(t0.y, t1.y) { swap(&t0, &t1); };
+    if gt(t0.y, t2.y) { swap(&t0, &t2); };
+    if gt(t1.y, t2.y) { swap(&t1, &t2); };
+    let total_height = t2.y - t0.y;
+
+    let y = t1.y + 1 in for y downto t0.y {
+        let segment_height = t1.y - t0.y + 1;
+        let alpha = (y - t0.y) as f16 / total_height as f16;
+        let beta = (y - t0.y) as f16 / segment_height as f16;
+        let a = t0.x + ((t2.x - t0.x) as f16 * alpha) as u16;
+        let b = t0.x + ((t1.x - t0.x) as f16 * beta) as u16;
+        if gt(a, b) {
+            let temp = a;
+            a = b;
+            b = temp;
+            // TODO: for some reason calling swap does not work, why?
+            // swap(&a, &b);
+        };
+        let j = b + 1 in for j downto (a) {
+            dbg!(j, y);
+        };
+    };
+
+    let y = t2.y + 1 in for y downto t1.y {
+        let segment_height = t2.y - t1.y + 1;
+        let alpha = (y - t0.y) as f16 / total_height as f16;
+        let beta = (y - t1.y) as f16 / segment_height as f16;
+        let a = t0.x + ((t2.x - t0.x) as f16 * alpha) as u16;
+        let b = t1.x + ((t2.x - t1.x) as f16 * beta) as u16;
+        if gt(a, b) {
+            let temp = a;
+            a = b;
+            b = temp;
+            // TODO: for some reason calling swap does not work, why?
+            // swap(&a, &b);
+        };
+        let j = b + 1 in for j downto (a) {
+            dbg!(j, y);
+        };
+    };
+}
+
+const X: &Vec2i = &Vec2i {
+    x: 10,
+    y: 10,
+};
+
+const Y: &Vec2i = &Vec2i {
+    x: 8,
+    y: 13,
+};
+
+const Z: &Vec2i = &Vec2i {
+    x: 15,
+    y: 15,
+};
+
+fn main() {
+    triangle(X, Y, Z);
+}
