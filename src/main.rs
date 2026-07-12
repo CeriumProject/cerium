@@ -1,7 +1,7 @@
 use ir_generator::error::FormatError;
 
 fn main() {
-    let code = include_str!("triangle.cer");
+    let code = include_str!("../examples/triangle.cer");
     let ir = match ir_generator::compile(code) {
         Ok(ir) => ir,
         Err(err) => {

@@ -19,58 +19,64 @@ fn triangle(t0: &Vec2i, t1: &Vec2i, t2: &Vec2i) {
     if gt(t1.y, t2.y) { swap(&t1, &t2); };
     let total_height = t2.y - t0.y;
 
+    device!(DISPLAY_PORT);
+    context!(0, 1);
+    context!(3, GREEN);
     let y = t1.y + 1 in for y downto t0.y {
         let segment_height = t1.y - t0.y + 1;
         let alpha = (y - t0.y) as f16 / total_height as f16;
         let beta = (y - t0.y) as f16 / segment_height as f16;
-        let a = t0.x + ((t2.x - t0.x) as f16 * alpha) as u16;
-        let b = t0.x + ((t1.x - t0.x) as f16 * beta) as u16;
-        if gt(a, b) {
-            let temp = a;
-            a = b;
-            b = temp;
-            // TODO: for some reason calling swap does not work, why?
-            // swap(&a, &b);
-        };
+        let a = t0.x + ((t2.x - t0.x) as i16 as f16 * alpha) as i16 as u16;
+        let b = t0.x + ((t1.x - t0.x) as i16 as f16 * beta) as i16 as u16;
+        if gt(a, b) { swap(&a, &b); };
+        context!(2, y);
         let j = b + 1 in for j downto (a) {
-            dbg!(j, y);
+            context!(1, j);
+            send!();
         };
     };
 
+    device!(DISPLAY_PORT);
+    context!(0, 1);
+    context!(3, GREEN);
     let y = t2.y + 1 in for y downto t1.y {
         let segment_height = t2.y - t1.y + 1;
         let alpha = (y - t0.y) as f16 / total_height as f16;
         let beta = (y - t1.y) as f16 / segment_height as f16;
-        let a = t0.x + ((t2.x - t0.x) as f16 * alpha) as u16;
-        let b = t1.x + ((t2.x - t1.x) as f16 * beta) as u16;
-        if gt(a, b) {
-            let temp = a;
-            a = b;
-            b = temp;
-            // TODO: for some reason calling swap does not work, why?
-            // swap(&a, &b);
-        };
+        let a = t0.x + ((t2.x - t0.x) as i16 as f16 * alpha) as i16 as u16;
+        let b = t1.x + ((t2.x - t1.x) as i16 as f16 * beta) as i16 as u16;
+        if gt(a, b) { swap(&a, &b); };
+        context!(2, y);
         let j = b + 1 in for j downto (a) {
-            dbg!(j, y);
+            context!(1, j);
+            send!();
         };
     };
 }
 
 const X: &Vec2i = &Vec2i {
-    x: 10,
-    y: 10,
+    x: 40,
+    y: 8,
 };
 
 const Y: &Vec2i = &Vec2i {
-    x: 8,
-    y: 13,
+    x: 22,
+    y: 76,
 };
 
 const Z: &Vec2i = &Vec2i {
-    x: 15,
-    y: 15,
+    x: 101,
+    y: 52,
 };
+
+const DISPLAY_PORT: u16 = 0;
+const GREEN: u16 = 48;
 
 fn main() {
     triangle(X, Y, Z);
+    loop {
+        device!(DISPLAY_PORT);
+        context!(0, 2);
+        send!();
+    }
 }

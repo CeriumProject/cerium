@@ -46,25 +46,36 @@ impl Compilable for Invocation {
         ctx: &mut Context,
         then: &mut dyn FnMut(&Operand, &CeriumType, &mut Context) -> CompilerResult<()>,
     ) -> CompilerResult<()> {
-        ctx.scope(|ctx| {
+        let mut result_type = MaybeUninit::uninit();
+        let offset = ctx.scope(|ctx| {
             let param_types = self.compile_params(ctx)?;
+            let offset = param_types
+                .iter()
+                .map(|(_, r#type)| r#type.size(ctx.structs()))
+                .sum::<CompilerResult<usize>>()?;
+
             self.function.1.compile(ctx, &mut |function, r#type, ctx| {
                 ctx.push_inst(inst!(Call, op function.clone()));
-                let result_type = check_parameter_types(
+                let r#type = check_parameter_types(
                     &param_types,
                     (self.function.0.clone(), r#type),
                     ctx.structs(),
                 )?;
-                let Some(result_type) = result_type else {
+                let Some(r#type) = r#type else {
                     unprocessable_unit!();
                 };
-                ctx.scope(|ctx| {
-                    let uuid = ctx.uuid();
-                    let op = ctx.push_var(uuid, result_type.clone());
-                    ctx.push_inst(Instruction::Receive(op.clone(), 0));
-                    then(&op, &result_type, ctx)
-                })
-            })
+                result_type = MaybeUninit::new(r#type);
+                Ok(())
+            })?;
+
+            Ok(offset)
+        })?;
+        let result_type = unsafe { result_type.assume_init() };
+        ctx.scope(|ctx| {
+            let uuid = ctx.uuid();
+            let op = ctx.push_var(uuid, result_type.clone());
+            ctx.push_inst(Instruction::Receive(op.clone(), offset));
+            then(&op, &result_type, ctx)
         })
     }
 
