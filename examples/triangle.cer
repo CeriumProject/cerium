@@ -13,7 +13,7 @@ fn swap(pt0: &any, pt1: &any) {
     *pt1 = temp;
 }
 
-fn triangle(t0: &Vec2i, t1: &Vec2i, t2: &Vec2i) {
+fn triangle(t0: &Vec2i, t1: &Vec2i, t2: &Vec2i, color: u16) {
     if gt(t0.y, t1.y) { swap(&t0, &t1); };
     if gt(t0.y, t2.y) { swap(&t0, &t2); };
     if gt(t1.y, t2.y) { swap(&t1, &t2); };
@@ -21,7 +21,7 @@ fn triangle(t0: &Vec2i, t1: &Vec2i, t2: &Vec2i) {
 
     device!(DISPLAY_PORT);
     context!(0, 1);
-    context!(3, GREEN);
+    context!(3, color);
     let y = t1.y + 1 in for y downto t0.y {
         let segment_height = t1.y - t0.y + 1;
         let alpha = (y - t0.y) as f16 / total_height as f16;
@@ -38,7 +38,7 @@ fn triangle(t0: &Vec2i, t1: &Vec2i, t2: &Vec2i) {
 
     device!(DISPLAY_PORT);
     context!(0, 1);
-    context!(3, GREEN);
+    context!(3, color);
     let y = t2.y + 1 in for y downto t1.y {
         let segment_height = t2.y - t1.y + 1;
         let alpha = (y - t0.y) as f16 / total_height as f16;
@@ -54,14 +54,24 @@ fn triangle(t0: &Vec2i, t1: &Vec2i, t2: &Vec2i) {
     };
 }
 
+const V: &Vec2i = &Vec2i {
+    x: 20,
+    y: 6,
+};
+
+const W: &Vec2i = &Vec2i {
+    x: 66,
+    y: 9,
+};
+
 const X: &Vec2i = &Vec2i {
-    x: 40,
-    y: 8,
+    x: 16,
+    y: 77,
 };
 
 const Y: &Vec2i = &Vec2i {
-    x: 22,
-    y: 76,
+    x: 61,
+    y: 50,
 };
 
 const Z: &Vec2i = &Vec2i {
@@ -69,14 +79,29 @@ const Z: &Vec2i = &Vec2i {
     y: 52,
 };
 
+const A: &Vec2i = &Vec2i {
+    x: 80,
+    y: 80,
+};
+
 const DISPLAY_PORT: u16 = 0;
 const GREEN: u16 = 48;
+const RED: u16 = 192;
+const ORANGE: u16 = 208;
+const BLUE: u16 = 12;
+const MAGENTA: u16 = 196;
+const PURPLE: u16 = 204;
 
 fn main() {
-    triangle(X, Y, Z);
     loop {
+        triangle(V, W, Y, RED);
+        triangle(V, X, Y, ORANGE);
+        triangle(W, Y, Z, BLUE);
+        triangle(X, Y, A, MAGENTA);
+        triangle(A, Y, Z, PURPLE);
         device!(DISPLAY_PORT);
         context!(0, 2);
         send!();
+        Y.x = ((Y.x + 30) & 127 | 64) - 29;
     }
 }
