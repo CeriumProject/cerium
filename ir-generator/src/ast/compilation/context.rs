@@ -90,7 +90,7 @@ impl Context<'_> {
             .get(struct_type)?
             .iter()
             .enumerate()
-            .find(|(idx, (field, _))| *field == *field_name)
+            .find(|(_, (field, _))| *field == *field_name)
             .map(|(idx, (_, r#type))| (idx, r#type.clone()))
     }
 

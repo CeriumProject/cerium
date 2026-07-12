@@ -112,7 +112,7 @@ impl CompilerError {
             CompilerError::UnexpectedEof(error) => error,
             CompilerError::UnparseableNumber(error) => error,
             CompilerError::IncompatibleTypes(error) => error,
-            CompilerError::UnprocessableUnit(error) => todo!(),
+            CompilerError::UnprocessableUnit(_error) => todo!(),
             CompilerError::FalseReturnType(error) => error,
             CompilerError::ValueNotDereferenceable(error) => error,
             CompilerError::TypeAliasHasDifferentSize(error) => error,

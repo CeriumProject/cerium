@@ -32,7 +32,7 @@ impl<'a> Iterator for RecursiveExpressionIterator<'a> {
                 self.recursion.pop();
                 self.next()
             }
-            Some(e) => todo!(),
+            Some(_e) => todo!(),
         }
     }
 }

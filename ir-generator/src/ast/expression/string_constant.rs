@@ -1,5 +1,5 @@
+use crate::ast::compilation::Compilable;
 use crate::ast::compilation::context::Context;
-use crate::ast::compilation::{Compilable, ConstCompilable};
 use crate::ast::optimize::OptimizeExpression;
 use crate::ast::{CeriumType, Expression};
 use crate::error::CompilerResult;
@@ -14,25 +14,25 @@ pub struct StringConstant {
 impl Compilable for StringConstant {
     fn compile(
         &self,
-        ctx: &mut Context,
-        then: &mut dyn FnMut(&Operand, &CeriumType, &mut Context) -> CompilerResult<()>,
+        _ctx: &mut Context,
+        _then: &mut dyn FnMut(&Operand, &CeriumType, &mut Context) -> CompilerResult<()>,
     ) -> CompilerResult<()> {
         todo!()
     }
 
     fn compile_mut(
         &self,
-        ctx: &mut Context,
-        then: &mut dyn FnMut(&Operand, &CeriumType, &mut Context) -> CompilerResult<()>,
+        _ctx: &mut Context,
+        _then: &mut dyn FnMut(&Operand, &CeriumType, &mut Context) -> CompilerResult<()>,
     ) -> CompilerResult<()> {
         todo!()
     }
 
-    fn compile_unit(&self, ctx: &mut Context) -> CompilerResult<()> {
+    fn compile_unit(&self, _ctx: &mut Context) -> CompilerResult<()> {
         todo!()
     }
 
-    fn compile_into(&self, ctx: &mut Context, operand: &Operand) -> CompilerResult<CeriumType> {
+    fn compile_into(&self, _ctx: &mut Context, _operand: &Operand) -> CompilerResult<CeriumType> {
         todo!()
     }
 }

@@ -14,31 +14,31 @@ pub struct Array {
 impl Compilable for Array {
     fn compile(
         &self,
-        ctx: &mut Context,
-        then: &mut dyn FnMut(&Operand, &CeriumType, &mut Context) -> CompilerResult<()>,
+        _ctx: &mut Context,
+        _then: &mut dyn FnMut(&Operand, &CeriumType, &mut Context) -> CompilerResult<()>,
     ) -> CompilerResult<()> {
         todo!("can only be const")
     }
 
     fn compile_mut(
         &self,
-        ctx: &mut Context,
-        then: &mut dyn FnMut(&Operand, &CeriumType, &mut Context) -> CompilerResult<()>,
+        _ctx: &mut Context,
+        _then: &mut dyn FnMut(&Operand, &CeriumType, &mut Context) -> CompilerResult<()>,
     ) -> CompilerResult<()> {
         todo!("can only be const")
     }
 
-    fn compile_unit(&self, ctx: &mut Context) -> CompilerResult<()> {
+    fn compile_unit(&self, _ctx: &mut Context) -> CompilerResult<()> {
         todo!("can only be const")
     }
 
-    fn compile_into(&self, ctx: &mut Context, operand: &Operand) -> CompilerResult<CeriumType> {
+    fn compile_into(&self, _ctx: &mut Context, _operand: &Operand) -> CompilerResult<CeriumType> {
         todo!("can only be const")
     }
 }
 
 impl ConstCompilable for Array {
-    fn compile_const(&self, ctx: &mut ConstContext) -> CompilerResult<(Operand, CeriumType)> {
+    fn compile_const(&self, _ctx: &mut ConstContext) -> CompilerResult<(Operand, CeriumType)> {
         todo!("can only be ref")
     }
 }

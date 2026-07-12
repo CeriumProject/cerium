@@ -16,8 +16,8 @@ pub struct Loop {
 impl Compilable for Loop {
     fn compile(
         &self,
-        ctx: &mut Context,
-        then: &mut dyn FnMut(&Operand, &CeriumType, &mut Context) -> CompilerResult<()>,
+        _ctx: &mut Context,
+        _then: &mut dyn FnMut(&Operand, &CeriumType, &mut Context) -> CompilerResult<()>,
     ) -> CompilerResult<()> {
         Err(UnprocessableUnit {
             range: self.body.0.clone(),
@@ -26,8 +26,8 @@ impl Compilable for Loop {
 
     fn compile_mut(
         &self,
-        ctx: &mut Context,
-        then: &mut dyn FnMut(&Operand, &CeriumType, &mut Context) -> CompilerResult<()>,
+        _ctx: &mut Context,
+        _then: &mut dyn FnMut(&Operand, &CeriumType, &mut Context) -> CompilerResult<()>,
     ) -> CompilerResult<()> {
         Err(UnprocessableUnit {
             range: self.body.0.clone(),
@@ -44,7 +44,7 @@ impl Compilable for Loop {
         })
     }
 
-    fn compile_into(&self, ctx: &mut Context, operand: &Operand) -> CompilerResult<CeriumType> {
+    fn compile_into(&self, _ctx: &mut Context, _operand: &Operand) -> CompilerResult<CeriumType> {
         Err(UnprocessableUnit {
             range: self.body.0.clone(),
         })?

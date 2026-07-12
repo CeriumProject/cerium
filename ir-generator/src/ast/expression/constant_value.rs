@@ -73,7 +73,7 @@ impl Compilable for ConstantValue {
         })
     }
 
-    fn compile_unit(&self, ctx: &mut Context) -> CompilerResult<()> {
+    fn compile_unit(&self, _ctx: &mut Context) -> CompilerResult<()> {
         Ok(())
     }
 
@@ -85,7 +85,7 @@ impl Compilable for ConstantValue {
 }
 
 impl ConstCompilable for ConstantValue {
-    fn compile_const(&self, ctx: &mut ConstContext) -> CompilerResult<(Operand, CeriumType)> {
+    fn compile_const(&self, _ctx: &mut ConstContext) -> CompilerResult<(Operand, CeriumType)> {
         self.parse()
             .map(|(val, r#type)| (Operand::Constant(val), r#type))
     }

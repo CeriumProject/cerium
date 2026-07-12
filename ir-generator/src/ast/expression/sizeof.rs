@@ -35,7 +35,7 @@ impl Compilable for Sizeof {
         })
     }
 
-    fn compile_unit(&self, ctx: &mut Context) -> CompilerResult<()> {
+    fn compile_unit(&self, _ctx: &mut Context) -> CompilerResult<()> {
         Ok(())
     }
 

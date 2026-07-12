@@ -23,7 +23,7 @@ impl Definition {
             Definition::Constant(constant) => {
                 Some((constant.name.1.clone(), constant.r#type.1.clone()))
             }
-            Definition::Structure(structure) => None,
+            Definition::Structure(_) => None,
         }
     }
 
