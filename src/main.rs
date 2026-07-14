@@ -1,7 +1,8 @@
+use clipboard::ClipboardProvider;
 use ir_generator::error::FormatError;
 
 fn main() {
-    let code = include_str!("../examples/triangle.cer");
+    let code = include_str!("../examples/nj_casino.cer");
     let ir = match ir_generator::compile(code) {
         Ok(ir) => ir,
         Err(err) => {
@@ -16,5 +17,7 @@ fn main() {
             .collect::<String>()
     );
     let asm = chasm_amine_backend::compile_chasm_to_amine(&ir);
-    println!("{}", asm.iter().map(|s| s.to_string()).collect::<String>());
+    let asm_str = asm.iter().map(|s| s.to_string()).collect::<String>();
+    println!("{}", &asm_str);
+    clipboard::ClipboardContext::new().unwrap().set_contents(asm_str).unwrap();
 }

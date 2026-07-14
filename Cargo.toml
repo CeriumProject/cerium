@@ -7,3 +7,4 @@ edition = "2024"
 chasm-ir = { git = "https://github.com/CeriumProject/chasm-ir.git" }
 chasm-amine-backend = { git = "https://github.com/CeriumProject/chasm-amine-backend.git" }
 ir-generator = { path = "ir-generator" }
+clipboard = "0.5.0"
