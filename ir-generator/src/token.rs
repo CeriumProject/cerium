@@ -26,7 +26,7 @@ pub enum Token {
     // bitwise operators
     Pipe, RShift, LShift,
     // multipurpose operators
-    Ampersand, Bang, Circumflex,
+    Ampersand, Bang, Circumflex, LessThan, GreaterThan,
     // types
     F16, I16, U16, Bool, Char, Any, Undefined,
     // conversion

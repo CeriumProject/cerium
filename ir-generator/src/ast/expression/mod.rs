@@ -24,6 +24,7 @@ pub use crate::ast::expression::variable::Variable;
 use crate::ast::field_access::FieldAccess;
 pub use crate::ast::invocation::Invocation;
 pub use crate::ast::reference::Reference;
+pub use crate::ast::turbofish::Turbofish;
 use crate::ast::struct_initialization::StructInitialization;
 use crate::ast::unary_operation::UnaryOperation;
 use crate::error::CompilerResult;
@@ -54,6 +55,7 @@ pub mod type_alias;
 pub mod type_cast;
 pub mod unary_operation;
 pub mod variable;
+pub mod turbofish;
 
 #[macro_export]
 macro_rules! unprocessable_unit {
@@ -87,6 +89,7 @@ pub enum Expression {
     StringConstant(Box<StringConstant>),
     BitwiseOperation(Box<BitwiseOperation>),
     IfElse(Box<IfElse>),
+    Turbofish(Box<Turbofish>),
 }
 
 // TODO: impl Deref Expression -> &dyn Compilable instead of ts
@@ -122,6 +125,7 @@ impl Compilable for Expression {
             Expression::StringConstant(string_constant) => string_constant.compile(ctx, then),
             Expression::BitwiseOperation(bitwise_operation) => bitwise_operation.compile(ctx, then),
             Expression::IfElse(if_else) => if_else.compile(ctx, then),
+            Expression::Turbofish(Turbofish) => Turbofish.compile(ctx, then),
         }
     }
 
@@ -160,6 +164,7 @@ impl Compilable for Expression {
             Expression::StringConstant(string_constant) => string_constant.compile_mut(ctx, then),
             Expression::BitwiseOperation(bitwise_operation) => bitwise_operation.compile(ctx, then),
             Expression::IfElse(if_else) => if_else.compile_mut(ctx, then),
+            Expression::Turbofish(turbofish) => turbofish.compile_mut(ctx, then),
         }
     }
 
@@ -190,6 +195,7 @@ impl Compilable for Expression {
             Expression::StringConstant(string_constant) => string_constant.compile_unit(ctx),
             Expression::BitwiseOperation(bitwise_operation) => bitwise_operation.compile_unit(ctx),
             Expression::IfElse(if_else) => if_else.compile_unit(ctx),
+            Expression::Turbofish(turbofish) => turbofish.compile_unit(ctx),
         }
     }
 
@@ -230,6 +236,7 @@ impl Compilable for Expression {
                 bitwise_operation.compile_into(ctx, operand)
             }
             Expression::IfElse(if_else) => if_else.compile_into(ctx, operand),
+            Expression::Turbofish(turbofish) => turbofish.compile_into(ctx, operand),
         }
     }
 }
@@ -242,6 +249,7 @@ impl ConstCompilable for Expression {
             Expression::TypeAlias(type_alias) => type_alias.compile_const(ctx),
             Expression::Variable(variable) => variable.compile_const(ctx),
             Expression::Sizeof(sizeof) => sizeof.compile_const(ctx),
+            Expression::Turbofish(turbofish) => turbofish.compile_const(ctx),
             _ => todo!("throw error"),
         }
     }
@@ -273,6 +281,7 @@ impl OptimizeExpression for Expression {
             Expression::StringConstant(expression) => expression.optimize(),
             Expression::BitwiseOperation(expression) => expression.optimize(),
             Expression::IfElse(if_else) => if_else.optimize(),
+            Expression::Turbofish(turbofish) => turbofish.optimize(),
         }
     }
 }

@@ -101,6 +101,16 @@ impl<'a> Parser<'a> {
             }
             // TODO: refactor ts
             (start_range, Token::Fn) => {
+                let mut generics = Vec::new();
+                if next_matches!(self.lexer, Token::LessThan) {
+                    while !next_matches!(self.lexer, Token::GreaterThan) {
+                        generics.push(self.parse_qualifier()?.1);
+                        if next_matches!(self.lexer, Token::GreaterThan) {
+                            break;
+                        }
+                        expect_token!(self.lexer, Token::Comma)?;
+                    }
+                }
                 expect_token!(self.lexer, (_, Token::LParen), {})?;
                 let mut param_types = Vec::new();
                 while !matches!(self.lexer.peek(), Some(Ok((_, Token::RParen)))) {
@@ -127,7 +137,11 @@ impl<'a> Parser<'a> {
                 };
                 Ok((
                     *start_range.start()..=end,
-                    CeriumType::Function(param_types, return_type),
+                    if generics.is_empty() {
+                        CeriumType::Function(param_types, return_type)
+                    } else {
+                        CeriumType::GenericFunction(generics, param_types, return_type)
+                    },
                 ))
             }
             (range, token) => Err(CompilerError::UnexpectedTokenError(UnexpectedTokenError {
