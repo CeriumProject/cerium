@@ -20,11 +20,11 @@ fn mem::copy<T>(dst: &T, src: &T, len: u16) {
 }
 
 fn main() {
-    let box = (mem::alloc)::<u16>(sizeof u16);
+    let box = mem::alloc::<u16>(sizeof u16);
     *box = 42;
-    let new_box = (mem::alloc)::<u16>(sizeof u16);
-    (mem::copy)::<u16>(new_box, box, sizeof u16);
+    let new_box = mem::alloc::<u16>(sizeof u16);
+    mem::copy::<u16>(new_box, box, sizeof u16);
     dbg!(*new_box); // 42
-    (mem::free)::<u16>(box);
-    (mem::free)::<u16>(new_box);
+    mem::free::<u16>(box);
+    mem::free::<u16>(new_box);
 }
