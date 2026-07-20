@@ -22,6 +22,19 @@ impl Parser<'_> {
     fn parse_function(&mut self) -> CompilerResult<Definition> {
         expect_token!(self.lexer, Token::Fn)?;
         let name = self.parse_qualifier()?;
+        let mut generics = match self.lexer.peek() {
+            Some(Ok((_, Token::LessThan))) => self.parse_generics(Self::parse_qualifier)?.1,
+            _ => Vec::new(),
+        };
+        if next_matches!(self.lexer, Token::LessThan) {
+            while !next_matches!(self.lexer, Token::GreaterThan) {
+                generics.push(self.parse_qualifier()?);
+                if next_matches!(self.lexer, Token::GreaterThan) {
+                    break;
+                }
+                expect_token!(self.lexer, Token::Comma)?;
+            }
+        }
         expect_token!(self.lexer, Token::LParen)?;
         let mut parameters = Vec::new();
         while !matches!(self.lexer.peek(), Some(Ok((_, Token::RParen)))) {
@@ -46,6 +59,7 @@ impl Parser<'_> {
 
         Ok(Definition::Function(Function {
             name,
+            generics,
             parameters,
             return_type,
             body,

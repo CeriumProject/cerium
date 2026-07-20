@@ -16,6 +16,7 @@ fn join_ranges<Lhs, Rhs>(lhs: &Ranged<Lhs>, rhs: &Ranged<Rhs>) -> RangeInclusive
 }
 
 pub struct Parser<'a> {
+    // TODO: replace with custom MultiPeek<>
     lexer: Peekable<Lexer<'a>>,
 }
 
@@ -101,6 +102,13 @@ impl<'a> Parser<'a> {
             }
             // TODO: refactor ts
             (start_range, Token::Fn) => {
+                let mut generics = match self.lexer.peek() {
+                    Some(Ok((_, Token::LessThan))) => {
+                        self.parse_generics(|parser| parser.parse_qualifier().map(|(_, q)| q))?
+                            .1
+                    }
+                    _ => Vec::new(),
+                };
                 expect_token!(self.lexer, (_, Token::LParen), {})?;
                 let mut param_types = Vec::new();
                 while !matches!(self.lexer.peek(), Some(Ok((_, Token::RParen)))) {
@@ -127,7 +135,11 @@ impl<'a> Parser<'a> {
                 };
                 Ok((
                     *start_range.start()..=end,
-                    CeriumType::Function(param_types, return_type),
+                    if generics.is_empty() {
+                        CeriumType::Function(param_types, return_type)
+                    } else {
+                        CeriumType::GenericFunction(generics, param_types, return_type)
+                    },
                 ))
             }
             (range, token) => Err(CompilerError::UnexpectedTokenError(UnexpectedTokenError {
@@ -135,5 +147,23 @@ impl<'a> Parser<'a> {
                 token,
             })),
         }
+    }
+
+    fn parse_generics<T>(
+        &mut self,
+        parser: fn(&mut Parser<'a>) -> CompilerResult<T>,
+    ) -> CompilerResult<Ranged<Vec<T>>> {
+        let mut generics = Vec::new();
+        let start = *expect_token!(self.lexer, Token::LessThan)?.start();
+        let mut end = start;
+        while next_matches!(self.lexer, (range, Token::GreaterThan), end = *range.end()).is_none() {
+            generics.push(parser(self)?);
+            if next_matches!(self.lexer, (range, Token::GreaterThan), end = *range.end()).is_some()
+            {
+                break;
+            }
+            expect_token!(self.lexer, Token::Comma)?;
+        }
+        Ok((start..=end, generics))
     }
 }

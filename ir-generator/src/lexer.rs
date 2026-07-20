@@ -118,11 +118,11 @@ impl<'a> Lexer<'a> {
             '^' => Ok(Token::Circumflex.ranged(idx..=idx)),
             '>' => match self.src.next_if(|(_, c)| *c == '>') {
                 Some(_) => Ok(Token::RShift.ranged(idx..=idx + 1)),
-                None => todo!("greater than"),
+                None => Ok(Token::GreaterThan.ranged(idx..=idx)),
             },
             '<' => match self.src.next_if(|(_, c)| *c == '<') {
                 Some(_) => Ok(Token::LShift.ranged(idx..=idx + 1)),
-                None => todo!("less than"),
+                None => Ok(Token::LessThan.ranged(idx..=idx)),
             },
             '.' => Ok(Token::Dot.ranged(idx..=idx)),
             _ => Err(UnexpectedCharacterError {
@@ -193,7 +193,7 @@ impl<'a> Lexer<'a> {
             None => return Some(Err(UnexpectedEof.into())),
         };
 
-        match literal.len() {
+        match literal.chars().count() {
             1 => Some(Ok((
                 start..=end,
                 Token::Character(literal.chars().next().unwrap()),

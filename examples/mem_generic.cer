@@ -1,0 +1,30 @@
+const mem::HEAP: &&undefined = &nullptr;
+
+fn mem::alloc<T>(size: u16) -> &T {
+    let result = *mem::HEAP;
+    result = result - size;
+    *mem::HEAP = result;
+    result
+}
+
+fn mem::free<T>(ptr: &T) {
+    // haha you thought
+}
+
+fn mem::copy<T>(dst: &T, src: &T, len: u16) {
+    for len downto 0 {
+        *dst = *src;
+        dst = dst + 1;
+        src = src + 1;
+    }
+}
+
+fn main() {
+    let box = (mem::alloc)::<u16>(sizeof u16);
+    *box = 42;
+    let new_box = (mem::alloc)::<u16>(sizeof u16);
+    (mem::copy)::<u16>(new_box, box, sizeof u16);
+    dbg!(*new_box); // 42
+    (mem::free)::<u16>(box);
+    (mem::free)::<u16>(new_box);
+}

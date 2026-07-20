@@ -3,7 +3,7 @@ use crate::error::CompilerResult;
 use std::collections::HashMap;
 use std::fmt::{Display, Formatter};
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum CeriumType {
     // /// used for implicit types; will cause error if not resolved in ast optimization step
     // Unknown,
@@ -14,6 +14,7 @@ pub enum CeriumType {
     Char,
     Reference(Box<CeriumType>),
     Function(Vec<CeriumType>, Option<Box<CeriumType>>),
+    GenericFunction(Vec<Qualifier>, Vec<CeriumType>, Option<Box<CeriumType>>),
     Struct(Qualifier),
     /// is subtype of every other type
     /// allows implicit conversion for nullptr
@@ -39,7 +40,27 @@ impl Display for CeriumType {
                         .iter()
                         .map(CeriumType::to_string)
                         .collect::<Vec<_>>()
-                        .join(",")
+                        .join(", ")
+                )?;
+                match result {
+                    Some(result) => write!(f, " -> {result}"),
+                    None => Ok(()),
+                }
+            }
+            CeriumType::GenericFunction(generics, params, result) => {
+                write!(
+                    f,
+                    "fn<{0}>({1})",
+                    generics
+                        .iter()
+                        .map(Qualifier::to_string)
+                        .collect::<Vec<_>>()
+                        .join(", "),
+                    params
+                        .iter()
+                        .map(CeriumType::to_string)
+                        .collect::<Vec<_>>()
+                        .join(", "),
                 )?;
                 match result {
                     Some(result) => write!(f, " -> {result}"),
@@ -47,6 +68,7 @@ impl Display for CeriumType {
                 }
             }
             CeriumType::Struct(name) => write!(f, "{name}"),
+            // TODO: SpecifiedStruct
             CeriumType::Undefined(size) => write!(f, "undefined[{size}]"),
             CeriumType::Any(size) => write!(f, "any[{size}]"),
         }
@@ -66,7 +88,8 @@ impl CeriumType {
             | CeriumType::Bool
             | CeriumType::Char
             | CeriumType::Reference(_)
-            | CeriumType::Function(_, _) => Ok(1),
+            | CeriumType::Function(_, _)
+            | CeriumType::GenericFunction(_, _, _) => Ok(1),
             CeriumType::Struct(name) => match structs.get(name) {
                 Some(fields) => fields
                     .iter()
@@ -78,6 +101,7 @@ impl CeriumType {
         }
     }
 
+    // TODO: generic functions
     pub fn is_subtype_of(
         &self,
         other: &CeriumType,
