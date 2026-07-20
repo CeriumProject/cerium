@@ -15,8 +15,8 @@ fn transmute<T, R>(t: T) -> R {
 }
 
 fn main() {
-    dbg!(eq::<u16>(3, 5)); // false
-    dbg!(u16_to_f16(8)); // 8.0
-    dbg!(transmute::<char, i16>('ü')); // +252
+    dbg!((eq)::<u16>(3, 5)); // false
+    dbg!((call_with)::<u16, f16>(u16_to_f16, 42)); // 42.0
+    dbg!((transmute)::<char, i16>('ü')); // +252
+    dbg!((call_with)::<u16, f16>((transmute)::<u16, f16>, 42)); // 2.5e-6
 }
-

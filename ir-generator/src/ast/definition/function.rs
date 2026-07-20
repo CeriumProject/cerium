@@ -35,25 +35,41 @@ impl Function {
             .as_ref()
             .map(|(_, r#type)| Box::new(r#type.clone()));
         let function = if self.generics.is_empty() {
-            CeriumType::Function(parameters, return_type)    
+            CeriumType::Function(parameters, return_type)
         } else {
             CeriumType::GenericFunction(generics, parameters, return_type)
         };
         CeriumType::Reference(Box::new(function))
     }
 
+    // TODO: HashMap<Qualifier, CeriumType>, this is currently a hack
+    fn generics(&self) -> HashMap<Qualifier, Vec<(Qualifier, CeriumType)>> {
+        self.generics
+            .iter()
+            .map(|(_, qualifier)| {
+                (
+                    qualifier.clone(),
+                    vec![(Qualifier::new(vec![]), CeriumType::Undefined(1))],
+                )
+            })
+            .collect()
+    }
+
     fn chasm_signature(
         &self,
         structs: &HashMap<Qualifier, Vec<(Qualifier, CeriumType)>>,
     ) -> CompilerResult<(Words, Vec<(String, Words)>)> {
+        let mut structs = structs.clone();
+        structs.extend(self.generics());
+
         Ok((
             self.return_type
                 .as_ref()
-                .map(|(_, r#type)| r#type.size(structs))
+                .map(|(_, r#type)| r#type.size(&structs))
                 .unwrap_or(Ok(0))?,
             self.parameters
                 .iter()
-                .map(|(name, r#type)| Ok((name.1.to_string(), r#type.1.size(structs)?)))
+                .map(|(name, r#type)| Ok((name.1.to_string(), r#type.1.size(&structs)?)))
                 .collect::<CompilerResult<_>>()?,
         ))
     }
@@ -63,6 +79,9 @@ impl Function {
         globals: &HashMap<Qualifier, CeriumType>,
         structs: &HashMap<Qualifier, Vec<(Qualifier, CeriumType)>>,
     ) -> CompilerResult<Vec<Section>> {
+        let mut structs = structs.clone();
+        structs.extend(self.generics());
+
         let parameters = self
             .parameters
             .iter()
@@ -96,7 +115,7 @@ impl Function {
         let body = ctx.resolve()?; // TODO: ctx.section(|...| ...) instead
         Ok(vec![Section {
             name: self.name.1.to_string(),
-            signature: Some(self.chasm_signature(structs)?),
+            signature: Some(self.chasm_signature(&structs)?),
             body,
         }])
     }

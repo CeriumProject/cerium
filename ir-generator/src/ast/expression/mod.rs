@@ -24,8 +24,8 @@ pub use crate::ast::expression::variable::Variable;
 use crate::ast::field_access::FieldAccess;
 pub use crate::ast::invocation::Invocation;
 pub use crate::ast::reference::Reference;
-pub use crate::ast::turbofish::Turbofish;
 use crate::ast::struct_initialization::StructInitialization;
+use crate::ast::turbofish::Turbofish;
 use crate::ast::unary_operation::UnaryOperation;
 use crate::error::CompilerResult;
 use chasm_ir::Operand;
@@ -51,11 +51,11 @@ pub mod scope;
 pub mod sizeof;
 pub mod string_constant;
 pub mod struct_initialization;
+pub mod turbofish;
 pub mod type_alias;
 pub mod type_cast;
 pub mod unary_operation;
 pub mod variable;
-pub mod turbofish;
 
 #[macro_export]
 macro_rules! unprocessable_unit {

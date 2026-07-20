@@ -6,6 +6,7 @@ use crate::ast::field_access::FieldAccess;
 use crate::ast::generic_operation::GenericOperator;
 use crate::ast::reference::Reference;
 use crate::ast::struct_initialization::StructInitialization;
+use crate::ast::turbofish::Turbofish;
 use crate::ast::unary_operation::UnaryOperation;
 use crate::ast::{
     Array, ArrayIndexation, Assignment, BitwiseOperation, ConstantValue, Declaration, ForDownTo,
@@ -287,6 +288,20 @@ impl Parser<'_> {
                     Expression::FieldAccess(Box::new(FieldAccess {
                         structure: result,
                         field,
+                    })),
+                );
+            } else if next_matches!(self.lexer, Token::Scope) {
+                let generics = self.parse_generics(Self::parse_type)?;
+                result = (
+                    *result.0.start()
+                        ..=generics
+                            .1
+                            .last()
+                            .map(|(last, _)| *last.end())
+                            .unwrap_or_else(|| *result.0.end()),
+                    Expression::Turbofish(Box::new(Turbofish {
+                        generics,
+                        value: result,
                     })),
                 );
             } else {

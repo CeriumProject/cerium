@@ -46,7 +46,7 @@ impl Display for CeriumType {
                     Some(result) => write!(f, " -> {result}"),
                     None => Ok(()),
                 }
-            },
+            }
             CeriumType::GenericFunction(generics, params, result) => {
                 write!(
                     f,
@@ -66,7 +66,7 @@ impl Display for CeriumType {
                     Some(result) => write!(f, " -> {result}"),
                     None => Ok(()),
                 }
-            },
+            }
             CeriumType::Struct(name) => write!(f, "{name}"),
             // TODO: SpecifiedStruct
             CeriumType::Undefined(size) => write!(f, "undefined[{size}]"),

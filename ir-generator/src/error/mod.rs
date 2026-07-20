@@ -11,7 +11,9 @@ mod incompatible_types;
 mod index_must_be_integer;
 mod invalid_char_length;
 mod invalid_counter_type;
+mod invalid_generic_amount;
 mod invalid_parameter_amount;
+mod invalid_turbofish_type;
 mod mismatched_assignment_type;
 mod mismatched_branch_types;
 mod mismatched_parameter_type;
@@ -30,6 +32,8 @@ pub use crate::error::cannot_read_fields_on_type::CannotReadFieldsOnType;
 pub use crate::error::condition_must_be_bool::ConditionMustBeBool;
 pub use crate::error::could_not_resolve_field::CouldNotResolveField;
 pub use crate::error::false_field_type::FalseFieldType;
+pub use crate::error::invalid_generic_amount::InvalidGenericAmount;
+pub use crate::error::invalid_turbofish_type::InvalidTurbofishType;
 pub use crate::error::mismatched_branch_types::MismatchedBranchTypes;
 pub use crate::error::unassigned_field::UnassignedField;
 pub use cannot_cast_type::CannotCastType;
@@ -88,6 +92,8 @@ pub enum CompilerError {
     IncompatibleBitwiseOperationTypes(IncompatibleBitwiseOperationTypes),
     ConditionMustBeBool(ConditionMustBeBool),
     MismatchesBranchTypes(MismatchedBranchTypes),
+    InvalidGenericAmount(InvalidGenericAmount),
+    InvalidTurbofishType(InvalidTurbofishType),
 }
 
 pub trait FormatError {
@@ -134,6 +140,8 @@ impl CompilerError {
             CompilerError::IncompatibleBitwiseOperationTypes(error) => error,
             CompilerError::ConditionMustBeBool(error) => error,
             CompilerError::MismatchesBranchTypes(error) => error,
+            CompilerError::InvalidGenericAmount(error) => error,
+            CompilerError::InvalidTurbofishType(error) => error,
         }
     }
 }
