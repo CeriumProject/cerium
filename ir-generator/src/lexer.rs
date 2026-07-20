@@ -193,7 +193,7 @@ impl<'a> Lexer<'a> {
             None => return Some(Err(UnexpectedEof.into())),
         };
 
-        match literal.len() {
+        match literal.chars().count() {
             1 => Some(Ok((
                 start..=end,
                 Token::Character(literal.chars().next().unwrap()),
