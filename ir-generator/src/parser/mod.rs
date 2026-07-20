@@ -1,14 +1,15 @@
 mod definition;
 mod expression;
 mod macros;
+mod multi_peek;
 
 use crate::ast::{CeriumType, Qualifier, Script};
 use crate::error::{CompilerError, CompilerResult, UnexpectedTokenError};
 use crate::lexer::Lexer;
+use crate::parser::multi_peek::{IntoMultiPeek, MultiPeek};
 use crate::ranged::Ranged;
 use crate::token::Token;
 use crate::{expect_token, next_matches};
-use std::iter::Peekable;
 use std::ops::RangeInclusive;
 
 fn join_ranges<Lhs, Rhs>(lhs: &Ranged<Lhs>, rhs: &Ranged<Rhs>) -> RangeInclusive<usize> {
@@ -17,13 +18,13 @@ fn join_ranges<Lhs, Rhs>(lhs: &Ranged<Lhs>, rhs: &Ranged<Rhs>) -> RangeInclusive
 
 pub struct Parser<'a> {
     // TODO: replace with custom MultiPeek<>
-    lexer: Peekable<Lexer<'a>>,
+    lexer: MultiPeek<Lexer<'a>>,
 }
 
 impl<'a> Parser<'a> {
     pub fn new(lexer: Lexer<'a>) -> Self {
         Parser {
-            lexer: lexer.peekable(),
+            lexer: lexer.multi_peek(),
         }
     }
 
@@ -41,7 +42,9 @@ impl<'a> Parser<'a> {
             (range, Token::Ident(ident)),
             (*range.start(), *range.end(), vec![ident])
         )?;
-        while next_matches!(self.lexer, Token::Scope) {
+        while !matches!(self.lexer.peek_nth(1), Some(Ok((_, Token::LessThan))))
+            && next_matches!(self.lexer, Token::Scope)
+        {
             expect_token!(self.lexer, (range, Token::Ident(ident)), {
                 end = *range.end();
                 scopes.push(ident);
