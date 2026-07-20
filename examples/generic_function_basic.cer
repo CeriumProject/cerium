@@ -1,0 +1,22 @@
+fn eq<T>(lhs: T, rhs: T) -> bool {
+    (1 - (((lhs alias u16 - rhs alias u16) | (rhs alias u16 - lhs alias u16)) >> 15)) alias bool
+}
+
+fn call_with<T, R>(f: &fn(T) -> R, t: T) -> R {
+    f(t)
+}
+
+fn u16_to_f16(x: u16) -> f16 {
+    x as f16
+}
+
+fn transmute<T, R>(t: T) -> R {
+    t alias R
+}
+
+fn main() {
+    dbg!(eq::<u16>(3, 5)); // false
+    dbg!(call_with::<u16, f16>(u16_to_f16, 42)); // 42.0
+    dbg!(transmute::<char, i16>('ü')); // +252
+    dbg!(call_with::<u16, f16>(transmute::<u16, f16>, 42)); // 2.5e-6
+}
