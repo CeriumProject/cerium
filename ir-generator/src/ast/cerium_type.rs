@@ -108,6 +108,7 @@ impl CeriumType {
         structs: &HashMap<Qualifier, Vec<(Qualifier, CeriumType)>>,
     ) -> CompilerResult<bool> {
         match (self, other) {
+            (CeriumType::U16, CeriumType::I16) => Ok(true),
             (CeriumType::Undefined(size), rhs) => Ok(*size == rhs.size(structs)?),
             (lhs, CeriumType::Any(size)) => Ok(lhs.size(structs)? == *size),
             (CeriumType::Reference(lhs), CeriumType::Reference(rhs)) => {

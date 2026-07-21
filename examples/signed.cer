@@ -1,0 +1,10 @@
+fn itof(x: i16) -> f16 {
+    x as f16
+}
+
+fn main() {
+    let x: i16 = +10;
+    let y: i16 = -10;
+    let z: i16 = 10;
+    itof(10);
+}
